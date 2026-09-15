@@ -2,8 +2,8 @@
   "use strict";
 
   const DEFAULT_PUBLIC_CONTACT_URL = "https://vplweadbeujidsoponrl.supabase.co/functions/v1/ldm-public-contact";
-  const PRODUCTION_ORIGIN = "https://locdaily.github.io";
-  const PUBLIC_APP_URL = "https://locdaily.github.io/locdaily-store.com";
+  const PRODUCTION_ORIGIN = "https://locdaily-store.github.io";
+  const PUBLIC_APP_URL = "https://locdaily-store.github.io/locdaily";
 
   function cleanUrl(value){
     const raw=String(value||"").trim();

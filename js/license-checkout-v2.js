@@ -12,7 +12,7 @@
       statusUrl:String(base.checkoutUrl||"").trim(),
       orderUrl:String(base.lynkOrderUrl||"").trim(),
       whatsapp:String(base.developerWhatsApp||"").replace(/\D/g,""),
-      publicAppUrl:String(base.publicAppUrl||"https://locdaily.github.io/locdaily-store.com").replace(/\/+$/,""),
+      publicAppUrl:String(base.publicAppUrl||"https://locdaily-store.github.io/locdaily").replace(/\/+$/,""),
       loginUrl:String(base.loginUrl||"").trim(),
       guideUrl:String(base.guideUrl||"").trim(),
       links:base.lynkCheckoutLinks||{}
@@ -25,7 +25,7 @@
   const wait=ms=>new Promise(r=>setTimeout(r,ms));
 
   function safePublicAppLink(raw,fallbackPath){
-    const base=cfg().publicAppUrl||"https://locdaily.github.io/locdaily-store.com";
+    const base=cfg().publicAppUrl||"https://locdaily-store.github.io/locdaily";
     const fallback=`${base}/${String(fallbackPath||"").replace(/^\/+/, "")}`;
     try{
       const expected=new URL(base);

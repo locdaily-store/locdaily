@@ -6,10 +6,10 @@
         checkoutUrl:"https://vplweadbeujidsoponrl.supabase.co/functions/v1/ldm-public-checkout-v2",
         lynkOrderUrl:"https://vplweadbeujidsoponrl.supabase.co/functions/v1/ldm-lynk-order",
         developerWhatsApp:"6287874352468",
-        publicAppUrl:"https://locdaily.github.io/locdaily-store.com",
-        loginUrl:"https://locdaily.github.io/locdaily-store.com/index.html",
-        guideUrl:"https://locdaily.github.io/locdaily-store.com/panduan.html",
-        passwordResetUrl:"https://locdaily.github.io/locdaily-store.com/account-password-reset.html",
+        publicAppUrl:"https://locdaily-store.github.io/locdaily",
+        loginUrl:"https://locdaily-store.github.io/locdaily/index.html",
+        guideUrl:"https://locdaily-store.github.io/locdaily/panduan.html",
+        passwordResetUrl:"https://locdaily-store.github.io/locdaily/account-password-reset.html",
 
         // V27: Lynk.id adalah satu-satunya jalur pembayaran.
         checkoutMode:"lynk",
@@ -23,7 +23,7 @@
             TOKO:Object.freeze({monthly:"https://lynk.id/locdaily/9xro4wkxep8z/checkout",yearly:"https://lynk.id/locdaily/669ekq3znom1/checkout",two_year:"https://lynk.id/locdaily/jdm3revj0n7x/checkout"})
         }),
 
-        appVersion:String(window.LDM_APP_VERSION || "27.9.0-v28.15.1"),
+        appVersion:String(window.LDM_APP_VERSION || "27.9.0-v28.15.2"),
         requestTimeoutMs:12000,
         onlineCacheMinutes:2,
         offlineGraceHours:24,
