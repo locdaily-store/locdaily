@@ -168,10 +168,27 @@
         document.addEventListener("DOMContentLoaded", () => {
             refreshZoneLabels(document);
             replaceFixedZoneText(document.body);
+            const zoneMutationQueue = new Set();
+            let zoneMutationScheduled = false;
+            const flushZoneMutations = () => {
+                zoneMutationScheduled = false;
+                for (const node of [...zoneMutationQueue]) {
+                    zoneMutationQueue.delete(node);
+                    if (node && node.isConnected !== false) replaceFixedZoneText(node);
+                }
+            };
+            const scheduleZoneMutations = () => {
+                if (zoneMutationScheduled || zoneLabel() === "WITA") return;
+                zoneMutationScheduled = true;
+                if ("requestIdleCallback" in window) requestIdleCallback(flushZoneMutations, { timeout: 120 });
+                else setTimeout(flushZoneMutations, 0);
+            };
             const observer = new MutationObserver(records => {
+                if (zoneLabel() === "WITA") return;
                 records.forEach(record => {
-                    record.addedNodes.forEach(node => replaceFixedZoneText(node));
+                    record.addedNodes.forEach(node => zoneMutationQueue.add(node));
                 });
+                if (zoneMutationQueue.size) scheduleZoneMutations();
             });
             observer.observe(document.body, { childList: true, subtree: true });
 

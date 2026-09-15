@@ -164,12 +164,68 @@
   if(nativeConfirm)window.confirm=(message)=>nativeConfirm(sanitize(message));
   if(nativePrompt)window.prompt=(message,defaultValue)=>nativePrompt(sanitize(message),defaultValue);
 
+  const pendingNodes=new Set();
+  let pendingFlush=false;
+
+  function queueSanitize(node){
+    if(!node)return;
+    const target=node.nodeType===Node.TEXT_NODE?node.parentElement:node;
+    if(target?.closest?.("script,style,code,pre,[data-ldm-developer-raw]"))return;
+    if(target&&target.nodeType===Node.ELEMENT_NODE){
+      for(const queued of [...pendingNodes]){
+        if(queued!==target&&target.contains?.(queued))pendingNodes.delete(queued);
+      }
+    }
+    let parent=target?.parentElement;
+    while(parent){
+      if(pendingNodes.has(parent))return;
+      parent=parent.parentElement;
+    }
+    pendingNodes.add(node);
+    scheduleSanitize();
+  }
+
+  function flushSanitize(deadline){
+    pendingFlush=false;
+    const started=performance?.now?.()||Date.now();
+    let processed=0;
+    for(const node of [...pendingNodes]){
+      pendingNodes.delete(node);
+      if(node.isConnected===false)continue;
+      if(node.nodeType===Node.TEXT_NODE){
+        sanitizeTextNode(node);
+      }else if(node.nodeType===Node.ELEMENT_NODE){
+        sanitizeElementAttributes(node);
+        sanitizeMessageElement(node);
+      }
+      processed+=1;
+      const elapsed=(performance?.now?.()||Date.now())-started;
+      if(processed>=16&&(elapsed>=7||(deadline&&deadline.timeRemaining&&deadline.timeRemaining()<2))){
+        if(pendingNodes.size)scheduleSanitize();
+        break;
+      }
+    }
+  }
+
+  function scheduleSanitize(){
+    if(pendingFlush)return;
+    pendingFlush=true;
+    // Jangan melakukan scan subtree besar di callback MutationObserver karena
+    // callback itu berjalan sebelum browser sempat menggambar respons klik.
+    setTimeout(()=>{
+      if("requestIdleCallback" in window)requestIdleCallback(flushSanitize,{timeout:100});
+      else flushSanitize(null);
+    },0);
+  }
+
   function boot(){
     sanitizeDocument();
 
     const observer=new MutationObserver(records=>{
       for(const record of records){
         if(record.type==="characterData"){
+          // Perubahan satu text node murah, sanitasi langsung agar error sensitif
+          // tidak sempat tampil mentah.
           sanitizeTextNode(record.target);
           continue;
         }
@@ -178,14 +234,9 @@
           continue;
         }
         for(const node of record.addedNodes){
-          if(node.nodeType===Node.TEXT_NODE){
-            sanitizeTextNode(node);
-          }else if(node.nodeType===Node.ELEMENT_NODE){
-            sanitizeElementAttributes(node);
-            sanitizeMessageElement(node);
-          }
+          if(node.nodeType===Node.TEXT_NODE)sanitizeTextNode(node);
+          else if(node.nodeType===Node.ELEMENT_NODE)queueSanitize(node);
         }
-        sanitizeMessageElement(record.target);
       }
     });
 
@@ -198,7 +249,7 @@
     });
   }
 
-  window.LDMCustomerCopy=Object.freeze({sanitize,sanitizeDocument});
+  window.LDMCustomerCopy=Object.freeze({version:"27.9.0-v28.15.3",sanitize,sanitizeDocument});
 
   if(document.readyState==="loading"){
     document.addEventListener("DOMContentLoaded",boot,{once:true});

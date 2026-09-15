@@ -1,6 +1,7 @@
 (function(){
   "use strict";
 
+  const VERSION="27.9.0-v28.15.3";
   const replacements=[
     [/Supabase\s+Auth/gi,"akun pengelola"],
     [/Supabase\s+Storage/gi,"penyimpanan aplikasi"],
@@ -41,43 +42,155 @@
     [/\bJADWAL_BELUM_DIATUR\b/g,"Jadwal belum diatur"]
   ];
 
+  // Filter cepat sebelum menjalankan seluruh daftar regex. Ini penting pada
+  // tabel/list besar: perubahan DOM biasa tidak lagi diproses kata-per-kata.
+  const TRIGGER_RE=/(?:Supabase|License\s+Authority|sessionStorage|localStorage|IndexedDB|Edge\s+Functions?|\bRPC\b|\bRLS\b|\bbackend\b|\bdatabase\b|\bendpoint\b|\bwebhook\b|\bAPI\b|Project\s+Ref|\bCORS\b|\borigin\b|\bmigration\b|\bbuild\b|\bcache\b|\bPWA\b|Stack\s+Trace|raw\s+error\s+code|error\s+code|\bsecret\b|\btoken\b|\bdebug\b|Developer\s+note|catatan\s+developer|AI-generated|Generated\s+by\s+AI|ChatGPT|OpenAI|OWNER_REQUIRED|SHIFT_TIDAK_SESUAI|JADWAL_BELUM_DIATUR)/i;
+  const pending=new Set();
+  let scheduled=false;
+  let idleHandle=0;
+  let rafHandle=0;
+
   function cleanText(value){
     let text=String(value??"");
+    if(!TRIGGER_RE.test(text))return text.trim();
     for(const [pattern,replacement] of replacements) text=text.replace(pattern,replacement);
     return text.replace(/\s{2,}/g," ").replace(/\s+([,.;:!?])/g,"$1").trim();
   }
 
+  function ignored(node){
+    const element=node?.nodeType===Node.ELEMENT_NODE?node:node?.parentElement;
+    return Boolean(element&&element.closest("script,style,noscript,template,[data-ldm-developer-raw]"));
+  }
+
+  function attributeNeedsCleaning(node){
+    if(node?.nodeType!==Node.ELEMENT_NODE)return false;
+    for(const attr of ["title","placeholder","aria-label"]){
+      if(node.hasAttribute(attr)&&TRIGGER_RE.test(node.getAttribute(attr)||""))return true;
+    }
+    return false;
+  }
+
+  function mightNeedCleaning(node){
+    if(!node||ignored(node))return false;
+    if(node.nodeType===Node.TEXT_NODE)return TRIGGER_RE.test(node.nodeValue||"");
+    if(node.nodeType!==Node.ELEMENT_NODE)return false;
+    if(attributeNeedsCleaning(node))return true;
+    return TRIGGER_RE.test(node.textContent||"");
+  }
+
   function cleanNode(node){
-    if(!node)return;
+    if(!node||ignored(node)||!mightNeedCleaning(node))return;
     if(node.nodeType===Node.TEXT_NODE){
-      const parent=node.parentElement;
-      if(parent&&/^(SCRIPT|STYLE|NOSCRIPT|TEMPLATE)$/i.test(parent.tagName))return;
       const before=node.nodeValue||"";
+      const trimmed=before.trim();
+      if(!trimmed)return;
       const after=cleanText(before);
-      if(after!==before.trim() && before.trim()) node.nodeValue=before.replace(before.trim(),after);
+      if(after!==trimmed)node.nodeValue=before.replace(trimmed,after);
       return;
     }
     if(node.nodeType!==Node.ELEMENT_NODE)return;
-    if(/^(SCRIPT|STYLE|NOSCRIPT|TEMPLATE)$/i.test(node.tagName))return;
     for(const attr of ["title","placeholder","aria-label"]){
-      if(node.hasAttribute(attr)){
-        const before=node.getAttribute(attr)||"";
-        const after=cleanText(before);
-        if(after!==before)node.setAttribute(attr,after);
-      }
+      if(!node.hasAttribute(attr))continue;
+      const before=node.getAttribute(attr)||"";
+      if(!TRIGGER_RE.test(before))continue;
+      const after=cleanText(before);
+      if(after!==before)node.setAttribute(attr,after);
     }
     node.childNodes.forEach(cleanNode);
   }
 
+  function hasQueuedAncestor(node){
+    let parent=node?.parentNode;
+    while(parent){
+      if(pending.has(parent))return true;
+      parent=parent.parentNode;
+    }
+    return false;
+  }
+
+  function enqueue(node){
+    if(!node||ignored(node)||!mightNeedCleaning(node)||hasQueuedAncestor(node))return;
+    if(node.nodeType===Node.ELEMENT_NODE){
+      for(const queued of [...pending]){
+        if(queued!==node&&node.contains?.(queued))pending.delete(queued);
+      }
+    }
+    pending.add(node);
+    scheduleFlush();
+  }
+
+  function flush(deadline){
+    scheduled=false;
+    idleHandle=0;
+    rafHandle=0;
+    const started=performance?.now?.()||Date.now();
+    let processed=0;
+    for(const node of [...pending]){
+      pending.delete(node);
+      if(node.isConnected!==false)cleanNode(node);
+      processed+=1;
+      const elapsed=(performance?.now?.()||Date.now())-started;
+      if(processed>=16&&(elapsed>=7||(deadline&&deadline.timeRemaining&&deadline.timeRemaining()<2))){
+        if(pending.size)scheduleFlush();
+        break;
+      }
+    }
+  }
+
+  function scheduleFlush(){
+    if(scheduled)return;
+    scheduled=true;
+    // MutationObserver berjalan sebelum paint. Pekerjaan berat sengaja dipindah
+    // keluar jalur klik agar tombol/hasil lokal dapat terlihat pada frame pertama.
+    rafHandle=requestAnimationFrame(()=>{
+      if("requestIdleCallback" in window){
+        idleHandle=requestIdleCallback(flush,{timeout:120});
+      }else{
+        setTimeout(()=>flush(null),0);
+      }
+    });
+  }
+
+  function installInteractionTuning(){
+    if(document.getElementById("ldmFastInteractionStyle"))return;
+    const style=document.createElement("style");
+    style.id="ldmFastInteractionStyle";
+    style.textContent=`
+      button,input[type="button"],input[type="submit"],input[type="reset"],[role="button"],a.btn,[onclick]{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+      [data-ldm-pressing="true"]{opacity:.9}
+      @media (prefers-reduced-motion:reduce){button,input[type="button"],input[type="submit"],input[type="reset"],[role="button"],a.btn,[onclick]{transition-duration:.01ms!important}}
+    `;
+    document.head.appendChild(style);
+
+    const selector='button,input[type="button"],input[type="submit"],input[type="reset"],[role="button"],a.btn,[onclick]';
+    let pressed=null;
+    const clear=()=>{
+      if(pressed){pressed.removeAttribute("data-ldm-pressing");pressed=null;}
+    };
+    document.addEventListener("pointerdown",event=>{
+      const target=event.target?.closest?.(selector);
+      if(!target||target.disabled||target.getAttribute("aria-disabled")==="true")return;
+      clear();
+      pressed=target;
+      target.setAttribute("data-ldm-pressing","true");
+    },{capture:true,passive:true});
+    document.addEventListener("pointerup",clear,{capture:true,passive:true});
+    document.addEventListener("pointercancel",clear,{capture:true,passive:true});
+    window.addEventListener("blur",clear,{passive:true});
+  }
+
   function run(){
+    installInteractionTuning();
+    // Initial cleanup boleh sinkron karena hanya terjadi sekali saat halaman siap.
     cleanNode(document.body);
     const observer=new MutationObserver(records=>{
       for(const record of records){
-        if(record.type==="characterData")cleanNode(record.target);
-        record.addedNodes.forEach(cleanNode);
+        if(record.type==="characterData")enqueue(record.target);
+        for(const node of record.addedNodes)enqueue(node);
       }
     });
     observer.observe(document.body,{subtree:true,childList:true,characterData:true});
+    window.LDMUiCopyCleanup=Object.freeze({version:VERSION,flush:()=>flush(null)});
   }
 
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",run,{once:true});

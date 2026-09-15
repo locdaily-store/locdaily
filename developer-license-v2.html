@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="id">
 <head>
-  <script src="js/app-version.js?v=27.9.0-v28.13.1"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.15.3"></script>
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
     <script src="js/storage-quota-guard.js?v=27.7.1"></script>
     <script defer src="js/storage-health-monitor.js?v=27.7.1"></script>
@@ -292,6 +292,6 @@ Pastikan dana sudah benar-benar dikembalikan kepada customer sebelum melanjutkan
     async function deactivateDevice(aid,lid){if(!confirm("Nonaktifkan perangkat ini dan kosongkan slotnya?"))return;await LDMLicenseV2Admin.call("deactivate_device",{activation_id:aid,reason:"Dinonaktifkan developer"});await devices(lid);await load()}
     (async()=>{try{if(!LDMLicenseV2Admin.configured()){$("loginMessage").textContent="Isi js/license-v2-admin-config.js terlebih dahulu.";return}const session=await LDMLicenseV2Admin.session();if(session){showApp(true);await load()}}catch(e){$("loginMessage").textContent=e.message}})();
   </script>
-<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.6.1"></script>
+<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.15.3-perf"></script>
 </body>
 </html>

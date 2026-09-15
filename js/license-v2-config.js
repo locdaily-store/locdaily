@@ -23,7 +23,7 @@
             TOKO:Object.freeze({monthly:"https://lynk.id/locdaily/9xro4wkxep8z/checkout",yearly:"https://lynk.id/locdaily/669ekq3znom1/checkout",two_year:"https://lynk.id/locdaily/jdm3revj0n7x/checkout"})
         }),
 
-        appVersion:String(window.LDM_APP_VERSION || "27.9.0-v28.15.2"),
+        appVersion:String(window.LDM_APP_VERSION || "27.9.0-v28.15.3"),
         requestTimeoutMs:12000,
         onlineCacheMinutes:2,
         offlineGraceHours:24,

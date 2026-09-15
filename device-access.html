@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="id"><head>
-  <script src="js/app-version.js?v=27.9.0-v28.13.1"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.15.3"></script>
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
     <script src="js/storage-quota-guard.js?v=27.7.1"></script>
     <script defer src="js/storage-health-monitor.js?v=27.7.1"></script>
@@ -11,6 +11,6 @@
 async function check(){try{await LDMCloudSession.ensureAuthenticated({registerDevice:true});const a=await LDMCloudAuth.getCurrentDeviceAccess();document.getElementById("code").textContent=a.client_device_id||"-";const s=String(a.status||"unknown").toLowerCase();document.getElementById("status").textContent=s.toUpperCase();document.getElementById("status").className="status "+s;let q=null;try{const {data,error}=await LDMSupabase.createClient().rpc("ldm_my_license_quota");if(error)throw error;q=data||null;const max=Number(q?.max_devices||0),used=Number(q?.active_devices||0);document.getElementById("quotaInfo").textContent=max?`Kuota perangkat paket: ${used}/${max} aktif. Perangkat PENDING belum memakai slot.`:"Kuota perangkat belum tersinkron."}catch(error){document.getElementById("quotaInfo").textContent="Kuota perangkat belum dapat dibaca."}if(s==="active"){document.getElementById("info").textContent="Perangkat sudah dihubungkan. Mengarahkan ke Dashboard...";setTimeout(()=>location.replace("dashboard.html"),600)}else if(s==="pending"){document.getElementById("info").textContent=q?.device_limit_reached?"Menunggu persetujuan Owner, tetapi kuota perangkat sedang penuh. Owner harus memutuskan perangkat lama atau upgrade paket. Server akan menolak perangkat unik baru di atas batas.":"Menunggu Owner membuka Perangkat Cloud di perangkat Owner yang sudah aktif lalu menekan Hubungkan pada Device ID ini."}else if(s==="revoked"){document.getElementById("info").textContent="Hubungan perangkat telah diputuskan oleh Owner. Owner dapat menghubungkannya kembali dari menu Perangkat Cloud selama kuota paket tersedia."}else{document.getElementById("info").textContent="Status perangkat belum dikenali."}}catch(e){document.getElementById("info").textContent="Gagal membaca status: "+(e.message||String(e))}}
 async function logout(){await LDMCloudSession.logout("index.html")}
 document.addEventListener("DOMContentLoaded",()=>{check();setInterval(check,5000)});
-</script><script src="js/customer-safe-copy-v2828.js?v=27.9.0-safe-copy-v2828"></script>
-<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.6.1"></script>
+</script><script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.15.3-perf"></script>
+<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.15.3-perf"></script>
 </body></html>

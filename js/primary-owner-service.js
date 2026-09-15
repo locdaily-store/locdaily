@@ -115,18 +115,33 @@
         `;
         document.head.appendChild(style);
     }
-    function hideSensitiveFields(){
+    function hideSensitiveFields(root=document){
         if(isPrimaryOwner())return;
         const procurementOwner=isProcurementOwner();
-        const ids=["hargaBeli","editHargaBeli","inputHargaBeliPO","inputHargaBeliGR"];
-        ids.forEach(id=>{
-            const node=document.getElementById(id);
-            if(!node)return;
+        const scope=root&&root.nodeType?root:document;
+        const candidates=[];
+        if(scope===document){
+            candidates.push(...document.querySelectorAll("#hargaBeli,#editHargaBeli,#inputHargaBeliPO,#inputHargaBeliGR"));
+        }else if(scope.nodeType===Node.ELEMENT_NODE){
+            if(["hargaBeli","editHargaBeli","inputHargaBeliPO","inputHargaBeliGR"].includes(scope.id))candidates.push(scope);
+            candidates.push(...scope.querySelectorAll?.("#hargaBeli,#editHargaBeli,#inputHargaBeliPO,#inputHargaBeliGR")||[]);
+        }
+        candidates.forEach(node=>{
             node.disabled=true;
             const wrapper=node.closest(".field,.form-group,.input-group,.form-row")||node;
             wrapper.classList.add("ldm-finance-restricted");
         });
-        document.querySelectorAll("th,label,h2,h3,h4,strong,span").forEach(node=>{
+
+        const inspect=[];
+        if(scope===document){
+            inspect.push(...document.querySelectorAll("th,label,h2,h3,h4,strong,span"));
+        }else if(scope.nodeType===Node.ELEMENT_NODE){
+            if(scope.matches?.("th,label,h2,h3,h4,strong,span"))inspect.push(scope);
+            inspect.push(...scope.querySelectorAll?.("th,label,h2,h3,h4,strong,span")||[]);
+        }else if(scope.nodeType===Node.TEXT_NODE&&scope.parentElement){
+            inspect.push(scope.parentElement);
+        }
+        inspect.forEach(node=>{
             const text=String(node.textContent||"").trim().toLowerCase();
             if(procurementOwner && /^(subtotal|subtotal estimasi|total nilai|total estimasi)$/.test(text))return;
             if(text.startsWith("harga beli") || text==="harga estimasi" || /^(hpp|profit bersih|profit setelah hpp|margin keuntungan)$/.test(text)){
@@ -182,8 +197,40 @@
         document.documentElement.dataset.ldmProcurementOwner=String(isProcurementOwner());
         if(!allowed){
             sanitizeKnownCaches();
-            hideSensitiveFields();
-            const observer=new MutationObserver(()=>hideSensitiveFields());
+            hideSensitiveFields(document);
+            const pending=new Set();
+            let scheduled=false;
+            const flush=()=>{
+                scheduled=false;
+                for(const node of [...pending]){
+                    pending.delete(node);
+                    if(node.isConnected!==false)hideSensitiveFields(node);
+                }
+            };
+            const schedule=()=>{
+                if(scheduled)return;
+                scheduled=true;
+                if("requestIdleCallback" in window)requestIdleCallback(flush,{timeout:80});
+                else setTimeout(flush,0);
+            };
+            const observer=new MutationObserver(records=>{
+                for(const record of records){
+                    for(const node of record.addedNodes){
+                        const target=node.nodeType===Node.TEXT_NODE?node.parentElement:node;
+                        if(!target)continue;
+                        let covered=false;
+                        for(let parent=target.parentElement;parent;parent=parent.parentElement){
+                            if(pending.has(parent)){covered=true;break;}
+                        }
+                        if(covered)continue;
+                        if(target.nodeType===Node.ELEMENT_NODE){
+                            for(const queued of [...pending])if(target.contains?.(queued))pending.delete(queued);
+                        }
+                        pending.add(target);
+                    }
+                }
+                if(pending.size)schedule();
+            });
             observer.observe(document.documentElement,{subtree:true,childList:true});
             setTimeout(()=>observer.disconnect(),15000);
         }
