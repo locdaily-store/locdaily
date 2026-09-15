@@ -1,10 +1,10 @@
-// Build: 27.9.0-v28.15.1 GitHub Pages Rollback - Legacy HTML Routes
+// Build: 27.9.0-v28.15.2 GitHub Pages Origin & Project Path Migration
 "use strict";
 
-const APP_VERSION = "27.9.0-v28.15.1";
+const APP_VERSION = "27.9.0-v28.15.2";
 const CACHE_PREFIX = "ldm-";
-const SHELL_CACHE = `${CACHE_PREFIX}release27-9-0-github-rollback-v28-15-1`;
-const RUNTIME_CACHE = `${CACHE_PREFIX}release27-9-0-github-rollback-runtime-v28-15-1`;
+const SHELL_CACHE = `${CACHE_PREFIX}release27-9-0-github-origin-v28-15-2`;
+const RUNTIME_CACHE = `${CACHE_PREFIX}release27-9-0-github-origin-runtime-v28-15-2`;
 const SUPABASE_CDN = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
 
 const APP_SHELL = [
