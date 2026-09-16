@@ -1,13 +1,12 @@
-(function(){
+(function(root){
     "use strict";
-    const APP_VERSION="27.9.0-v28.15.3";
-    const BUILD_VERSION="V28.15.3";
-    const BUILD_NAME="Global Interaction Latency Hotfix";
-    window.LDM_APP_VERSION=APP_VERSION;
-    window.LDM_BUILD_VERSION=BUILD_VERSION;
-    window.LDM_BUILD_INFO=Object.freeze({
-        appVersion:APP_VERSION,
-        buildVersion:BUILD_VERSION,
-        buildName:BUILD_NAME
+    const INFO=Object.freeze({
+        appVersion:"27.9.0-v28.16.0",
+        buildVersion:"V28.16.0",
+        buildName:"Production Security Hardening"
     });
-})();
+    root.LDM_VERSION_INFO=INFO;
+    root.LDM_APP_VERSION=INFO.appVersion;
+    root.LDM_BUILD_VERSION=INFO.buildVersion;
+    root.LDM_BUILD_INFO=INFO;
+})(typeof globalThis!=="undefined"?globalThis:this);

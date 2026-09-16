@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script src="js/app-version.js?v=27.9.0-v28.15.3"></script>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
+
+  <script src="js/app-version.js?v=27.9.0-v28.16.0"></script>
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
     <script src="js/storage-quota-guard.js?v=27.7.1"></script>
     <script defer src="js/storage-health-monitor.js?v=27.7.1"></script>
-<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=19.0"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
+<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=27.9.0-v28.16.0-security"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
 <script defer src="js/qa-runtime.js?v=19.0"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,7 +27,7 @@
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
     <script src="js/pwa-manager.js?v=27.9.0-v28.13.1"></script>
 <!-- Library Chart.js untuk Grafik -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.js"></script>
 
 <!-- Google Fonts Lengkap -->
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fira+Code:wght@500;700&family=Fredoka:wght@600;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&family=Lato:wght@400;700&family=Lobster&family=Merriweather:wght@400;700&family=Montserrat:wght@400;600;700&family=Nunito:wght@400;700&family=Open+Sans:wght@400;600;700&family=Oswald:wght@500;700&family=Pacifico&family=Playfair+Display:wght@600;800&family=Poppins:wght@400;600;700&family=Raleway:wght@500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -3244,7 +3246,7 @@ body.dark-mode
 </script>
 
     
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
     <script src="js/supabase-config.js"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/cloud-auth.js?v=15.0"></script>
@@ -4836,7 +4838,7 @@ body.dark-mode
                     </small>
                 </div>
                 <div class="form-row">
-                    <label>Password Akun (Harus 8 Karakter)</label>
+                    <label>Password dikelola melalui Akun Cloud</label>
                     <input type="password" id="inputNewPassword" placeholder="Masukkan password" minlength="8" maxlength="8">
                 </div>
                 <div class="form-row">
@@ -6000,34 +6002,12 @@ function logout() {
             tampilkanAlertCustom("Berhasil", "Pengaturan tampilan berhasil disimpan!", "success");
         }
 
-        async function hashPassword(password) {
-
-    const encoder =
-        new TextEncoder();
-
-    const data =
-        encoder.encode(password);
-
-    const hashBuffer =
-        await crypto.subtle.digest(
-            "SHA-256",
-            data
-        );
-
-    const hashArray =
-        Array.from(
-            new Uint8Array(hashBuffer)
-        );
-
-    return hashArray
-        .map(
-            byte =>
-                byte
-                    .toString(16)
-                    .padStart(2, "0")
-        )
-        .join("");
-}
+        function stripLegacyAccountCredential(account) {
+            if (window.LDMSecurity?.stripLegacyCredentialFields) return window.LDMSecurity.stripLegacyCredentialFields(account);
+            const copy = { ...(account || {}) };
+            delete copy.password; delete copy.passwordHash; delete copy.password_hash; delete copy.pin;
+            return copy;
+        }
 
         function getDatabaseAkun() {
 
@@ -6202,7 +6182,7 @@ function escapeHtml(value) {
                         font-size:0.72rem;
                         color:var(--label-color);
                     ">
-                        ${roleLabel}
+                        ${escapeHtml(roleLabel)}
                         ${isCurrentUser ? " • Akun Anda" : ""}
                     </div>
 
@@ -6226,7 +6206,7 @@ function escapeHtml(value) {
                     font-size:0.7rem;
                     color:var(--label-color);
                 ">
-                    ID: ${akun.id}
+                    ID: ${escapeHtml(akun.id)}
                 </div>
 
             </div>
@@ -6352,565 +6332,14 @@ function escapeHtml(value) {
 }
 
         async function tambahAkunBaru() {
-
-    const usernameInput =
-        document.getElementById(
-            "inputNewUsername"
-        );
-
-    const passwordInput =
-        document.getElementById(
-            "inputNewPassword"
-        );
-
-    const roleInput =
-        document.getElementById(
-            "selectNewRole"
-        );
-
-
-    const username =
-        usernameInput.value.trim();
-
-    const password =
-        passwordInput.value;
-
-    const role =
-    document.getElementById(
-        "selectNewRole"
-    ).value;
-
-
-    // -----------------------------------------
-    // VALIDASI USERNAME
-    // -----------------------------------------
-
-    if (!username) {
-
-        tampilkanAlertCustom(
-            "Peringatan",
-            "Username wajib diisi!",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    if (username.length < 3) {
-
-        tampilkanAlertCustom(
-            "Peringatan",
-            "Username minimal 3 karakter.",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    if (
-        !/^[a-zA-Z0-9._-]+$/.test(username)
-    ) {
-
-        tampilkanAlertCustom(
-            "Peringatan",
-            "Username hanya boleh menggunakan huruf, angka, titik, garis bawah, atau tanda minus.",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    // -----------------------------------------
-    // VALIDASI PASSWORD
-    // -----------------------------------------
-
-    if (!password) {
-
-        tampilkanAlertCustom(
-            "Peringatan",
-            "Password wajib diisi!",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    if (password.length < 8) {
-
-        tampilkanAlertCustom(
-            "Peringatan",
-            "Password minimal 8 karakter.",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    // -----------------------------------------
-    // VALIDASI ROLE
-    // -----------------------------------------
-
-    if (
-        role !== "owner" &&
-        role !== "admin" &&
-        role !== "kasir"
-    ) {
-
-        tampilkanAlertCustom(
-            "Peringatan",
-            "Role akun tidak valid.",
-            "warning"
-        );
-
-        return;
-    }
-
-
-    const akunList =
-        getDatabaseAkun();
-
-
-    // -----------------------------------------
-    // CEK USERNAME DUPLIKAT
-    // -----------------------------------------
-
-    const usernameExists =
-        akunList.some(
-            akun =>
-                String(akun.username)
-                    .toLowerCase()
-                    .trim() ===
-                username.toLowerCase()
-        );
-
-
-    if (usernameExists) {
-
-        tampilkanAlertCustom(
-            "Peringatan",
-            "Username tersebut sudah terdaftar!",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    // -----------------------------------------
-    // TAMBAH AKUN
-    // -----------------------------------------
-
-    const employee =
-        window.LDMEmployee
-            ? LDMEmployee.createForAccount({
-                username:
-                    username,
-                role:
-                    role
-            })
-            : null;
-
-
-    const passwordHash = await hashPassword(password);
-
-    akunList.push({
-
-        id:
-            Date.now(),
-
-        username:
-            username,
-
-        namaKaryawan:
-            username,
-
-        employeeId:
-            employee
-                ? employee.employeeId
-                : "",
-
-        nikKaryawan:
-            employee
-                ? employee.nikKaryawan
-                : "",
-
-        passwordHash:
-            passwordHash,
-
-        role:
-            role
-
-    });
-
-
-    localStorage.setItem(
-        "daftarAkun",
-        JSON.stringify(akunList)
-    );
-
-
-    usernameInput.value = "";
-
-    passwordInput.value = "";
-
-
-    renderListAkunModal();
-
-
-    buatAuditLog(
-        "CREATE_ACCOUNT",
-        `Membuat akun "${username}" dengan role ${role}`
-    );
-
-
-    tampilkanAlertCustom(
-        "Berhasil",
-        "Akun baru berhasil ditambahkan!",
-        "success"
-    );
-
-}
-
-        async function simpanPerubahanAkun(idx) {
-
-    const akunList =
-        getDatabaseAkun();
-
-
-    const target =
-        akunList[idx];
-
-
-    if (!target) {
-
-        tampilkanAlertCustom(
-            "Gagal",
-            "Data akun tidak ditemukan.",
-            "danger"
-        );
-
-        return;
-
-    }
-
-
-    const newUsername =
-        document
-            .getElementById(`editUser_${idx}`)
-            .value
-            .trim();
-
-
-    const newPassword =
-        document
-            .getElementById(`editPass_${idx}`)
-            .value;
-
-
-    const newRole =
-        document
-            .getElementById(`editRole_${idx}`)
-            .value;
-
-
-    const currentUsername =
-        localStorage.getItem(
-            "username"
-        );
-
-
-    // -----------------------------------------
-    // VALIDASI USERNAME
-    // -----------------------------------------
-
-    if (!newUsername) {
-
-        tampilkanAlertCustom(
-            "Peringatan",
-            "Username tidak boleh kosong.",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    if (newUsername.length < 3) {
-
-        tampilkanAlertCustom(
-            "Peringatan",
-            "Username minimal 3 karakter.",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    if (
-        !/^[a-zA-Z0-9._-]+$/.test(newUsername)
-    ) {
-
-        tampilkanAlertCustom(
-            "Peringatan",
-            "Username mengandung karakter yang tidak diperbolehkan.",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    // -----------------------------------------
-    // CEK DUPLIKAT USERNAME
-    // -----------------------------------------
-
-    const duplicate =
-        akunList.some(
-            (akun, akunIndex) =>
-
-                akunIndex !== idx &&
-
-                String(akun.username)
-                    .toLowerCase()
-                    .trim() ===
-                newUsername.toLowerCase()
-        );
-
-
-    if (duplicate) {
-
-        tampilkanAlertCustom(
-            "Peringatan",
-            "Username tersebut sudah digunakan oleh akun lain.",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    // -----------------------------------------
-    // VALIDASI ROLE
-    // -----------------------------------------
-
-    if (
-    newRole !== "owner" &&
-    newRole !== "admin" &&
-    newRole !== "kasir"
-) {
-
-    tampilkanAlertCustom(
-        "Peringatan",
-        "Role tidak valid.",
-        "warning"
-    );
-
-    return;
-}
-
-
-    // -----------------------------------------
-    // JANGAN DEMOTE OWNER TERAKHIR
-    // -----------------------------------------
-
-    if (
-        target.role === "owner" &&
-        newRole !== "owner"
-    ) {
-
-        const jumlahOwner =
-            akunList.filter(
-                akun =>
-                    akun.role === "owner"
-            ).length;
-
-
-        if (jumlahOwner <= 1) {
-
-            tampilkanAlertCustom(
-                "Akses Ditolak",
-                "Minimal harus ada satu akun Owner. Owner terakhir tidak dapat diturunkan menjadi Admin.",
-                "warning"
-            );
-
-            return;
-
+            tampilkanAlertCustom("Akun Cloud", "Pembuatan akun lokal sudah dipensiunkan. Gunakan Manajemen Akun Cloud.", "warning");
+            setTimeout(() => { window.location.href = "account-management.html"; }, 250);
         }
 
-    }
-
-
-// -----------------------------------------
-// PASSWORD BARU OPSIONAL
-// -----------------------------------------
-
-if (newPassword.trim() !== "") {
-
-    const passwordBaru =
-        newPassword.trim();
-
-
-    // Validasi panjang password
-    if (passwordBaru.length < 8) {
-
-        tampilkanAlertCustom(
-            "Peringatan",
-            "Password baru minimal 8 karakter.",
-            "warning"
-        );
-
-        return;
-    }
-
-
-    // -----------------------------------------
-    // HASH PASSWORD BARU
-    // -----------------------------------------
-
-    const passwordHashBaru =
-        await hashPassword(
-            passwordBaru
-        );
-
-
-    /*
-     * Sistem login membaca passwordHash,
-     * bukan password plaintext.
-     */
-    target.passwordHash =
-        passwordHashBaru;
-
-
-    /*
-     * Hapus password plaintext lama
-     * jika masih tersisa.
-     */
-    if (
-        Object.prototype.hasOwnProperty.call(
-            target,
-            "password"
-        )
-    ) {
-
-        delete target.password;
-
-    }
-
-}
-
-
-    const oldUsername =
-        target.username;
-
-    const oldRole =
-        target.role;
-
-
-    target.username =
-        newUsername;
-
-    target.role =
-        newRole;
-
-    /*
-     * Nama Karyawan selalu mengikuti username.
-     */
-    target.namaKaryawan =
-        newUsername;
-
-
-    if (window.LDMEmployee) {
-
-        const employeeUpdated =
-            LDMEmployee.updateUsername(
-                oldUsername,
-                newUsername,
-                newRole
-            );
-
-
-        if (employeeUpdated) {
-
-            target.employeeId =
-                employeeUpdated.employeeId;
-
-            target.nikKaryawan =
-                employeeUpdated.nikKaryawan;
-
+        async function simpanPerubahanAkun(_idx) {
+            tampilkanAlertCustom("Akun Cloud", "Perubahan username, role, dan password lokal sudah dipensiunkan. Gunakan Manajemen Akun Cloud.", "warning");
+            setTimeout(() => { window.location.href = "account-management.html"; }, 250);
         }
-
-    }
-
-
-    const dataAkunBaru =
-    JSON.stringify(
-        akunList
-    );
-
-
-localStorage.setItem(
-    "daftarAkun",
-    dataAkunBaru
-);
-
-const akunTersimpan =
-    JSON.parse(
-        localStorage.getItem(
-            "daftarAkun"
-        )
-    ) || [];
-
-
-
-    // -----------------------------------------
-    // UPDATE SESSION JIKA AKUN SENDIRI
-    // -----------------------------------------
-
-    if (
-        String(oldUsername).toLowerCase() ===
-        String(currentUsername).toLowerCase()
-    ) {
-
-        localStorage.setItem(
-            "username",
-            newUsername
-        );
-
-    }
-
-
-    renderListAkunModal();
-
-
-    buatAuditLog(
-        "UPDATE_ACCOUNT",
-        `Mengubah akun "${oldUsername}" → "${newUsername}", role ${oldRole} → ${newRole}`
-    );
-
-
-    tampilkanAlertCustom(
-        "Berhasil",
-        "Data akun berhasil diperbarui.",
-        "success"
-    );
-
-}
 
         function konfirmasiHapusAkun(idx) {
 
@@ -12443,7 +11872,7 @@ window.addEventListener(
 })();
 </script>
 
-<script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.15.3-perf"></script>
-<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.15.3-perf"></script>
+<script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
+<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
 </body>
 </html>

@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script src="js/app-version.js?v=27.9.0-v28.15.3"></script>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
+
+  <script src="js/app-version.js?v=27.9.0-v28.16.0"></script>
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
     <script src="js/storage-quota-guard.js?v=27.7.1"></script>
     <script defer src="js/storage-health-monitor.js?v=27.7.1"></script>
-<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=19.0"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
+<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=27.9.0-v28.16.0-security"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
 <script defer src="js/qa-runtime.js?v=19.0"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -690,7 +692,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
     <script src="js/supabase-config.js"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/cloud-auth.js?v=15.0"></script>
@@ -961,116 +963,38 @@ function updateLoginSecurityDisplay() {
 
 }
 
-async function hashPassword(password) {
-
-    const encoder =
-        new TextEncoder();
-
-    const data =
-        encoder.encode(password);
-
-    const hashBuffer =
-        await crypto.subtle.digest(
-            "SHA-256",
-            data
-        );
-
-    const hashArray =
-        Array.from(
-            new Uint8Array(hashBuffer)
-        );
-
-    return hashArray
-        .map(
-            byte =>
-                byte
-                    .toString(16)
-                    .padStart(2, "0")
-        )
-        .join("");
+function retireLegacyAccountCredentials() {
+    if (window.LDMSecurity && typeof window.LDMSecurity.retireLegacyCredentials === "function") {
+        return window.LDMSecurity.retireLegacyCredentials();
+    }
+    try {
+        const raw = localStorage.getItem("daftarAkun");
+        if (!raw) return { changed: false, count: 0 };
+        const accounts = JSON.parse(raw);
+        if (!Array.isArray(accounts)) return { changed: false, count: 0 };
+        let changed = false;
+        let count = 0;
+        const cleaned = accounts.map(account => {
+            if (!account || typeof account !== "object") return account;
+            const copy = { ...account };
+            let accountChanged = false;
+            ["password","passwordHash","password_hash","pin","passwordPlaintext"].forEach(key => {
+                if (Object.prototype.hasOwnProperty.call(copy, key)) { delete copy[key]; changed = true; accountChanged = true; }
+            });
+            if (accountChanged) count++;
+            return copy;
+        });
+        if (changed) localStorage.setItem("daftarAkun", JSON.stringify(cleaned));
+        return { changed, count };
+    } catch (_error) {
+        return { changed: false, count: 0 };
+    }
 }
 
 async function migrateOldAccounts() {
-
-    const raw =
-        localStorage.getItem("daftarAkun");
-
-    if (!raw) {
-        return;
-    }
-
-
-    let accounts;
-
-    try {
-
-        accounts =
-            JSON.parse(raw);
-
-    } catch {
-
-        console.warn(
-            "Data daftarAkun tidak valid."
-        );
-
-        return;
-    }
-
-
-    if (!Array.isArray(accounts)) {
-        return;
-    }
-
-
-    let changed = false;
-
-
-    for (const account of accounts) {
-
-        /*
-         * Jika akun lama masih mempunyai
-         * password plaintext
-         */
-
-        if (account.password) {
-
-            /*
-             * Jika versi lama menyimpan password plaintext sekaligus
-             * passwordHash yang sudah usang, anggap password plaintext
-             * sebagai nilai terbaru, lalu bangun ulang hash.
-             */
-            account.passwordHash =
-                await hashPassword(
-                    account.password
-                );
-
-
-            /*
-             * Setelah berhasil di-hash,
-             * password plaintext dihapus.
-             */
-
-            delete account.password;
-
-            changed = true;
-        }
-
-    }
-
-
-    if (changed) {
-
-        localStorage.setItem(
-            "daftarAkun",
-            JSON.stringify(accounts)
-        );
-
-        console.log(
-            "Akun lama berhasil dimigrasikan."
-        );
-    }
+    // V28.16.0: password lokal dipensiunkan. Cache daftarAkun hanya menyimpan metadata kompatibilitas.
+    retireLegacyAccountCredentials();
 }
-
 
 // =====================================================
 // LOGIN UTAMA
@@ -1772,7 +1696,7 @@ document.addEventListener(
 );
 </script>
 
-<script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.15.3-perf"></script>
-<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.15.3-perf"></script>
+<script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
+<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
 </body>
 </html>

@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="id" class="closing-access-pending">
 <head>
-  <script src="js/app-version.js?v=27.9.0-v28.15.3"></script>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
+
+  <script src="js/app-version.js?v=27.9.0-v28.16.0"></script>
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
     <script src="js/storage-quota-guard.js?v=27.7.1"></script>
     <script defer src="js/storage-health-monitor.js?v=27.7.1"></script>
-<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=19.0"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
+<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=27.9.0-v28.16.0-security"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
 <script defer src="js/qa-runtime.js?v=19.0"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1557,7 +1559,7 @@
 </script>
 
     
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
     <script src="js/supabase-config.js"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/cloud-auth.js?v=15.0"></script>
@@ -2838,7 +2840,7 @@
             txtTotal.innerText = `${shiftLog.length} Record (${selectedFilterDate})`;
 
             if (shiftLog.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding: 15px;">Belum ada riwayat closing shift untuk tanggal ${selectedFilterDate}.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding: 15px;">Belum ada riwayat closing shift untuk tanggal ${escapeHtmlClosing(selectedFilterDate)}.</td></tr>`;
                 return;
             }
 
@@ -2877,7 +2879,7 @@ if (
             class="btn-delete-log"
             onclick="
                 konfirmasiHapusLog(
-                    ${log.id}
+                    ${Number(log.id)}
                 )
             "
         >
@@ -2906,10 +2908,10 @@ else {
                 html += `
                     <tr>
                         <td>
-                            <strong>${log.kasir}</strong><br>
-                            <small style="color:#64748b;">${log.tanggal} ${log.waktu}</small>
+                            <strong>${escapeHtmlClosing(log.kasir)}</strong><br>
+                            <small style="color:#64748b;">${escapeHtmlClosing(log.tanggal)} ${escapeHtmlClosing(log.waktu)}</small>
                         </td>
-                        <td><span class="badge-shift">${log.shift}</span></td>
+                        <td><span class="badge-shift">${escapeHtmlClosing(log.shift)}</span></td>
                         <td>
                             <strong>Omzet:</strong> Rp ${log.totalOmzet.toLocaleString("id-ID")}<br>
                             <small style="color:#0284c7;">Modal: Rp ${(log.modalAwal || 0).toLocaleString("id-ID")}</small> | 
@@ -2923,7 +2925,7 @@ else {
                             <small style="${selisihColor}">Selisih Tunai: ${selisihText}</small>
                         </td>
                         <td>
-                            <button type="button" class="btn-print-log" onclick="cetakLaporanLog(${log.id})">🖨️ Cetak</button>
+                            <button type="button" class="btn-print-log" onclick="cetakLaporanLog(${Number(log.id)})">🖨️ Cetak</button>
                             ${btnHapusHtml}
                         </td>
                     </tr>
@@ -3035,11 +3037,11 @@ else {
 
             printArea.innerHTML = `
                 <div class="print-receipt">
-                    <div class="print-title">${config.judul || "LocDailyMar"}</div>
+                    <div class="print-title">${escapeHtmlClosing(config.judul || "LocDailyMar")}</div>
                     <div class="print-sub">LAPORAN PENUTUPAN SHIFT</div>
-                    <div class="print-row"><span>Tanggal/Waktu:</span> <span>${log.tanggal} ${log.waktu}</span></div>
-                    <div class="print-row"><span>Kasir:</span> <span>${log.kasir}</span></div>
-                    <div class="print-row"><span>Shift:</span> <span>${log.shift}</span></div>
+                    <div class="print-row"><span>Tanggal/Waktu:</span> <span>${escapeHtmlClosing(log.tanggal)} ${escapeHtmlClosing(log.waktu)}</span></div>
+                    <div class="print-row"><span>Kasir:</span> <span>${escapeHtmlClosing(log.kasir)}</span></div>
+                    <div class="print-row"><span>Shift:</span> <span>${escapeHtmlClosing(log.shift)}</span></div>
                     <div class="print-divider"></div>
                     <div class="print-row"><span>Modal Awal (Terpisah):</span> <span>Rp ${(log.modalAwal || 0).toLocaleString("id-ID")}</span></div>
                     <div class="print-row"><span>Total Omzet:</span> <span>Rp ${log.totalOmzet.toLocaleString("id-ID")}</span></div>
@@ -3051,7 +3053,7 @@ else {
                     <div class="print-divider"></div>
                     <div class="print-row"><span>Uang Tunai Fisik Akhir (Tanpa Modal):</span> <span>Rp ${tunaiFisikTanpaModal.toLocaleString("id-ID")}</span></div>
                     <div class="print-row"><span>Selisih Tunai:</span> <span>${selisihText}</span></div>
-                    ${log.catatan ? `<div class="print-divider"></div><div style="font-size:0.75rem;"><strong>Catatan:</strong> ${log.catatan}</div>` : ''}
+                    ${log.catatan ? `<div class="print-divider"></div><div style="font-size:0.75rem;"><strong>Catatan:</strong> ${escapeHtmlClosing(log.catatan)}</div>` : ''}
                     <div class="print-divider"></div>
                     <div style="text-align:center; font-size:0.7rem; margin-top:10px;">Dicetak Otomatis POS LocDailyMar</div>
                 </div>
@@ -4728,7 +4730,7 @@ document.addEventListener(
 </script>
 
 <script src="js/global-system-navigation.js?v=27.9.0-v28.13.1"></script>
-<script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.15.3-perf"></script>
-<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.15.3-perf"></script>
+<script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
+<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
 </body>
 </html>

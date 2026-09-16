@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script src="js/app-version.js?v=27.9.0-v28.15.3"></script>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
+
+  <script src="js/app-version.js?v=27.9.0-v28.16.0"></script>
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
     <script src="js/storage-quota-guard.js?v=27.7.1"></script>
     <script defer src="js/storage-health-monitor.js?v=27.7.1"></script>
-<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=19.0"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
+<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=27.9.0-v28.16.0-security"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
 <script defer src="js/qa-runtime.js?v=19.0"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,7 +27,7 @@
     <script src="js/pwa-manager.js?v=27.9.0-v28.13.1"></script>
 
     <!-- Library HTML5-QRCode -->
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" type="text/javascript"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Caveat&family=Fira+Code&family=Fredoka:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono&family=Lato:wght@400;700&family=Lobster&family=Merriweather:wght@400;700&family=Montserrat:wght@400;600;700&family=Nunito:wght@400;600;700&family=Open+Sans:wght@400;600;700&family=Oswald:wght@500;700&family=Pacifico&family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&family=Raleway:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     
@@ -1556,7 +1558,7 @@
 
 
     
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
     <script src="js/supabase-config.js"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/offline-queue.js?v=16.0"></script>
@@ -3046,9 +3048,10 @@ function renderMenuVisualMode(){
     grid.innerHTML=filtered.map(({item,index})=>{
         const useImage = mode === "cafe";
         const visual = useImage && window.LDMProductVisuals ? window.LDMProductVisuals.get(item) : "";
+        const safeVisual = window.LDMSecurity ? LDMSecurity.safeUrl(visual,{allowBlob:true,allowImageData:true}) : "";
         const price=Number(item.harga)||0;
         return `<button type="button" class="ldm-visual-menu-item ${mode==='warung'?'ldm-warung-quick-item':''}" onclick="tambahItemDariMenuMode(${index})" title="Tambah ${escapeModeHtml(item.nama)} ke keranjang">
-            ${useImage ? `<span class="ldm-visual-menu-image">${visual ? `<img src="${visual}" alt="">` : 'FOTO MENU'}</span>` : ''}
+            ${useImage ? `<span class="ldm-visual-menu-image">${safeVisual ? `<img src="${LDMSecurity.escapeAttr(safeVisual)}" alt="">` : 'FOTO MENU'}</span>` : ''}
             <span class="ldm-visual-menu-content">
                 <span class="ldm-visual-menu-name">${escapeModeHtml(item.nama)}</span>
                 <span class="ldm-visual-menu-price">Rp ${price.toLocaleString('id-ID')}</span>
@@ -3172,8 +3175,9 @@ function filterBarang() {
         const visualUrl = showVisual && window.LDMProductVisuals
             ? window.LDMProductVisuals.get(item)
             : "";
+        const safeVisualUrl = window.LDMSecurity ? LDMSecurity.safeUrl(visualUrl,{allowBlob:true,allowImageData:true}) : "";
         const visualHTML = showVisual
-            ? `<div style="width:42px;height:42px;flex:0 0 42px;border-radius:8px;overflow:hidden;background:#eef2f7;display:grid;place-items:center;color:#94a3b8;font-size:.55rem;">${visualUrl ? `<img src="${visualUrl}" alt="" style="width:100%;height:100%;object-fit:cover;">` : "MENU"}</div>`
+            ? `<div style="width:42px;height:42px;flex:0 0 42px;border-radius:8px;overflow:hidden;background:#eef2f7;display:grid;place-items:center;color:#94a3b8;font-size:.55rem;">${safeVisualUrl ? `<img src="${LDMSecurity.escapeAttr(safeVisualUrl)}" alt="" style="width:100%;height:100%;object-fit:cover;">` : "MENU"}</div>`
             : "";
         const stockHTML = isRetailMode
             ? `<small style="color:#94a3b8;margin-left:4px;">(Stok: ${Number(item.stok) || 0})</small>`
@@ -3183,7 +3187,7 @@ function filterBarang() {
             <div style="display:flex;justify-content:space-between;align-items:center;gap:9px;">
                 ${visualHTML}
                 <div style="min-width:0;flex:1;">
-                    <strong>${item.nama}</strong>
+                    <strong>${esc(item.nama)}</strong>
                     – ${hargaHTML}
                     ${satuanText}
                     ${stockHTML}
@@ -3432,7 +3436,7 @@ function tambahItem() {
                 row.className = "cart-item";
                 row.innerHTML = `
                     <div class="cart-item-title">
-                        <strong>${item.nama}</strong><br>
+                        <strong>${esc(item.nama)}</strong><br>
                        
 <div style="margin-top:2px;">
 
@@ -4937,7 +4941,7 @@ ${totalDiskonHTML}
                     row.className = "pending-item";
                     row.innerHTML = `
                         <div>
-                            <strong>${p.label}</strong><br>
+                            <strong>${esc(p.label)}</strong><br>
                             <small style="color:#0284c7; font-weight:700;">Rp ${totalVal.toLocaleString('id-ID')}</small>
                         </div>
                         <button onclick="recallTransaksi(${idx})" style="padding:6px 10px; background:#10b981; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer;">Lanjutkan</button>
@@ -6451,7 +6455,7 @@ document.addEventListener(
     if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",applyKasirMode,{once:true}); else applyKasirMode();
 })();
 </script>
-<script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.15.3-perf"></script>
-<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.15.3-perf"></script>
+<script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
+<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
 </body>
 </html>

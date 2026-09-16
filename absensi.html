@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script src="js/app-version.js?v=27.9.0-v28.15.3"></script>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
+
+  <script src="js/app-version.js?v=27.9.0-v28.16.0"></script>
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
     <script src="js/storage-quota-guard.js?v=27.7.1"></script>
     <script defer src="js/storage-health-monitor.js?v=27.7.1"></script>
-<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=19.0"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
+<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=27.9.0-v28.16.0-security"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
 <script defer src="js/qa-runtime.js?v=19.0"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -2205,7 +2207,7 @@
 </script>
 
     
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
     <script src="js/supabase-config.js"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/cloud-auth.js?v=15.0"></script>
@@ -2829,7 +2831,7 @@ async function cekAbsensiOwnerTanggal() {
             const scheduleDetail = row.schedule_status === "WORK"
                 ? `${row.shift_label || "-"} · ${String(row.planned_start_time || "-").slice(0,5)}-${String(row.planned_end_time || "-").slice(0,5)} WITA`
                 : (row.schedule_status === "OFF" ? "Hari libur" : row.schedule_status === "ANNUAL_LEAVE" ? "Cuti tahunan" : row.schedule_status === "OPTIONAL" ? "Jadwal opsional" : "Belum ada jadwal");
-            card.innerHTML = `<div><div class="user-name">👤 ${String(row.display_name || row.username || "-")}</div><small>${scheduleDetail}</small></div><div class="user-status ${visual.cls}">${visual.text}</div>`;
+            card.innerHTML = `<div><div class="user-name">👤 ${esc(String(row.display_name || row.username || "-"))}</div><small>${esc(scheduleDetail)}</small></div><div class="user-status ${visual.cls}">${visual.text}</div>`;
             listContainer.appendChild(card);
         });
 
@@ -2839,7 +2841,7 @@ async function cekAbsensiOwnerTanggal() {
 
         if (totalTidakAbsen > 0) {
             alertBox.style.background = ""; alertBox.style.borderColor = ""; alertBox.style.color = "";
-            alertBox.innerHTML = `⚠️ <strong>Perhatian</strong><br>Pada tanggal <strong>${formatTanggalOwner(tanggal)}</strong> terdapat <strong>${totalTidakAbsen} akun</strong> yang wajib presensi tetapi belum melakukan absensi.<br><br><strong>Akun:</strong> ${daftarTidakAbsen.join(", ")}`;
+            alertBox.innerHTML = `⚠️ <strong>Perhatian</strong><br>Pada tanggal <strong>${formatTanggalOwner(tanggal)}</strong> terdapat <strong>${totalTidakAbsen} akun</strong> yang wajib presensi tetapi belum melakukan absensi.<br><br><strong>Akun:</strong> ${esc(daftarTidakAbsen.join(", "))}`;
         } else {
             alertBox.innerHTML = `✅ <strong>Tidak ada kewajiban presensi yang terlewat</strong><br>Akun yang berstatus Libur/Cuti Tahunan tidak dihitung sebagai tidak absen pada ${formatTanggalOwner(tanggal)}.`;
             alertBox.style.background = "#f0fdf4"; alertBox.style.borderColor = "#bbf7d0"; alertBox.style.color = "#166534";
@@ -3541,8 +3543,8 @@ const loggedUser =
                 card.className = "account-card";
                 card.innerHTML = `
                     <div class="account-info">
-                        <h5>👤 ${acc.username}</h5>
-                        <p>${infoSub}</p>
+                        <h5>👤 ${esc(acc.username)}</h5>
+                        <p>${esc(infoSub)}</p>
                     </div>
                     <div>${badgeHTML}</div>
                 `;
@@ -3566,7 +3568,7 @@ const loggedUser =
             tbody.innerHTML = "";
 
             if (logUserToday.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:15px;">Belum ada log presensi hari ini untuk akun ${selectedUser}.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:15px;">Belum ada log presensi hari ini untuk akun ${esc(selectedUser)}.</td></tr>`;
                 return;
             }
 
@@ -3575,7 +3577,7 @@ const loggedUser =
 
                 let suratCol = "-";
                 if (item.surat) {
-                    suratCol = `<span class="surat-preview-link" onclick="bukaModalSurat('${item.id}')">🔍 Lihat Bukti Foto</span>`;
+                    suratCol = `<span class="surat-preview-link" onclick="bukaModalSurat(${LDMSecurity.inlineJsString(item.id)})">🔍 Lihat Bukti Foto</span>`;
                 }
 
                 let badgeClass = 'badge-masuk';
@@ -3593,10 +3595,10 @@ const loggedUser =
                 }
 
                 tr.innerHTML = `
-                    <td style="font-weight:600;">${item.waktu} WITA</td>
-                    <td><b>${item.username}</b></td>
-                    <td><span class="badge-status ${badgeClass}">${item.jenis}</span></td>
-                    <td>${item.shift}</td>
+                    <td style="font-weight:600;">${esc(item.waktu)} WITA</td>
+                    <td><b>${esc(item.username)}</b></td>
+                    <td><span class="badge-status ${badgeClass}">${esc(item.jenis)}</span></td>
+                    <td>${esc(item.shift)}</td>
                     <td>${suratCol}</td>
                     <td>${hapusCol}</td>
                 `;
@@ -4040,7 +4042,7 @@ async function cekRiwayatAbsensiOwner() {
                 : expected && expected.schedule_status === "ANNUAL_LEAVE" ? "Cuti tahunan"
                 : expected && expected.schedule_status === "OPTIONAL" ? "Owner Pusat · opsional"
                 : "Jadwal belum diatur";
-            card.innerHTML = `<div class="owner-history-no-photo">${expected && !expected.is_missing ? "🗓️ Tidak wajib foto" : "🚫 Tidak ada foto"}</div><div class="owner-history-info"><div class="owner-history-user">👤 ${username}</div><div class="owner-history-row"><span>Status</span><span><span class="owner-status-badge ${visual.cls}">${visual.text}</span></span></div><div class="owner-history-row"><span>Jadwal</span><span>${scheduleInfo}</span></div><div class="owner-history-row"><span>Waktu</span><span>-</span></div></div>`;
+            card.innerHTML = `<div class="owner-history-no-photo">${expected && !expected.is_missing ? "🗓️ Tidak wajib foto" : "🚫 Tidak ada foto"}</div><div class="owner-history-info"><div class="owner-history-user">👤 ${esc(username)}</div><div class="owner-history-row"><span>Status</span><span><span class="owner-status-badge ${visual.cls}">${visual.text}</span></span></div><div class="owner-history-row"><span>Jadwal</span><span>${esc(scheduleInfo)}</span></div><div class="owner-history-row"><span>Waktu</span><span>-</span></div></div>`;
             list.appendChild(card);
             return;
         }
@@ -4102,10 +4104,10 @@ async function cekRiwayatAbsensiOwner() {
             fotoHTML = `
 
                 <img
-                    src="${item.surat}"
+                    src="${LDMSecurity.escapeAttr(LDMSecurity.safeUrl(item.surat,{allowImageData:true,allowBlob:true}))}"
                     class="owner-history-photo"
-                    alt="Bukti presensi ${item.username}"
-                    onclick="bukaModalSurat('${item.id}')"
+                    alt="Bukti presensi ${LDMSecurity.escapeAttr(item.username)}"
+                    onclick="bukaModalSurat(${LDMSecurity.inlineJsString(item.id)})"
                     title="Klik untuk memperbesar foto"
                 >
 
@@ -4138,7 +4140,7 @@ async function cekRiwayatAbsensiOwner() {
                 <div
                     class="owner-history-user"
                 >
-                    👤 ${item.username}
+                    👤 ${esc(item.username)}
                 </div>
 
 
@@ -4158,7 +4160,7 @@ async function cekRiwayatAbsensiOwner() {
                                 ${statusClass}
                             "
                         >
-                            ${item.jenis}
+                            ${esc(item.jenis)}
                         </span>
 
                     </span>
@@ -4175,7 +4177,7 @@ async function cekRiwayatAbsensiOwner() {
                     </span>
 
                     <span>
-                        ${item.waktu || "-"} WITA
+                        ${esc(item.waktu || "-")} WITA
                     </span>
 
                 </div>
@@ -4190,7 +4192,7 @@ async function cekRiwayatAbsensiOwner() {
                     </span>
 
                     <span>
-                        ${item.shift || "-"}
+                        ${esc(item.shift || "-")}
                     </span>
 
                 </div>
@@ -4205,7 +4207,7 @@ async function cekRiwayatAbsensiOwner() {
                     </span>
 
                     <span>
-                        ${item.catatan || "-"}
+                        ${esc(item.catatan || "-")}
                     </span>
 
                 </div>
@@ -4268,7 +4270,7 @@ async function cekRiwayatAbsensiOwner() {
             <br><br>
 
             <strong>Akun:</strong>
-            ${daftarTidakAbsen.join(", ")}
+            ${esc(daftarTidakAbsen.join(", "))}
 
         `;
 
@@ -5748,7 +5750,7 @@ window.addEventListener(
 
 <script src="js/attendance-workforce-ui.js?v=28.5.1"></script>
 <script src="js/global-system-navigation.js?v=27.9.0-v28.13.1"></script>
-<script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.15.3-perf"></script>
-<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.15.3-perf"></script>
+<script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
+<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
 </body>
 </html>

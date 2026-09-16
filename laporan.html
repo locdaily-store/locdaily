@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script src="js/app-version.js?v=27.9.0-v28.15.3"></script>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
+
+  <script src="js/app-version.js?v=27.9.0-v28.16.0"></script>
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
     <script src="js/storage-quota-guard.js?v=27.7.1"></script>
     <script defer src="js/storage-health-monitor.js?v=27.7.1"></script>
-<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=19.0"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
+<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=27.9.0-v28.16.0-security"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
 <script defer src="js/qa-runtime.js?v=19.0"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -2040,7 +2042,7 @@
 </script>
 
     
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
     <script src="js/supabase-config.js"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/cloud-auth.js?v=15.0"></script>
@@ -3614,10 +3616,10 @@ function simpanLaporanKeStorage(dataArray) {
                 tbody.innerHTML += `
                     <tr class="tr-clickable" onclick="bukaDetail(${item.realIndex})">
                         <td data-label="ID Transaksi">
-                            <span class="trx-code">${kodeTransaksi}</span>
+                            <span class="trx-code">${esc(kodeTransaksi)}</span>
                         </td>
-                        <td data-label="Waktu">${item.waktu_teks || item.tanggal || '-'}</td>
-                        <td data-label="Kasir"><span style="font-weight:600; color:#0284c7;">${namaKasir}</span></td>
+                        <td data-label="Waktu">${esc(item.waktu_teks || item.tanggal || '-')}</td>
+                        <td data-label="Kasir"><span style="font-weight:600; color:#0284c7;">${esc(namaKasir)}</span></td>
                         <td data-label="Total"><strong>Rp ${getNetTransactionTotal(item).toLocaleString("id-ID")}</strong></td>
                         <td data-label="Pembayaran">${badgePembayaran}</td>
                         <td data-label="Aksi"><span class="badge-view">Lihat Detail ➔</span></td>
@@ -3719,7 +3721,7 @@ function simpanLaporanKeStorage(dataArray) {
                     let rowHTML = `
                         <div class="item-row">
                             <div class="item-main-info">
-                                <span>• ${b.nama} (${b.qty} ${b.satuan || 'Pcs'})</span>
+                                <span>• ${esc(b.nama)} (${Number(b.qty)||0} ${esc(b.satuan || 'Pcs')})</span>
                                 <span>Rp ${Number(b.subtotal || (b.harga * b.qty)).toLocaleString("id-ID")}</span>
                             </div>`;
                     
@@ -3731,7 +3733,7 @@ function simpanLaporanKeStorage(dataArray) {
                 });
             } else if (typeof item.barang === 'string') {
                 item.barang.split(", ").forEach(i => {
-                    itemBox.innerHTML += `<div class="item-row"><div class="item-main-info"><span>• ${i}</span></div></div>`;
+                    itemBox.innerHTML += `<div class="item-row"><div class="item-main-info"><span>• ${esc(i)}</span></div></div>`;
                 });
             }
 
@@ -3750,7 +3752,7 @@ function simpanLaporanKeStorage(dataArray) {
             const returBox = document.getElementById("advReturBox");
             if (approvedRetur.length) {
                 returBox.style.display = "block";
-                returBox.innerHTML = `<strong>↩️ Riwayat Retur</strong><br>${approvedRetur.map(r => `${r.returId} • -Rp ${Number(r.totalRetur||0).toLocaleString("id-ID")}`).join("<br>")}<hr style="border:0;border-top:1px dashed var(--border-color);margin:6px 0"><strong>Penjualan Bersih: Rp ${Math.max(0,Number(item.total||0)-totalRetur).toLocaleString("id-ID")}</strong>`;
+                returBox.innerHTML = `<strong>↩️ Riwayat Retur</strong><br>${approvedRetur.map(r => `${esc(r.returId)} • -Rp ${Number(r.totalRetur||0).toLocaleString("id-ID")}`).join("<br>")}<hr style="border:0;border-top:1px dashed var(--border-color);margin:6px 0"><strong>Penjualan Bersih: Rp ${Math.max(0,Number(item.total||0)-totalRetur).toLocaleString("id-ID")}</strong>`;
             } else {
                 returBox.style.display = "none";
                 returBox.innerHTML = "";
@@ -6458,7 +6460,7 @@ function batasiTampilanOmzetLaporan() {
 </script>
 
 <script src="js/global-system-navigation.js?v=27.9.0-v28.13.1"></script>
-<script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.15.3-perf"></script>
-<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.15.3-perf"></script>
+<script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
+<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
 </body>
 </html>

@@ -93,14 +93,14 @@
     body.className="package-manage-grid";
     body.innerHTML=`
       <div class="package-manage-card">
-        <h3>${plan(code).name||ctx.plan_name||code}</h3>
+        <h3>${esc(plan(code).name||ctx.plan_name||code)}</h3>
         <p>Paket pada perangkat dan toko ini. Store Code, akun Owner, serta data operasional tetap dipertahankan saat perpanjangan maupun upgrade.</p>
         <div class="package-manage-stats">
           <div class="package-manage-stat"><span>Status</span><strong>${expired?"Ditangguhkan sementara":"Aktif"}</strong></div>
           <div class="package-manage-stat"><span>Masa berlaku</span><strong>${date(ctx.expires_at)}</strong></div>
-          <div class="package-manage-stat"><span>Sisa waktu</span><strong>${statusText}</strong></div>
+          <div class="package-manage-stat"><span>Sisa waktu</span><strong>${esc(statusText)}</strong></div>
         </div>
-        <div class="package-manage-alert ${alertClass}">${alertText}</div>
+        <div class="package-manage-alert ${alertClass}">${esc(alertText)}</div>
         <div class="package-manage-actions">
           <button type="button" class="btn primary" id="renewPackageBtn">Perpanjang Masa Aktif</button>
           <button type="button" class="btn ghost" id="refreshPackageBtn">Periksa Ulang</button>
@@ -110,7 +110,7 @@
         <h3>Upgrade Paket</h3>
         <p>Upgrade berlaku segera setelah pembayaran terverifikasi. Sisa masa aktif lama tetap dipertahankan lalu periode paket baru ditambahkan.</p>
         <div class="upgrade-options" id="upgradeOptions">
-          ${upgrades.length?upgrades.map(target=>`<div class="upgrade-option"><div><strong>${plan(target).name||target}</strong><span>Mulai ${money(plan(target).monthly)}/bulan · toko dan data tetap sama</span></div><button type="button" class="btn ghost" data-upgrade-plan="${target}">Upgrade</button></div>`).join(""):'<div class="package-manage-empty">Kamu sudah menggunakan paket tertinggi. Gunakan Perpanjang Masa Aktif untuk menambah periode.</div>'}
+          ${upgrades.length?upgrades.map(target=>`<div class="upgrade-option"><div><strong>${esc(plan(target).name||target)}</strong><span>Mulai ${money(plan(target).monthly)}/bulan · toko dan data tetap sama</span></div><button type="button" class="btn ghost" data-upgrade-plan="${target}">Upgrade</button></div>`).join(""):'<div class="package-manage-empty">Kamu sudah menggunakan paket tertinggi. Gunakan Perpanjang Masa Aktif untuk menambah periode.</div>'}
         </div>
       </div>`;
     $("renewPackageBtn")?.addEventListener("click",()=>startRenewal("yearly"));

@@ -73,8 +73,8 @@
             : 'Jangan menambah banyak transaksi offline sebelum perangkat kembali online.';
 
         banner.innerHTML = `
-            <div style="font-weight:800;margin-bottom:3px">${title} · ${state.percent.toFixed(1)}%</div>
-            <div style="opacity:.92">${formatBytes(state.usage)} dari ${formatBytes(state.quota)} terpakai. ${action}</div>
+            <div style="font-weight:800;margin-bottom:3px">${esc(title)} · ${state.percent.toFixed(1)}%</div>
+            <div style="opacity:.92">${formatBytes(state.usage)} dari ${formatBytes(state.quota)} terpakai. ${esc(action)}</div>
             <div style="display:flex;gap:8px;margin-top:9px">
                 <a href="pwa-settings.html" style="color:#0d2240;background:#fff;padding:7px 10px;border-radius:8px;text-decoration:none;font-weight:800">Kelola Storage</a>
                 <button type="button" data-close style="border:0;background:#ffffff22;color:#fff;padding:7px 10px;border-radius:8px;font-weight:800;cursor:pointer">Tutup</button>

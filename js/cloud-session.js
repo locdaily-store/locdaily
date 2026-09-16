@@ -112,11 +112,18 @@
                 target.role =
                     role;
 
+                const safeAccounts = accounts.map(account =>
+                    window.LDMSecurity?.stripLegacyCredentialFields
+                        ? window.LDMSecurity.stripLegacyCredentialFields(account)
+                        : (() => {
+                            const copy = { ...(account || {}) };
+                            delete copy.password; delete copy.passwordHash; delete copy.password_hash; delete copy.pin;
+                            return copy;
+                        })()
+                );
                 localStorage.setItem(
                     "daftarAkun",
-                    JSON.stringify(
-                        accounts
-                    )
+                    JSON.stringify(safeAccounts)
                 );
             }
         }catch(error){

@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script src="js/app-version.js?v=27.9.0-v28.15.3"></script>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
+
+  <script src="js/app-version.js?v=27.9.0-v28.16.0"></script>
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
     <script src="js/storage-quota-guard.js?v=27.7.1"></script>
     <script defer src="js/storage-health-monitor.js?v=27.7.1"></script>
-<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=19.0"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
+<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=27.9.0-v28.16.0-security"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
 <script defer src="js/qa-runtime.js?v=19.0"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1919,7 +1921,7 @@
 </script>
 
     
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
     <script src="js/supabase-config.js"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/cloud-auth.js?v=15.0"></script>
@@ -3581,7 +3583,7 @@ async function deleteEOD(id){
 
     loadEOD();
 }
-function printEOD(id){const x=eodLogs().find(r=>Number(r.id)===Number(id));if(!x)return;const cfg=JSON.parse(localStorage.getItem('headerConfig')||'null')||DEFAULT;printArea.innerHTML=`<div style="font:12px Arial;color:#111"><div style="text-align:center;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:10px"><h2>${esc(cfg.judul||'LocDailyMar')}</h2><div>END OF DAY</div><div>${esc(x.tanggal)} ${esc(x.waktu||'')} WITA</div></div><table style="width:100%;border-collapse:collapse">${[['Final Oleh',`${x.finalizedBy} (${String(x.role||'').toUpperCase()})`],['Penjualan Sistem',rp(x.penjualanSistem)],['Omzet Closing',rp(x.omzetClosing)],['Selisih Omzet',signed(x.selisihOmzet)],['Tunai Sistem',rp(x.tunaiSistem)],['Mutasi Kas Masuk',rp(x.mutasiKasMasuk)],['Mutasi Kas Keluar',rp(x.mutasiKasKeluar)],['Ekspektasi Tunai Fisik',rp(x.ekspektasiTunaiFisik)],['Tunai Fisik Tanpa Modal',rp(x.tunaiFisik)],['Selisih Tunai',signed(x.selisihTunai)],['Modal Awal Terpisah',rp(x.modalAwal)],['Non-Tunai',rp(x.nonTunai)]].map(r=>`<tr><td style="border:1px solid #bbb;padding:5px">${r[0]}</td><td style="border:1px solid #bbb;padding:5px">${r[1]}</td></tr>`).join('')}</table><h3 style="margin:12px 0 4px">Catatan</h3><div style="border:1px solid #bbb;padding:6px">${esc(x.catatan||'Tidak ada catatan.')}</div></div>`;window.print()}
+function printEOD(id){const x=eodLogs().find(r=>Number(r.id)===Number(id));if(!x)return;const cfg=JSON.parse(localStorage.getItem('headerConfig')||'null')||DEFAULT;printArea.innerHTML=`<div style="font:12px Arial;color:#111"><div style="text-align:center;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:10px"><h2>${esc(cfg.judul||'LocDailyMar')}</h2><div>END OF DAY</div><div>${esc(x.tanggal)} ${esc(x.waktu||'')} WITA</div></div><table style="width:100%;border-collapse:collapse">${[['Final Oleh',`${esc(x.finalizedBy)} (${esc(String(x.role||'').toUpperCase())})`],['Penjualan Sistem',rp(x.penjualanSistem)],['Omzet Closing',rp(x.omzetClosing)],['Selisih Omzet',signed(x.selisihOmzet)],['Tunai Sistem',rp(x.tunaiSistem)],['Mutasi Kas Masuk',rp(x.mutasiKasMasuk)],['Mutasi Kas Keluar',rp(x.mutasiKasKeluar)],['Ekspektasi Tunai Fisik',rp(x.ekspektasiTunaiFisik)],['Tunai Fisik Tanpa Modal',rp(x.tunaiFisik)],['Selisih Tunai',signed(x.selisihTunai)],['Modal Awal Terpisah',rp(x.modalAwal)],['Non-Tunai',rp(x.nonTunai)]].map(r=>`<tr><td style="border:1px solid #bbb;padding:5px">${r[0]}</td><td style="border:1px solid #bbb;padding:5px">${r[1]}</td></tr>`).join('')}</table><h3 style="margin:12px 0 4px">Catatan</h3><div style="border:1px solid #bbb;padding:6px">${esc(x.catatan||'Tidak ada catatan.')}</div></div>`;window.print()}
 function alertBox(t,m,type='success'){modalIcon.textContent=type==='success'?'✅':type==='warning'?'⚠️':'❌';modalTitle.textContent=t;modalMsg.textContent=m;modalActions.innerHTML='<button class="btn primary" onclick="closeModal()">Tutup</button>';modal.style.display='flex'}function confirmBox(t,m){modalIcon.textContent='❓';modalTitle.textContent=t;modalMsg.textContent=m;modalActions.innerHTML='<button class="btn secondary" onclick="closeModal()">Batal</button><button class="btn primary" onclick="saveEOD()">Ya, Simpan</button>';modal.style.display='flex'}function closeModal(){modal.style.display='none'}
 function theme(){let c;try{c=JSON.parse(localStorage.getItem('headerConfig')||'null')||DEFAULT}catch{c=DEFAULT}logo.style.display=c.logoData?'block':'none';if(c.logoData)logo.src=c.logoData;storeTitle.textContent=c.judul||DEFAULT.judul;storeTitle.style.color=c.warnaJudul||'#fff';storeTitle.style.textShadow=`1px 1px 0 ${c.warnaOutline||DEFAULT.warnaOutline}`;storeSub.textContent=c.subJudul||DEFAULT.subJudul;storeSub.style.color=c.warnaSubJudul||DEFAULT.warnaSubJudul;headerApp.style.background=c.warnaBgHeader||DEFAULT.warnaBgHeader;document.documentElement.style.setProperty('--app-font',c.fontFamily||DEFAULT.fontFamily);document.documentElement.style.setProperty('--brand-font',c.brandFontFamily||c.fontFamily||DEFAULT.brandFontFamily);document.documentElement.style.setProperty('--bg-primary',c.bgPrimary||DEFAULT.bgPrimary);document.documentElement.style.setProperty('--bg-secondary',c.bgSecondary||DEFAULT.bgSecondary);document.documentElement.style.setProperty('--accent-color',c.warnaSubJudul||DEFAULT.warnaSubJudul);document.documentElement.style.setProperty('--nav-desktop-bg',c.warnaBgHeader||DEFAULT.warnaBgHeader);document.body.classList.toggle('dark-mode',!!c.darkMode)}
 function identity(){currentUser=localStorage.getItem('activeUsername')||localStorage.getItem('loggedInUser')||localStorage.getItem('username')||'';currentRole=String(localStorage.getItem('userRole')||'').toLowerCase();userBadge.textContent=`👤 ${currentUser||'-'} (${(currentRole||'-').toUpperCase()})`}
@@ -4307,7 +4309,7 @@ document.addEventListener('DOMContentLoaded',init);
 </script>
 
 <script src="js/global-system-navigation.js?v=27.9.0-v28.13.1"></script>
-<script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.15.3-perf"></script>
-<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.15.3-perf"></script>
+<script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
+<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
 </body>
 </html>

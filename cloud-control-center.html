@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="id" class="secure-page-pending">
 <head>
-  <script src="js/app-version.js?v=27.9.0-v28.15.3"></script>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
+
+  <script src="js/app-version.js?v=27.9.0-v28.16.0"></script>
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
     <script src="js/storage-quota-guard.js?v=27.7.1"></script>
     <script defer src="js/storage-health-monitor.js?v=27.7.1"></script>
-<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=19.0"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
+<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=27.9.0-v28.16.0-security"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
 <script defer src="js/qa-runtime.js?v=19.0"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -13,7 +15,7 @@
 <style>
 :root{--bg:#f4f7fb;--card:#fff;--text:#172033;--muted:#667085;--line:#e4e7ec;--primary:#0d2240;--ok:#15803d;--warn:#b45309;--bad:#b91c1c}.secure-page-pending body{visibility:hidden!important}*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}.wrap{width:min(1180px,calc(100% - 24px));margin:22px auto}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px;margin-bottom:12px;box-shadow:0 8px 24px rgba(16,24,40,.05)}h1{font-size:1.35rem;margin:0 0 5px}h2{font-size:.95rem;margin:0 0 10px}p{font-size:.76rem;color:var(--muted);line-height:1.55;margin:6px 0}.actions{display:flex;gap:8px;flex-wrap:wrap}button,a.btn{border:0;border-radius:9px;min-height:40px;padding:9px 13px;font-weight:750;cursor:pointer;background:var(--primary);color:white;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}.secondary{background:white!important;color:var(--text)!important;border:1px solid var(--line)!important}.export{background:#166534!important}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.stat{border:1px solid var(--line);border-radius:11px;padding:11px}.stat span{display:block;font-size:.66rem;color:var(--muted);margin-bottom:4px}.stat strong{font-size:.9rem;overflow-wrap:anywhere}.status{display:inline-flex;padding:6px 10px;border-radius:999px;font-size:.7rem;font-weight:800}.healthy{background:#dcfce7;color:#166534}.warning{background:#fef3c7;color:#92400e}.critical{background:#fee2e2;color:#991b1b}.check-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.check{padding:10px;border:1px solid var(--line);border-radius:10px;font-size:.7rem}.check strong{display:block;font-size:.9rem;margin-top:4px}.table-wrap{overflow:auto;max-height:520px}table{width:100%;border-collapse:collapse;font-size:.7rem}th,td{border-bottom:1px solid var(--line);padding:9px 7px;text-align:left;vertical-align:top}th{position:sticky;top:0;background:#f8fafc;z-index:1}.muted{color:var(--muted)}.notice{border-left:4px solid #d97706;background:#fffbeb;padding:10px 12px;border-radius:8px;font-size:.72rem;line-height:1.5;color:#78350f}.error{white-space:pre-wrap;color:#991b1b;font-size:.74rem}.spin{opacity:.55;pointer-events:none}@media(max-width:850px){.grid,.check-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.grid,.check-grid{grid-template-columns:1fr}.actions{display:grid}.actions>*{width:100%}}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
 <script src="js/supabase-config.js"></script>
 <script src="js/supabase-client.js"></script>
 <script src="js/cloud-auth.js?v=15.0"></script>
@@ -143,7 +145,7 @@ async function boot(){
 document.addEventListener("DOMContentLoaded",boot);
 </script>
 <script src="js/global-system-navigation.js?v=27.9.0-v28.13.1"></script>
-<script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.15.3-perf"></script>
-<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.15.3-perf"></script>
+<script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
+<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
 </body>
 </html>

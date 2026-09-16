@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script src="js/app-version.js?v=27.9.0-v28.15.3"></script>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
+
+  <script src="js/app-version.js?v=27.9.0-v28.16.0"></script>
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
     <script src="js/storage-quota-guard.js?v=27.7.1"></script>
     <script defer src="js/storage-health-monitor.js?v=27.7.1"></script>
-<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=19.0"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
+<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=27.9.0-v28.16.0-security"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
 <script defer src="js/qa-runtime.js?v=19.0"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,7 +19,7 @@
     <script src="js/pwa-manager.js?v=27.9.0-v28.13.1"></script>
 
     <!-- HTML5 QRCode Scanner Library -->
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" type="text/javascript"></script>
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Caveat&family=Fira+Code&family=Fredoka:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono&family=Lato:wght@400;700&family=Lobster&family=Merriweather:wght@400;700&family=Montserrat:wght@400;600;700&family=Nunito:wght@400;600;700&family=Open+Sans:wght@400;600;700&family=Oswald:wght@500;700&family=Pacifico&family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&family=Raleway:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -2477,7 +2479,7 @@
 </style>
 
     
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
     <script src="js/supabase-config.js"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/cloud-auth.js?v=15.0"></script>
@@ -3812,22 +3814,23 @@ function CekPromoTersedia(item) {
             const satuanBeli = item.satuanBeli || stn;
             const konversiBeli = Math.max(Number(item.konversiBeli || 1),0.001);
             const infoKonversiHTML = !isCashier && (satuanBeli !== stn || konversiBeli !== 1)
-                ? `<div style="margin-top:8px;padding:7px 9px;border-radius:8px;background:var(--bg-primary);font-size:.7rem;color:var(--label-color);">📦 Beli: 1 ${satuanBeli} = ${konversiBeli} ${stn}</div>`
+                ? `<div style="margin-top:8px;padding:7px 9px;border-radius:8px;background:var(--bg-primary);font-size:.7rem;color:var(--label-color);">📦 Beli: 1 ${esc(satuanBeli)} = ${konversiBeli} ${esc(stn)}</div>`
                 : "";
 
             const metadataHTML = isCashier
                 ? ""
                 : `<div style="display:flex; justify-content:space-between; font-size:0.7rem; color:#94a3b8;">
-                        <span>Barcode: <b>${bcode}</b></span>
-                        <span style="background:var(--border-color); padding:1px 6px; border-radius:4px; color:var(--text-color);">${ktg}</span>
+                        <span>Barcode: <b>${esc(bcode)}</b></span>
+                        <span style="background:var(--border-color); padding:1px 6px; border-radius:4px; color:var(--text-color);">${esc(ktg)}</span>
                    </div>`;
 
             let isWarning = isRetailMode && stok <= BATAS_STOK_MINIMAL;
             const productVisualUrl = showProductVisuals && window.LDMProductVisuals
                 ? window.LDMProductVisuals.get(item)
                 : "";
+            const safeProductVisualUrl = window.LDMSecurity ? LDMSecurity.safeUrl(productVisualUrl,{allowBlob:true,allowImageData:true}) : "";
             const productVisualHTML = showProductVisuals
-                ? `<div class="ldm-product-visual">${productVisualUrl ? `<img src="${productVisualUrl}" alt="Gambar ${item.nama}">` : `<span>Belum ada gambar menu</span>`}</div>`
+                ? `<div class="ldm-product-visual">${safeProductVisualUrl ? `<img src="${LDMSecurity.escapeAttr(safeProductVisualUrl)}" alt="Gambar ${LDMSecurity.escapeAttr(item.nama)}">` : `<span>Belum ada gambar menu</span>`}</div>`
                 : "";
 
 // Promo tersedia secara waktu/status
@@ -4012,7 +4015,7 @@ else {
                 <div class="item-card ${isWarning ? 'stok-warning' : ''}">
                     ${productVisualHTML}
                     <div class="item-header">
-                        <strong>${isWarning ? '⚠️ ' : ''}${item.nama}</strong>
+                        <strong>${isWarning ? '⚠️ ' : ''}${esc(item.nama)}</strong>
                         ${stockBadgeHTML}
                     </div>
                     ${metadataHTML}
@@ -5320,20 +5323,20 @@ const totalHargaPromo =
                     card.innerHTML = `
                         <div>
                             <div class="v2-header">
-                                <span class="v2-store-name">${namaToko} ${isPromoValid ? ' (PROMO)' : ''}</span>
+                                <span class="v2-store-name">${esc(namaToko)} ${isPromoValid ? ' (PROMO)' : ''}</span>
                             </div>
                             <div class="v2-harga-box">
                                 ${hargaV2HTML}
                             </div>
-                            <div class="v2-nama" title="${namaBarang}">${namaBarang}</div>
+                            <div class="v2-nama" title="${LDMSecurity.escapeAttr(namaBarang)}">${esc(namaBarang)}</div>
                             ${durasiPromoHTML}
                             <div class="v2-detail-row">
-                                ${bcode}
+                                ${esc(bcode)}
                             </div>
                         </div>
                         <div class="v2-footer-row">
-                            <span class="v2-code">${isPromoValid && item.promo.minQty > 1 ? `MIN ${item.promo.minQty} ` : ''}PER / ${stn.toUpperCase()}</span>
-                            <span class="v2-date">${tglCetakCode}</span>
+                            <span class="v2-code">${isPromoValid && item.promo.minQty > 1 ? `MIN ${item.promo.minQty} ` : ''}PER / ${esc(stn.toUpperCase())}</span>
+                            <span class="v2-date">${esc(tglCetakCode)}</span>
                         </div>
                     `;
                 pageDiv.appendChild(card);
@@ -6597,7 +6600,7 @@ window.addEventListener(
 </script>
 
 <script src="js/global-system-navigation.js?v=27.9.0-v28.13.1"></script>
-<script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.15.3-perf"></script>
-<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.15.3-perf"></script>
+<script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
+<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
 </body>
 </html>

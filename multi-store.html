@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script src="js/app-version.js?v=27.9.0-v28.15.3"></script>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
+
+  <script src="js/app-version.js?v=27.9.0-v28.16.0"></script>
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
     <script src="js/storage-quota-guard.js?v=27.7.1"></script>
     <script defer src="js/storage-health-monitor.js?v=27.7.1"></script>
@@ -35,7 +37,7 @@
     </style>
     <link rel="stylesheet" href="css/multi-store-dashboard-theme.css?v=22.1">
         <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
     <script src="js/supabase-config.js"></script>
     <script src="js/supabase-client.js?v=22.0"></script>
     <script src="js/offline-queue.js?v=16.0"></script>
@@ -49,6 +51,7 @@
 <script src="js/license-quota-sync-v2841.js?v=27.9.0-v28.4.2"></script>
 <script src="js/multi-store-service.js?v=28.11.0"></script>
 <script defer src="js/license-v2-guard.js?v=27.9.0-v28.4.2"></script>
+  <script src="js/security-hardening.js?v=27.9.0-v28.16.0-security"></script>
 </head>
 <body>
     <div class="ms-offline" id="offlineBanner">Mode offline — pergantian toko dan transfer stok dinonaktifkan.</div>
@@ -181,11 +184,11 @@
             $("storeList").innerHTML=stores.length?stores.map(store=>`
                 <div class="ms-store ${store.is_current?"current":""}">
                     <div><div class="ms-store-name">${esc(store.store_name)}</div><div class="ms-store-code">${esc(store.store_code)} · ${esc(store.member_role)}</div><div class="ms-store-meta">${modeLabel(store.operational_mode)} · ${num(store.product_count)} produk · total stok ${num(store.total_stock)}</div></div>
-                    ${store.is_current?'<span class="ms-current-badge">TOKO AKTIF</span>':`<button class="ms-btn ms-btn-light" data-switch-store="${store.store_id}">Pindah ke Toko Ini</button>`}
+                    ${store.is_current?'<span class="ms-current-badge">TOKO AKTIF</span>':`<button class="ms-btn ms-btn-light" data-switch-store="${esc(store.store_id)}">Pindah ke Toko Ini</button>`}
                 </div>`).join(""):'<div class="ms-empty">Tidak ada toko yang dapat diakses.</div>';
             $("storeList").querySelectorAll("[data-switch-store]").forEach(button=>button.onclick=()=>switchStore(button.dataset.switchStore));
             const activeId=active?.store_id||"";
-            $("destinationStore").innerHTML='<option value="">Pilih toko tujuan</option>'+networkStores.filter(row=>row.store_id!==activeId).map(row=>`<option value="${row.store_id}">${esc(row.store_name)} (${esc(row.store_code)}) · ${modeLabel(row.operational_mode)}</option>`).join("");
+            $("destinationStore").innerHTML='<option value="">Pilih toko tujuan</option>'+networkStores.filter(row=>row.store_id!==activeId).map(row=>`<option value="${esc(row.store_id)}">${esc(row.store_name)} (${esc(row.store_code)}) · ${modeLabel(row.operational_mode)}</option>`).join("");
             updateBranchCopyPolicy();
             updateTransferModeNote();
         }
@@ -267,8 +270,8 @@
             $("transferList").innerHTML=transfers.length?transfers.map(row=>{
                 const items=Array.isArray(row.items)?row.items:[];
                 let actions="";
-                if(row.status==="DRAFT"&&row.source_store_id===activeId){actions=`<button class="ms-btn ms-btn-primary" data-send="${row.id}">Kirim Stok</button><button class="ms-btn ms-btn-danger" data-cancel="${row.id}">Batalkan</button>`}
-                if(row.status==="IN_TRANSIT"&&row.destination_store_id===activeId){actions=`<button class="ms-btn ms-btn-primary" data-receive="${row.id}">Terima Stok</button>`}
+                if(row.status==="DRAFT"&&row.source_store_id===activeId){actions=`<button class="ms-btn ms-btn-primary" data-send="${esc(row.id)}">Kirim Stok</button><button class="ms-btn ms-btn-danger" data-cancel="${esc(row.id)}">Batalkan</button>`}
+                if(row.status==="IN_TRANSIT"&&row.destination_store_id===activeId){actions=`<button class="ms-btn ms-btn-primary" data-receive="${esc(row.id)}">Terima Stok</button>`}
                 return `<article class="ms-transfer"><div class="ms-transfer-top"><div><div class="ms-transfer-code">${esc(row.transfer_code)}</div><div class="ms-transfer-route">${esc(row.source_store_name)} → ${esc(row.destination_store_name)}</div></div><span class="ms-status status-${String(row.status).toLowerCase()}">${statusLabel(row.status)}</span></div><div class="ms-transfer-items">${items.map(item=>`${esc(item.name)}: ${num(item.qty_requested)} ${esc(item.unit)}`).join(" · ")||"Tanpa item"}</div>${row.note?`<div class="ms-transfer-items">Catatan: ${esc(row.note)}</div>`:""}<div class="ms-actions">${actions}</div></article>`
             }).join(""):'<div class="ms-empty">Belum ada transfer stok.</div>';
             $("transferList").querySelectorAll("[data-send]").forEach(btn=>btn.onclick=()=>sendTransfer(btn.dataset.send));
@@ -279,7 +282,7 @@
         function selectedEmployee(){return employees.find(row=>row.user_id===$("employeeSelect").value)||null}
         function renderEmployeeForm(){
             const selected=selectedEmployee();
-            $("employeeSelect").innerHTML='<option value="">Pilih karyawan</option>'+employees.map(row=>`<option value="${row.user_id}">${esc(row.display_name||row.username)} · ${esc(row.role)} · ${esc(row.store_name)}</option>`).join("");
+            $("employeeSelect").innerHTML='<option value="">Pilih karyawan</option>'+employees.map(row=>`<option value="${esc(row.user_id)}">${esc(row.display_name||row.username)} · ${esc(row.role)} · ${esc(row.store_name)}</option>`).join("");
             if(selected) $("employeeSelect").value=selected.user_id;
             updateEmployeeDestination();
         }
@@ -291,7 +294,7 @@
                 return;
             }
             $("employeeInfo").innerHTML=`<strong>${esc(employee.display_name||employee.username)}</strong><span class="ms-role-pill">${esc(employee.role)}</span><br>NIK Karyawan: ${esc(employee.employee_id||"-")}<br>Cabang asal: <strong>${esc(employee.store_name)}</strong> (${esc(employee.store_code)})`;
-            $("employeeDestination").innerHTML='<option value="">Pilih cabang tujuan</option>'+networkStores.filter(row=>row.store_id!==employee.store_id).map(row=>`<option value="${row.store_id}">${esc(row.store_name)} (${esc(row.store_code)})</option>`).join("");
+            $("employeeDestination").innerHTML='<option value="">Pilih cabang tujuan</option>'+networkStores.filter(row=>row.store_id!==employee.store_id).map(row=>`<option value="${esc(row.store_id)}">${esc(row.store_name)} (${esc(row.store_code)})</option>`).join("");
         }
         function renderEmployeeTransfers(){
             $("employeeTransferList").innerHTML=employeeTransfers.length?employeeTransfers.map(row=>`<article class="ms-employee-move"><strong>${esc(row.display_name||row.username||"Karyawan")} <span class="ms-role-pill">${esc(row.employee_role)}</span></strong><p>${esc(row.source_store_name)} → <strong>${esc(row.destination_store_name)}</strong><br>${new Date(row.moved_at).toLocaleString("id-ID")}${row.note?` · ${esc(row.note)}`:""}<br>Dipindahkan oleh ${esc(row.moved_by_name||"Owner")}</p></article>`).join(""):'<div class="ms-empty">Belum ada riwayat pemindahan karyawan.</div>';
@@ -359,7 +362,7 @@
     })();
     </script>
     <script src="js/global-system-navigation.js?v=27.9.0-v28.13.1"></script>
-<script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.15.3-perf"></script>
-<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.15.3-perf"></script>
+<script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
+<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
 </body>
 </html>
