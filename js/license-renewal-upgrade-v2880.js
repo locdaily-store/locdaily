@@ -7,6 +7,9 @@
   const plan=code=>cfg().plans?.[code]||{name:code};
   const money=n=>new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(Number(n||0));
   const date=v=>v?new Date(v).toLocaleString("id-ID",{dateStyle:"long",timeStyle:"short"}):"Tanpa batas";
+  const esc=value=>window.LDMSecurity?.escapeHTML
+    ? window.LDMSecurity.escapeHTML(value)
+    : String(value??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
   let latestContext=null;
 
   function daysLeft(v){

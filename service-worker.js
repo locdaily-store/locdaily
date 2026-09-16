@@ -1,4 +1,4 @@
-// Build: 27.9.0-v28.16.0 Production Security Hardening
+// Build: 27.9.0-v28.16.1 Runtime Rendering Recovery Hotfix
 "use strict";
 
 importScripts("./js/app-version.js");

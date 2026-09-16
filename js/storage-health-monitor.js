@@ -9,6 +9,11 @@
     const CRITICAL_PERCENT = 97;
     const CHECK_INTERVAL_MS = 2 * 60 * 1000;
 
+    const esc = value => window.LDMSecurity?.escapeHTML
+        ? window.LDMSecurity.escapeHTML(value)
+        : String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+
+
     let state = {
         supported: false,
         usage: 0,

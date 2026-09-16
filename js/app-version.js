@@ -1,9 +1,9 @@
 (function(root){
     "use strict";
     const INFO=Object.freeze({
-        appVersion:"27.9.0-v28.16.0",
-        buildVersion:"V28.16.0",
-        buildName:"Production Security Hardening"
+        appVersion:"27.9.0-v28.16.1",
+        buildVersion:"V28.16.1",
+        buildName:"Runtime Rendering Recovery Hotfix"
     });
     root.LDM_VERSION_INFO=INFO;
     root.LDM_APP_VERSION=INFO.appVersion;
