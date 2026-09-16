@@ -1,4 +1,4 @@
-/* LocDailyMar V28.9.2 - Demo Production Shell Recovery */
+/* LocDailyMar V28.16.4 - Demo Mode Reliability & Parity Hardening */
 :root{
   --ldm-nav:#0d2240;
   --ldm-accent:#ffc107;
@@ -712,3 +712,73 @@ html[data-demo-store-mode="cafe"] .ldm-mega-nav-shell{box-shadow:inset 0 -2px 0 
 .dark-mode .dp-sales-line,.dark-mode .dp-sales-point{stroke:#38bdf8}
 .dark-mode .dp-sales-point{fill:#38bdf8}
 @media(max-width:720px){.dp-sales-chart-head{flex-direction:column}.dp-sales-chart-summary{width:100%;justify-content:flex-start}.dp-sales-chart-summary span{flex:1}.dp-sales-chart-wrap{height:220px}.dp-sales-y-label,.dp-sales-x-label{font-size:8px}}
+
+
+/* ==========================================================================
+   V28.16.4 FINAL · DEMO RELIABILITY / MOBILE / ACCESSIBILITY
+   ========================================================================== */
+body.demo-app .demo-mobile-menu-trigger{
+  position:fixed;
+  top:10px;
+  left:10px;
+  z-index:1125;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  min-height:40px;
+  padding:0 13px;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:10px;
+  background:#0d2240;
+  color:#fff;
+  box-shadow:0 8px 24px rgba(15,23,42,.22);
+  font-size:11px;
+  font-weight:900;
+  cursor:pointer;
+  touch-action:manipulation;
+}
+body.demo-app .demo-mobile-menu-trigger[aria-expanded="true"]{
+  background:#0f9d58;
+}
+.demo-login-notice{
+  margin:0 0 14px;
+  padding:11px 13px;
+  border:1px solid #bfdbfe;
+  border-radius:11px;
+  background:#eff6ff;
+  color:#1e3a8a;
+  font-size:11px;
+  line-height:1.55;
+  font-weight:700;
+}
+.dark-mode .demo-login-notice{
+  border-color:#1e3a8a;
+  background:#172554;
+  color:#dbeafe;
+}
+body.demo-app button:focus-visible,
+body.demo-app input:focus-visible,
+body.demo-app select:focus-visible,
+body.demo-app textarea:focus-visible,
+body.demo-login-page button:focus-visible,
+body.demo-login-page a:focus-visible{
+  outline:3px solid rgba(14,165,233,.42);
+  outline-offset:2px;
+}
+body.demo-app .wf-table-wrap{
+  overscroll-behavior:contain;
+}
+@media(max-width:899px){
+  body.demo-app .demo-mobile-menu-trigger{display:inline-flex}
+  body.demo-app .main-content{padding-top:58px!important}
+}
+@media(max-width:480px){
+  body.demo-app .demo-mobile-menu-trigger{
+    top:8px;
+    left:8px;
+    min-height:38px;
+    padding:0 11px;
+    font-size:10px;
+  }
+}

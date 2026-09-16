@@ -1,9 +1,13 @@
 (function(){
   "use strict";
 
-  const STATE_KEY="ldm_demo_account_state_v28101";
+  const STATE_KEY="ldm_demo_account_state_v28164";
   const TTL_MS=2*60*60*1000;
-  const VERSION="28.10.1";
+  const VERSION="28.16.4";
+  const LEGACY_STATE_KEYS=["ldm_demo_account_state_v28101","ldm_demo_account_state_v2860"];
+  const NOTICE_KEY="ldm_demo_notice_v28164";
+  const DEMO_TZ="Asia/Makassar";
+  const SESSION_CHECK_MS=30000;
   const CATEGORIES={
     SAKIT_KONDISI:"Sakit / kondisi kesehatan",
     KEPERLUAN_KELUARGA:"Keperluan keluarga mendesak",
@@ -59,9 +63,28 @@
   function esc(value){return String(value??"").replace(/[&<>'"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[ch]));}
   function money(value){return new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(Number(value)||0);}
   function pad(v){return String(v).padStart(2,"0");}
-  function dateKey(date){const d=new Date(date);return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;}
-  function shiftDate(offset){const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+offset);return dateKey(d);}
-  function timeNow(){const d=new Date();return `${pad(d.getHours())}:${pad(d.getMinutes())}`;}
+  function zonedParts(date=new Date()){
+    const parts=new Intl.DateTimeFormat("en-CA",{
+      timeZone:DEMO_TZ,year:"numeric",month:"2-digit",day:"2-digit",
+      hour:"2-digit",minute:"2-digit",hourCycle:"h23"
+    }).formatToParts(date);
+    return Object.fromEntries(parts.filter(part=>part.type!=="literal").map(part=>[part.type,part.value]));
+  }
+  function dateKeyFromParts(parts){return `${parts.year}-${parts.month}-${parts.day}`;}
+  function shiftDate(offset=0){
+    const parts=zonedParts(new Date());
+    const anchor=new Date(Date.UTC(Number(parts.year),Number(parts.month)-1,Number(parts.day)+Number(offset||0),12,0,0));
+    return `${anchor.getUTCFullYear()}-${pad(anchor.getUTCMonth()+1)}-${pad(anchor.getUTCDate())}`;
+  }
+  function timeNow(){const parts=zonedParts(new Date());return `${parts.hour}:${parts.minute}`;}
+  function currentMonthKey(){const parts=zonedParts(new Date());return `${parts.year}-${parts.month}`;}
+  function monthParts(value=currentMonthKey()){
+    const match=String(value||"").match(/^(\d{4})-(\d{2})$/);
+    if(!match)return {year:Number(zonedParts().year),month:Number(zonedParts().month)-1,key:currentMonthKey()};
+    const year=Number(match[1]),month=Number(match[2])-1;
+    if(month<0||month>11)return {year:Number(zonedParts().year),month:Number(zonedParts().month)-1,key:currentMonthKey()};
+    return {year,month,key:`${year}-${pad(month+1)}`};
+  }
   function uid(prefix){return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;}
   function clone(value){return JSON.parse(JSON.stringify(value));}
 
@@ -133,6 +156,12 @@
       page:"dashboard",
       storeMode:"retail",
       demoTheme:"dashboard",
+      demoCash:0,
+      demoDiscount:0,
+      demoSelectedProductId:"",
+      masterEmployeeId:"",
+      masterMonth:currentMonthKey(),
+      masterTemplate:{shift:"SHIFT_1",start:"08:00",end:"16:00",tolerance:15,weekdays:[1,2,3,4,5,6]},
       cart:[],
       products:clone(modeCatalogs.retail),
       modeCatalogs,
@@ -179,19 +208,110 @@
     };
   }
 
-  function read(){
+  function rememberNotice(reason){
+    try{sessionStorage.setItem(NOTICE_KEY,String(reason||""));}catch(_){}
+  }
+  function consumeNotice(){
     try{
-      const raw=sessionStorage.getItem(STATE_KEY);
-      const data=raw?JSON.parse(raw):null;
-      if(!data||data.version!==VERSION||Number(data.expiresAt||0)<=Date.now()) return null;
-      return data;
+      const value=sessionStorage.getItem(NOTICE_KEY)||"";
+      sessionStorage.removeItem(NOTICE_KEY);
+      return value;
+    }catch(_){return "";}
+  }
+  function isPlainObject(value){return Boolean(value&&typeof value==="object"&&!Array.isArray(value));}
+  function arrayOr(value,fallback=[]){return Array.isArray(value)?value:clone(fallback);}
+  function repairState(source,profileId){
+    const requested=PROFILES[profileId]?profileId:(PROFILES[source?.profileId]?source.profileId:"owner-pusat");
+    const fresh=seedState(requested);
+    if(!isPlainObject(source))return fresh;
+
+    const state={...fresh};
+    state.profileId=PROFILES[source.profileId]?source.profileId:fresh.profileId;
+    state.page=ROUTES.some(route=>route.id===source.page)?source.page:"dashboard";
+    state.storeMode=MODE_CONFIG[source.storeMode]?source.storeMode:"retail";
+    state.demoTheme=["dashboard","light","dark"].includes(source.demoTheme)?source.demoTheme:"dashboard";
+    state.cart=arrayOr(source.cart);
+    state.products=arrayOr(source.products,fresh.products);
+    state.employees=arrayOr(source.employees,fresh.employees);
+    state.schedules=arrayOr(source.schedules,fresh.schedules);
+    state.attendance=arrayOr(source.attendance,fresh.attendance);
+    state.transactions=arrayOr(source.transactions,fresh.transactions);
+    state.absences=arrayOr(source.absences,fresh.absences);
+    state.modeCatalogs=isPlainObject(source.modeCatalogs)?source.modeCatalogs:fresh.modeCatalogs;
+    state.reportFrom=/^\d{4}-\d{2}-\d{2}$/.test(String(source.reportFrom||""))?source.reportFrom:fresh.reportFrom;
+    state.reportTo=/^\d{4}-\d{2}-\d{2}$/.test(String(source.reportTo||""))?source.reportTo:fresh.reportTo;
+    state.reportSearch=String(source.reportSearch||"");
+    state.reportPage=Math.max(1,Number(source.reportPage)||1);
+    state.demoCash=Math.max(0,Number(source.demoCash)||0);
+    state.demoDiscount=Math.max(0,Number(source.demoDiscount)||0);
+    state.demoSelectedProductId=String(source.demoSelectedProductId||"");
+    state.masterEmployeeId=String(source.masterEmployeeId||"");
+    state.masterMonth=/^\d{4}-\d{2}$/.test(String(source.masterMonth||""))?source.masterMonth:fresh.masterMonth;
+    const template=isPlainObject(source.masterTemplate)?source.masterTemplate:{};
+    state.masterTemplate={
+      shift:["SHIFT_1","SHIFT_2","FULL_DAY"].includes(template.shift)?template.shift:"SHIFT_1",
+      start:/^\d{2}:\d{2}$/.test(String(template.start||""))?template.start:"08:00",
+      end:/^\d{2}:\d{2}$/.test(String(template.end||""))?template.end:"16:00",
+      tolerance:Math.max(0,Math.min(180,Number(template.tolerance)||15)),
+      weekdays:Array.isArray(template.weekdays)&&template.weekdays.length
+        ? [...new Set(template.weekdays.map(Number).filter(day=>day>=0&&day<=6))]
+        : [1,2,3,4,5,6]
+    };
+    state.version=VERSION;
+    state.createdAt=Number(source.createdAt)||Date.now();
+    state.expiresAt=Date.now()+TTL_MS;
+    return state;
+  }
+  function parseStateKey(key){
+    try{
+      const raw=sessionStorage.getItem(key);
+      if(!raw)return null;
+      return JSON.parse(raw);
     }catch(_){return null;}
   }
-  function save(state){sessionStorage.setItem(STATE_KEY,JSON.stringify(state));return state;}
+  function read(){
+    const current=parseStateKey(STATE_KEY);
+    if(current){
+      if(Number(current.expiresAt||0)<=Date.now()){
+        try{sessionStorage.removeItem(STATE_KEY);}catch(_){}
+        rememberNotice("expired");
+        return null;
+      }
+      const repaired=repairState(current,current.profileId);
+      sessionStorage.setItem(STATE_KEY,JSON.stringify(repaired));
+      return repaired;
+    }
+
+    for(const legacyKey of LEGACY_STATE_KEYS){
+      const legacy=parseStateKey(legacyKey);
+      if(!legacy)continue;
+      if(Number(legacy.expiresAt||0)>0&&Number(legacy.expiresAt)<=Date.now())continue;
+      const migrated=repairState(legacy,legacy.profileId);
+      try{
+        sessionStorage.setItem(STATE_KEY,JSON.stringify(migrated));
+        LEGACY_STATE_KEYS.forEach(key=>sessionStorage.removeItem(key));
+      }catch(_){}
+      rememberNotice("migrated");
+      return migrated;
+    }
+
+    return null;
+  }
+  function save(state,{touch=true}={}){
+    const repaired=repairState(state,state?.profileId);
+    if(touch)repaired.expiresAt=Date.now()+TTL_MS;
+    sessionStorage.setItem(STATE_KEY,JSON.stringify(repaired));
+    Object.assign(state,repaired);
+    return state;
+  }
   function ensure(profileId){let state=read();if(!state)state=save(seedState(profileId));return state;}
   function currentProfile(state){return PROFILES[state.profileId]||PROFILES["owner-pusat"];}
-  function start(profileId){const state=save(seedState(profileId));state.page="dashboard";save(state);location.href="demo-app.html";}
-  function reset(){const old=read();const state=save(seedState(old?.profileId||"owner-pusat"));state.page=old?.page||"dashboard";save(state);return state;}
+  function routeAllowed(profile,routeId){
+    const route=ROUTES.find(item=>item.id===routeId);
+    return Boolean(route&&route.roles.includes(profile.role));
+  }
+  function start(profileId){save(seedState(profileId));location.href="demo-app.html";}
+  function reset(){const old=read();const state=seedState(old?.profileId||"owner-pusat");state.page=old?.page||"dashboard";return save(state);}
   function exit(){
     try{
       const keys=[];
@@ -248,9 +368,9 @@
 
   function demoNote(){return `<div class="dp-demo-note"><span>ℹ️</span><div><strong>Mode Demo.</strong> Halaman ini dibuat menyerupai tampilan production dengan data latihan. Tampilan dan fitur Demo tidak mewakili 100% aplikasi sebenarnya.</div><button type="button" data-demo-limit-info>Detail Demo</button></div>`;}
   function brandHeader(subtitle,actions=""){return `<header class="dp-production-header"><div class="dp-brand-block"><div class="dp-brand-text"><strong>LocDailyMar</strong><small>${esc(subtitle)}</small></div></div><div class="dp-header-actions">${actions}</div></header>`;}
-  function idDate(value){try{return new Date(value+"T12:00:00").toLocaleDateString("id-ID",{day:"2-digit",month:"2-digit",year:"numeric"});}catch(_){return value;}}
-  function monthLabel(){return new Date().toLocaleDateString("id-ID",{month:"long",year:"numeric"});}
-  function todayLong(){return new Date().toLocaleDateString("id-ID",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});}
+  function idDate(value){try{return new Date(value+"T12:00:00+08:00").toLocaleDateString("id-ID",{timeZone:DEMO_TZ,day:"2-digit",month:"2-digit",year:"numeric"});}catch(_){return value;}}
+  function monthLabel(){return new Date().toLocaleDateString("id-ID",{timeZone:DEMO_TZ,month:"long",year:"numeric"});}
+  function todayLong(){return new Date().toLocaleDateString("id-ID",{timeZone:DEMO_TZ,weekday:"long",day:"2-digit",month:"long",year:"numeric"});}
   function calcProductMargin(p){return Math.max(0,Number(p.price||0)-Number(p.purchasePrice||Math.round(Number(p.price||0)*.82)));}
   function lowLabel(p,mode="retail"){const qty=Number(p.stock||0),unit=esc(p.unit||"Pcs"),cfg=modeConfig(mode);if(cfg.strictStock&&qty<=0)return `Stok Habis: 0 ${unit}`;if(!cfg.strictStock&&qty<0)return `Catatan Stok: ${qty} ${unit}`;if(!cfg.strictStock&&qty===0)return `Stok Tercatat: 0 ${unit}`;if(qty<=Number(p.minStock||0))return `${cfg.strictStock?"Hampir Habis":"Stok Rendah"}: ${qty} ${unit}`;return `Stok: ${qty} ${unit}`;}
 
@@ -270,7 +390,7 @@
       ${brandHeader("Dashboard",`<button class="dp-header-btn green" type="button" data-demo-action="account">👤 Manage Account</button><button class="dp-header-btn gray" type="button" data-demo-theme-open>🎨 Tema</button><button class="dp-header-btn red" type="button" data-demo-exit>🚪 Keluar Demo</button>`)}
       ${demoNote()}
       <div class="dp-dash-mode"><select class="dp-select" id="demoInlineModeSelect"><option value="retail">🛒 Toko Ritel</option><option value="warung">🍜 Warung</option><option value="cafe">☕ Kafe</option></select></div>
-      <div class="dp-grid-4" style="margin-bottom:10px"><div class="dp-stat"><span>Omzet Hari Ini</span><strong>${money(sales)}</strong></div><div class="dp-stat green"><span>Profit Bersih</span><strong>${money(profit)}</strong></div><div class="dp-stat"><span>Total Transaksi</span><strong>${rows.length||28} TRX</strong></div><div class="dp-stat orange"><span>Barang Menipis</span><strong>${state.products.filter(p=>p.stock<=p.minStock).length} Item</strong></div></div>
+      <div class="dp-grid-4" style="margin-bottom:10px"><div class="dp-stat"><span>Omzet Hari Ini</span><strong>${money(sales)}</strong></div><div class="dp-stat green"><span>Profit Bersih</span><strong>${money(profit)}</strong></div><div class="dp-stat"><span>Total Transaksi</span><strong>${rows.length} TRX</strong></div><div class="dp-stat orange"><span>Barang Menipis</span><strong>${state.products.filter(p=>p.stock<=p.minStock).length} Item</strong></div></div>
       <div class="dp-profit-formula">Rumus Profit: <b>OMZET (${money(sales).replace('Rp','').trim()}) - MODAL (${money(modal).replace('Rp','').trim()}) = TOTAL PROFIT ${money(profit).replace('Rp','').trim()}</b></div>
       <section class="dp-card"><div class="dp-month-head"><div class="dp-card-title" style="margin:0"><h2>📊 Statistik Penjualan Bulanan</h2></div><label style="display:flex;align-items:center;gap:6px;font-size:9px">Bulan: <input class="dp-input" style="width:145px;min-height:30px" value="${monthLabel()}" readonly></label></div>
         <div class="dp-month-stats"><div class="dp-stat"><span>🧮 Omzet Bulan Ini</span><strong>${money(monthSales)}</strong></div><div class="dp-stat green"><span>📈 Profit Bersih</span><strong>${money(monthProfit)}</strong></div><div class="dp-stat"><span>🧾 Total Transaksi</span><strong>${monthTrx} Transaksi</strong></div></div>
@@ -308,7 +428,7 @@
       ${brandHeader("Data Barang",`<button type="button" class="dp-header-btn green" data-demo-limited="Cetak Label Price">🏷️ Cetak Label Price</button>`)}
       ${demoNote()}
       <div class="dp-products-layout"><section class="dp-card dp-product-form"><div class="dp-card-title"><h2>+ TAMBAH BARANG BARU</h2></div><label class="dp-label">Kode Barcode</label><input id="demoNewBarcode" class="dp-input" placeholder="Scan / Ketik Barcode..."><label class="dp-label">Nama Barang</label><input id="demoNewName" class="dp-input" placeholder="Contoh: Indomie Goreng"><label class="dp-label">Kategori Produk</label><select id="demoNewCategory" class="dp-select"><option>Sembako</option><option>Frozen Food</option><option>Minuman</option><option>Makanan</option></select><label class="dp-label">Jumlah Stok Awal</label><input id="demoNewStock" class="dp-input" type="number" placeholder="Contoh: 50"><label class="dp-label">Satuan Dasar / Stok / Kasir</label><select id="demoNewUnit" class="dp-select"><option>Pcs</option><option>Kg</option><option>Liter</option><option>Bungkus</option></select><label class="dp-label">Harga Beli per Satuan Dasar</label><input id="demoNewBuy" class="dp-input" type="number" placeholder="Contoh: 2800"><label class="dp-label">Harga Jual (ke Konsumen)</label><input id="demoNewSell" class="dp-input" type="number" placeholder="Contoh: 3500"><button class="dp-btn" style="width:100%" id="demoAddProductBtn" type="button" ${editable?'':'disabled'}>+ SIMPAN BARANG</button></section>
-      <section class="dp-product-list-area"><div class="dp-search-row"><input class="dp-input" id="demoInventorySearch" placeholder="🔍 Cari nama / barcode / kategori..."><button class="dp-btn blue" type="button" data-demo-limited="Scan barcode">▣ Scan</button></div><div class="dp-products-grid">${state.products.map(p=>`<article class="dp-product-card ${p.stock>p.minStock?'safe':''}" data-demo-product-card data-product-search="${esc((p.name+' '+p.barcode+' '+(p.category||'')).toLowerCase())}"><div class="dp-product-head"><strong>${p.stock<=p.minStock?'⚠️ ':''}${esc(p.name)}</strong><span class="dp-chip ${p.stock<=0?'red':p.stock<=p.minStock?'red':'green'}">${lowLabel(p)}</span></div><div style="font-size:8px;color:#64748b;margin-bottom:7px">Barcode: ${esc(p.barcode||'-')} <span style="float:right" class="dp-chip">${esc(p.category||'Sembako')}</span></div><div class="dp-product-meta"><div>Harga Beli<b>${money(p.purchasePrice||Math.round(p.price*.82))}</b></div><div>Harga Normal<b>${money(p.price)}</b></div></div><div class="dp-margin">Margin Keuntungan: +${money(calcProductMargin(p))} / ${esc(p.unit||'Pcs')}</div><div class="dp-product-buttons"><button class="promo" type="button" data-demo-limited="Promo Barang">🏷 Promo</button><button class="edit" type="button" data-stock="${esc(p.id)}" data-delta="1" ${editable?'':'disabled'}>✏ Edit</button><button class="delete" type="button" data-demo-delete-product="${esc(p.id)}" ${editable?'':'disabled'}>🗑 Hapus</button></div></article>`).join("")}</div></section></div>
+      <section class="dp-product-list-area"><div class="dp-search-row"><input class="dp-input" id="demoInventorySearch" placeholder="🔍 Cari nama / barcode / kategori..."><button class="dp-btn blue" type="button" data-demo-limited="Scan barcode">▣ Scan</button></div><div class="dp-products-grid">${state.products.map(p=>`<article class="dp-product-card ${p.stock>p.minStock?'safe':''}" data-demo-product-card data-product-search="${esc((p.name+' '+p.barcode+' '+(p.category||'')).toLowerCase())}"><div class="dp-product-head"><strong>${p.stock<=p.minStock?'⚠️ ':''}${esc(p.name)}</strong><span class="dp-chip ${p.stock<=0?'red':p.stock<=p.minStock?'red':'green'}">${lowLabel(p)}</span></div><div style="font-size:8px;color:#64748b;margin-bottom:7px">Barcode: ${esc(p.barcode||'-')} <span style="float:right" class="dp-chip">${esc(p.category||'Sembako')}</span></div><div class="dp-product-meta"><div>Harga Beli<b>${money(p.purchasePrice||Math.round(p.price*.82))}</b></div><div>Harga Normal<b>${money(p.price)}</b></div></div><div class="dp-margin">Margin Keuntungan: +${money(calcProductMargin(p))} / ${esc(p.unit||'Pcs')}</div><div class="dp-product-buttons"><button class="promo" type="button" data-demo-limited="Promo Barang">🏷 Promo</button><button class="edit" type="button" data-stock="${esc(p.id)}" data-delta="1" ${editable?'':'disabled'}>＋1 Stok</button><button class="delete" type="button" data-demo-delete-product="${esc(p.id)}" ${editable?'':'disabled'}>🗑 Hapus</button></div></article>`).join("")}</div></section></div>
     </div>`;
   }
 
@@ -354,21 +474,55 @@
   }
 
   function renderMasterShift(state,profile){
-    if(profile.role!=="owner")return `<div class="wf-shell"><header class="wf-hero"><div class="wf-hero-main"><div class="wf-hero-copy"><h1>🗓️ Master Shift</h1><p>Halaman ini khusus Owner.</p></div></div></header><section class="wf-card"><div class="wf-empty">Akun Demo ini tidak memiliki akses Master Shift.</div></section></div>`;
-    const emps=visibleEmployees(state,profile),selected=state.masterEmployeeId&&emps.some(e=>e.id===state.masterEmployeeId)?state.masterEmployeeId:(emps[0]?.id||"");state.masterEmployeeId=selected;save(state);const emp=employeeById(state,selected);const now=new Date(),year=now.getFullYear(),month=now.getMonth();const rows=state.schedules.filter(s=>s.employeeId===selected&&new Date(s.workDate+'T12:00:00').getMonth()===month);const work=rows.filter(r=>r.status==='WORK').length,off=rows.filter(r=>r.status==='OFF').length,leave=rows.filter(r=>r.status==='ANNUAL_LEAVE').length;
-    return `<div class="wf-shell"><header class="wf-hero"><div class="wf-hero-main"><div class="wf-hero-copy"><h1>🗓️ Master Shift</h1><p>Atur jadwal kerja bulanan, jam masuk-keluar, hari libur, dan cuti tahunan dari satu halaman.</p></div></div><div class="wf-hero-actions"><span class="wf-pill">🔒 Owner Only</span><button class="wf-link-btn soft" type="button" data-go="absensi">← Absensi</button></div></header>${demoNote().replace('dp-demo-note','dp-demo-note dp-demo-workforce-note')}
-      <section class="wf-card"><div class="wf-card-head"><div><h2>Pilih Jadwal</h2><p>Tentukan cabang, bulan, dan akun. Owner Cabang hanya melihat cabangnya sendiri.</p></div><button class="wf-btn soft" type="button" data-demo-limited="Muat Ulang Master Shift">↻ Muat Ulang</button></div><div class="wf-grid"><div class="wf-field wf-col-4"><label>Cabang</label><select><option>${esc(storeLabel(profile.storeCode))} · Pusat</option></select></div><div class="wf-field wf-col-4"><label>Bulan</label><input type="month" value="${year}-${pad(month+1)}"></div><div class="wf-field wf-col-4"><label>Akun Karyawan</label><select id="demoMasterEmployee">${emps.map(e=>`<option value="${esc(e.id)}" ${e.id===selected?'selected':''}>${esc(e.name.replace(' Demo',''))} · ${esc(roleLabel(e.role))}</option>`).join("")}</select></div></div></section>
+    if(profile.role!=="owner"){
+      return `<div class="wf-shell"><header class="wf-hero"><div class="wf-hero-main"><div class="wf-hero-copy"><h1>🗓️ Master Shift</h1><p>Halaman ini khusus Owner.</p></div></div></header><section class="wf-card"><div class="wf-empty">Akun Demo ini tidak memiliki akses Master Shift.</div></section></div>`;
+    }
+
+    const emps=visibleEmployees(state,profile);
+    const selected=state.masterEmployeeId&&emps.some(e=>e.id===state.masterEmployeeId)
+      ? state.masterEmployeeId
+      : (emps[0]?.id||"");
+    state.masterEmployeeId=selected;
+
+    const selectedMonth=monthParts(state.masterMonth||currentMonthKey());
+    state.masterMonth=selectedMonth.key;
+
+    const template=isPlainObject(state.masterTemplate)?state.masterTemplate:{
+      shift:"SHIFT_1",start:"08:00",end:"16:00",tolerance:15,weekdays:[1,2,3,4,5,6]
+    };
+    const weekdays=Array.isArray(template.weekdays)?template.weekdays:[1,2,3,4,5,6];
+
+    const emp=employeeById(state,selected);
+    const rows=state.schedules
+      .filter(s=>{
+        if(s.employeeId!==selected)return false;
+        const match=String(s.workDate||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        return Boolean(
+          match &&
+          Number(match[1])===selectedMonth.year &&
+          Number(match[2])===selectedMonth.month+1
+        );
+      })
+      .sort((a,b)=>String(a.workDate).localeCompare(String(b.workDate)));
+
+    const work=rows.filter(r=>r.status==="WORK").length;
+    const off=rows.filter(r=>r.status==="OFF").length;
+    const leave=rows.filter(r=>r.status==="ANNUAL_LEAVE").length;
+    const scopeLabel=profile.scope==="network"?"Semua Cabang / Network":storeLabel(profile.storeCode);
+
+    return `<div class="wf-shell"><header class="wf-hero"><div class="wf-hero-main"><div class="wf-hero-copy"><h1>🗓️ Master Shift</h1><p>Atur jadwal kerja bulanan, jam masuk-keluar, hari libur, dan cuti tahunan dari satu halaman.</p></div></div><div class="wf-hero-actions"><span class="wf-pill">🔒 Owner Only</span><button class="wf-link-btn soft" type="button" data-go="absensi">← Absensi</button></div></header>${demoNote().replace("dp-demo-note","dp-demo-note dp-demo-workforce-note")}
+      <section class="wf-card"><div class="wf-card-head"><div><h2>Pilih Jadwal</h2><p>Tentukan cabang, bulan, dan akun. Owner Cabang hanya melihat cabangnya sendiri.</p></div><button class="wf-btn soft" type="button" data-demo-master-refresh>↻ Muat Ulang</button></div><div class="wf-grid"><div class="wf-field wf-col-4"><label>Cakupan</label><select disabled><option>${esc(scopeLabel)}</option></select></div><div class="wf-field wf-col-4"><label>Bulan</label><input id="demoMasterMonth" type="month" value="${esc(selectedMonth.key)}"></div><div class="wf-field wf-col-4"><label>Akun Karyawan</label><select id="demoMasterEmployee">${emps.map(e=>`<option value="${esc(e.id)}" ${e.id===selected?"selected":""}>${esc(e.name.replace(" Demo",""))} · ${esc(roleLabel(e.role))}</option>`).join("")}</select></div></div></section>
       <section class="wf-stats"><div class="wf-stat"><span>Hari Kerja</span><strong>${work}</strong></div><div class="wf-stat"><span>Hari Libur</span><strong>${off}</strong></div><div class="wf-stat"><span>Cuti Bulan Ini</span><strong>${leave}</strong></div><div class="wf-stat"><span>Hak Cuti Tahunan</span><strong>${Number(emp?.annualLeave||0)}</strong></div><div class="wf-stat"><span>Sisa Cuti</span><strong>${Math.max(0,Number(emp?.annualLeave||0)-leave)}</strong></div></section>
-      <div class="wf-layout-2"><section class="wf-card"><div class="wf-card-head"><div><h2>Template Cepat</h2><p>Atur pola umum sekali, lalu terapkan ke seluruh bulan.</p></div></div><div class="wf-field"><label>Hari kerja</label><div class="wf-weekdays">${['Sen','Sel','Rab','Kam','Jum','Sab','Min'].map((d,i)=>`<label class="wf-weekday"><input type="checkbox" ${i<6?'checked':''}> ${d}</label>`).join("")}</div></div><div class="wf-grid" style="margin-top:10px"><div class="wf-field wf-col-6"><label>Shift</label><select id="demoMasterShift"><option value="SHIFT_1">Shift 1</option><option value="SHIFT_2">Shift 2</option><option value="FULL_DAY">Full Day</option></select></div><div class="wf-field wf-col-6"><label>Toleransi terlambat</label><input type="number" value="30"></div><div class="wf-field wf-col-6"><label>Jam masuk</label><input id="demoMasterStart" type="time" value="08:00"></div><div class="wf-field wf-col-6"><label>Jam keluar</label><input id="demoMasterEnd" type="time" value="16:00"></div></div><div class="wf-actions" style="margin-top:12px"><button class="wf-btn primary" type="button" id="demoApplyMonthBtn">Terapkan ke Bulan</button></div></section>
-      <section class="wf-card"><div class="wf-card-head"><div><h2>Hak Cuti Tahunan</h2><p>Hak cuti mengikuti tahun pada bulan yang sedang dipilih.</p></div></div><div class="wf-grid"><div class="wf-field wf-col-6"><label>Hak cuti / tahun</label><input id="demoAnnualLeave" type="number" min="0" max="366" value="${Number(emp?.annualLeave||0)}"></div><div class="wf-field wf-col-6"><label>Tahun</label><input type="text" readonly value="${year}"></div><div class="wf-col-12"><div class="wf-notice">Hak ${Number(emp?.annualLeave||0)} hari · terpakai ${leave} hari · sisa ${Math.max(0,Number(emp?.annualLeave||0)-leave)} hari.</div></div></div><div class="wf-actions" style="margin-top:12px"><button class="wf-btn soft" type="button" id="demoSaveLeaveBtn">Simpan Hak Cuti</button></div><div class="wf-divider"></div><div class="wf-notice">Owner Pusat boleh membiarkan jadwal akunnya sendiri kosong. Akun lain tetap wajib memiliki jadwal lengkap untuk setiap tanggal dalam bulan.</div></section></div>
-      <section class="wf-card"><div class="wf-card-head"><div><h2>Jadwal Bulanan</h2><p>Setelah template diterapkan, cukup ubah tanggal yang berbeda menjadi Libur, Cuti Tahunan, atau shift lain.</p></div><div class="wf-actions"><button class="wf-btn danger" type="button" data-demo-limited="Kosongkan Jadwal">Kosongkan Jadwal Owner Pusat</button><button class="wf-btn primary" type="button" id="demoSaveScheduleBtn">💾 Simpan Jadwal Bulan</button></div></div><div class="wf-notice warning">${rows.length?'Jadwal contoh tersedia untuk bulan ini.':'Belum ada jadwal. Gunakan Template Cepat untuk membuat jadwal satu bulan.'}</div><div class="wf-table-wrap" style="margin-top:12px"><table class="wf-table"><thead><tr><th>Tanggal</th><th>Status</th><th>Shift</th><th>Jam Kerja</th><th>Catatan</th></tr></thead><tbody>${rows.length?rows.slice(0,12).map(r=>`<tr><td>${esc(idDate(r.workDate))}</td><td>${esc(workStatusLabel(r.status))}</td><td>${esc(shiftLabel(r.shift))}</td><td>${esc(r.start)} - ${esc(r.end)}</td><td>${esc(r.note||'Jadwal Demo')}</td></tr>`).join(""):`<tr><td colspan="5">Belum ada jadwal.</td></tr>`}</tbody></table></div></section>
+      <div class="wf-layout-2"><section class="wf-card"><div class="wf-card-head"><div><h2>Template Cepat</h2><p>Hari kerja, shift, toleransi, dan jam yang dipilih benar-benar digunakan saat template diterapkan.</p></div></div><div class="wf-field"><label>Hari kerja</label><div class="wf-weekdays">${[["Sen",1],["Sel",2],["Rab",3],["Kam",4],["Jum",5],["Sab",6],["Min",0]].map(([label,day])=>`<label class="wf-weekday"><input type="checkbox" data-demo-master-weekday="${day}" ${weekdays.includes(day)?"checked":""}> ${label}</label>`).join("")}</div></div><div class="wf-grid" style="margin-top:10px"><div class="wf-field wf-col-6"><label>Shift</label><select id="demoMasterShift"><option value="SHIFT_1" ${template.shift==="SHIFT_1"?"selected":""}>Shift 1</option><option value="SHIFT_2" ${template.shift==="SHIFT_2"?"selected":""}>Shift 2</option><option value="FULL_DAY" ${template.shift==="FULL_DAY"?"selected":""}>Full Day</option></select></div><div class="wf-field wf-col-6"><label>Toleransi terlambat</label><input id="demoMasterTolerance" type="number" min="0" max="180" value="${Number(template.tolerance||0)}"></div><div class="wf-field wf-col-6"><label>Jam masuk</label><input id="demoMasterStart" type="time" value="${esc(template.start||"08:00")}"></div><div class="wf-field wf-col-6"><label>Jam keluar</label><input id="demoMasterEnd" type="time" value="${esc(template.end||"16:00")}"></div></div><div class="wf-actions" style="margin-top:12px"><button class="wf-btn primary" type="button" id="demoApplyMonthBtn">Terapkan ke Bulan</button></div></section>
+      <section class="wf-card"><div class="wf-card-head"><div><h2>Hak Cuti Tahunan</h2><p>Hak cuti mengikuti tahun pada bulan yang sedang dipilih.</p></div></div><div class="wf-grid"><div class="wf-field wf-col-6"><label>Hak cuti / tahun</label><input id="demoAnnualLeave" type="number" min="0" max="366" value="${Number(emp?.annualLeave||0)}"></div><div class="wf-field wf-col-6"><label>Tahun</label><input type="text" readonly value="${selectedMonth.year}"></div><div class="wf-col-12"><div class="wf-notice">Hak ${Number(emp?.annualLeave||0)} hari · terpakai ${leave} hari · sisa ${Math.max(0,Number(emp?.annualLeave||0)-leave)} hari.</div></div></div><div class="wf-actions" style="margin-top:12px"><button class="wf-btn soft" type="button" id="demoSaveLeaveBtn">Simpan Hak Cuti</button></div><div class="wf-divider"></div><div class="wf-notice">Owner Pusat boleh membiarkan jadwal akunnya sendiri kosong. Akun lain tetap wajib memiliki jadwal lengkap untuk setiap tanggal dalam bulan.</div></section></div>
+      <section class="wf-card"><div class="wf-card-head"><div><h2>Jadwal Bulanan</h2><p>Menampilkan jadwal ${esc(selectedMonth.key)} untuk akun terpilih.</p></div><div class="wf-actions"><button class="wf-btn danger" type="button" data-demo-limited="Kosongkan Jadwal">Kosongkan Jadwal Owner Pusat</button><button class="wf-btn primary" type="button" id="demoSaveScheduleBtn">💾 Simpan Jadwal Bulan</button></div></div><div class="wf-notice warning">${rows.length?`${rows.length} baris jadwal tersedia untuk bulan ini.`:"Belum ada jadwal. Gunakan Template Cepat untuk membuat jadwal satu bulan."}</div><div class="wf-table-wrap" style="margin-top:12px"><table class="wf-table"><thead><tr><th>Tanggal</th><th>Status</th><th>Shift</th><th>Jam Kerja</th><th>Toleransi</th><th>Catatan</th></tr></thead><tbody>${rows.length?rows.map(r=>`<tr><td>${esc(idDate(r.workDate))}</td><td>${esc(workStatusLabel(r.status))}</td><td>${esc(shiftLabel(r.shift))}</td><td>${esc(r.start)} - ${esc(r.end)}</td><td>${Number(r.tolerance||0)} mnt</td><td>${esc(r.note||"Jadwal Demo")}</td></tr>`).join(""):`<tr><td colspan="6">Belum ada jadwal.</td></tr>`}</tbody></table></div></section>
     </div>`;
   }
 
   function eligibleDates(state,profile){const dates=[shiftDate(-1),shiftDate(-2),shiftDate(-3)];return dates.filter(date=>{const sch=scheduleFor(state,profile.employeeId,date);return sch&&sch.status==="WORK"&&!attendanceFor(state,profile.employeeId,date)&&!absenceFor(state,profile.employeeId,date);});}
   function visibleAbsences(state,profile){return state.absences.filter(row=>profile.scope==="network"||row.storeCode===profile.storeCode);}
   function renderKetidakhadiran(state,profile){
-    const owner=profile.role==='owner',eligible=eligibleDates(state,profile),own=state.absences.filter(x=>x.employeeId===profile.employeeId),inbox=owner?visibleAbsences(state,profile):[];const reviewed=inbox.filter(x=>x.status==='REVIEWED').length;
+    const owner=profile.role==='owner',eligible=eligibleDates(state,profile),own=state.absences.filter(x=>x.employeeId===profile.employeeId),inbox=owner?visibleAbsences(state,profile):[];const reviewed=(owner?inbox:own).filter(x=>x.status==='REVIEWED').length;
     return `<div class="wf-shell"><header class="wf-hero"><div class="wf-hero-main"><div class="wf-hero-copy"><h1>📋 Ketidakhadiran</h1><p>Jelaskan jadwal kerja yang terlewat. Hari Libur dan Cuti Tahunan tidak dianggap sebagai ketidakhadiran.</p></div></div><div class="wf-hero-actions"><button class="wf-link-btn soft" type="button" data-go="absensi">← Absensi</button></div></header>${demoNote().replace('dp-demo-note','dp-demo-note dp-demo-workforce-note')}
       <section class="wf-stats"><div class="wf-stat"><span>Perlu Dijelaskan</span><strong>${eligible.length}</strong></div><div class="wf-stat"><span>Sudah Dikirim</span><strong>${own.filter(x=>x.status!=='REVIEWED').length}</strong></div><div class="wf-stat"><span>Sudah Ditinjau</span><strong>${reviewed}</strong></div><div class="wf-stat"><span>Role Aktif</span><strong>${esc(roleLabel(profile.role))}</strong></div><div class="wf-stat"><span>Cakupan</span><strong>${profile.scope==='network'?'Semua Cabang':'Cabang Ini'}</strong></div></section>
       <div class="wf-layout-2"><section class="wf-card"><div class="wf-card-head"><div><h2>Kirim Penjelasan</h2><p>Form hanya menampilkan tanggal kerja yang sudah melewati batas jam masuk tetapi belum mempunyai Absen Masuk, izin, atau sakit.</p></div></div>${eligible.length?`<div class="wf-field"><label>Tanggal kerja</label><select id="demoAbsenceDate">${eligible.map(d=>`<option>${d}</option>`).join("")}</select></div><div class="wf-field" style="margin-top:10px"><label>Jenis ketidakhadiran</label><select id="demoAbsenceCategory">${Object.entries(CATEGORIES).map(([k,v])=>`<option value="${k}">${esc(v)}</option>`).join("")}</select></div><div class="wf-field" style="margin-top:10px"><label>Penjelasan</label><textarea id="demoAbsenceReason" placeholder="Jelaskan kejadian dengan jelas, minimal 10 karakter."></textarea></div><div class="wf-actions" style="margin-top:12px"><button id="demoSubmitAbsenceBtn" class="wf-btn primary" type="button">Kirim ke Owner</button></div>`:`<div class="wf-empty">Tidak ada tanggal kerja terlewat yang perlu dijelaskan. Hari libur dan cuti tidak dimasukkan.</div>`}</section><section class="wf-card"><div class="wf-card-head"><div><h2>Riwayat Saya</h2><p>Pengajuan tidak mengubah status menjadi hadir. Ini tetap menjadi catatan pertanggungjawaban untuk ditinjau Owner.</p></div></div><div class="wf-list">${own.length?own.map(x=>`<div class="wf-item"><div class="wf-item-head"><div><h3>${esc(idDate(x.workDate))}</h3><small>${esc(CATEGORIES[x.category]||x.category)}</small></div><span class="wf-tag ${x.status==='REVIEWED'?'reviewed':''}">${x.status==='REVIEWED'?'Ditinjau':'Dikirim'}</span></div><p>${esc(x.reason)}</p></div>`).join(""):`<div class="wf-empty">Belum ada pengajuan ketidakhadiran.</div>`}</div></section></div>
@@ -438,7 +592,7 @@
     const cfg=modeConfig(state.storeMode),editable=profile.role!=="kasir";
     const title=cfg.id==="cafe"?"Menu & Harga":cfg.id==="warung"?"Barang & Menu":"Data Barang";
     return `<div class="dp-page" data-demo-mode-page="${cfg.id}">${brandHeader(`${title} · ${cfg.label}`,`<button type="button" class="dp-header-btn green" data-demo-mode-open>${cfg.icon} ${cfg.stockLabel}</button>`)}${demoNote()}${modeBehaviorStrip(state)}<div class="dp-products-layout"><section class="dp-card dp-product-form"><div class="dp-card-title"><h2>+ TAMBAH ${cfg.id==="cafe"?"MENU":"BARANG"} BARU</h2></div><label class="dp-label">${cfg.id==="cafe"?"Kode Menu / Barcode":"Kode Barcode"}</label><input id="demoNewBarcode" class="dp-input" placeholder="${cfg.id==="cafe"?"Contoh: MENU-LATTE":"Scan / Ketik Barcode..."}"><label class="dp-label">Nama ${cfg.id==="cafe"?"Menu":"Barang"}</label><input id="demoNewName" class="dp-input" placeholder="${cfg.id==="cafe"?"Contoh: Caramel Latte":"Contoh: Indomie Goreng"}"><label class="dp-label">Kategori</label><select id="demoNewCategory" class="dp-select">${cfg.id==="cafe"?'<option>Coffee</option><option>Non Coffee</option><option>Food</option><option>Pastry</option>':cfg.id==="warung"?'<option>Makanan</option><option>Minuman</option><option>Snack</option><option>Sembako</option>':'<option>Sembako</option><option>Frozen Food</option><option>Minuman</option><option>Makanan</option>'}</select><label class="dp-label">${cfg.strictStock?"Jumlah Stok Awal":"Catatan Stok Awal"}</label><input id="demoNewStock" class="dp-input" type="number" placeholder="Contoh: 50"><label class="dp-label">Satuan</label><select id="demoNewUnit" class="dp-select"><option>Pcs</option><option>Porsi</option><option>Kg</option><option>Liter</option><option>Bungkus</option></select><label class="dp-label">Harga Beli / Modal</label><input id="demoNewBuy" class="dp-input" type="number" placeholder="Contoh: 2800"><label class="dp-label">Harga Jual</label><input id="demoNewSell" class="dp-input" type="number" placeholder="Contoh: 3500"><button class="dp-btn" style="width:100%" id="demoAddProductBtn" type="button" ${editable?'':'disabled'}>+ SIMPAN ${cfg.id==="cafe"?"MENU":"BARANG"}</button></section>
-      <section class="dp-product-list-area"><div class="dp-search-row"><input class="dp-input" id="demoInventorySearch" placeholder="🔍 Cari ${cfg.id==="cafe"?"menu":"nama / barcode / kategori"}..."><button class="dp-btn blue" type="button" data-demo-limited="Scan barcode">▣ Scan</button></div><div class="dp-products-grid ${cfg.showImages?"cafe-visual-grid":""}">${state.products.map(p=>`<article class="dp-product-card ${cfg.strictStock?(p.stock>p.minStock?'safe':''):'safe soft-card'}" data-demo-product-card data-product-search="${esc((p.name+' '+p.barcode+' '+(p.category||'')).toLowerCase())}">${cfg.showImages?`<div class="dp-cafe-product-visual">${modeVisual(p)}<span>${esc(p.category||'Menu')}</span></div>`:""}<div class="dp-product-head"><strong>${cfg.strictStock&&p.stock<=p.minStock?'⚠️ ':''}${esc(p.name)}</strong><span class="dp-chip ${cfg.strictStock&&p.stock<=p.minStock?'red':!cfg.strictStock&&p.stock<=p.minStock?'orange':'green'}">${lowLabel(p,cfg.id)}</span></div><div style="font-size:8px;color:#64748b;margin-bottom:7px">${cfg.id==="cafe"?'Kode':'Barcode'}: ${esc(p.barcode||'-')} <span style="float:right" class="dp-chip">${esc(p.category||'Umum')}</span></div><div class="dp-product-meta"><div>Harga Beli<b>${money(p.purchasePrice||Math.round(p.price*.82))}</b></div><div>Harga Jual<b>${money(p.price)}</b></div></div><div class="dp-margin">Margin: +${money(calcProductMargin(p))} / ${esc(p.unit||'Pcs')}</div><div class="dp-product-buttons"><button class="promo" type="button" data-demo-limited="Promo">🏷 Promo</button><button class="edit" type="button" data-stock="${esc(p.id)}" data-delta="1" ${editable?'':'disabled'}>✏ Edit</button><button class="delete" type="button" data-demo-delete-product="${esc(p.id)}" ${editable?'':'disabled'}>🗑 Hapus</button></div></article>`).join("")}</div></section></div></div>`;
+      <section class="dp-product-list-area"><div class="dp-search-row"><input class="dp-input" id="demoInventorySearch" placeholder="🔍 Cari ${cfg.id==="cafe"?"menu":"nama / barcode / kategori"}..."><button class="dp-btn blue" type="button" data-demo-limited="Scan barcode">▣ Scan</button></div><div class="dp-products-grid ${cfg.showImages?"cafe-visual-grid":""}">${state.products.map(p=>`<article class="dp-product-card ${cfg.strictStock?(p.stock>p.minStock?'safe':''):'safe soft-card'}" data-demo-product-card data-product-search="${esc((p.name+' '+p.barcode+' '+(p.category||'')).toLowerCase())}">${cfg.showImages?`<div class="dp-cafe-product-visual">${modeVisual(p)}<span>${esc(p.category||'Menu')}</span></div>`:""}<div class="dp-product-head"><strong>${cfg.strictStock&&p.stock<=p.minStock?'⚠️ ':''}${esc(p.name)}</strong><span class="dp-chip ${cfg.strictStock&&p.stock<=p.minStock?'red':!cfg.strictStock&&p.stock<=p.minStock?'orange':'green'}">${lowLabel(p,cfg.id)}</span></div><div style="font-size:8px;color:#64748b;margin-bottom:7px">${cfg.id==="cafe"?'Kode':'Barcode'}: ${esc(p.barcode||'-')} <span style="float:right" class="dp-chip">${esc(p.category||'Umum')}</span></div><div class="dp-product-meta"><div>Harga Beli<b>${money(p.purchasePrice||Math.round(p.price*.82))}</b></div><div>Harga Jual<b>${money(p.price)}</b></div></div><div class="dp-margin">Margin: +${money(calcProductMargin(p))} / ${esc(p.unit||'Pcs')}</div><div class="dp-product-buttons"><button class="promo" type="button" data-demo-limited="Promo">🏷 Promo</button><button class="edit" type="button" data-stock="${esc(p.id)}" data-delta="1" ${editable?'':'disabled'}>＋1 Stok</button><button class="delete" type="button" data-demo-delete-product="${esc(p.id)}" ${editable?'':'disabled'}>🗑 Hapus</button></div></article>`).join("")}</div></section></div></div>`;
   }
 
   function renderSecurity(){return `<div class="dp-page">${brandHeader("Informasi Demo",`<button class="dp-header-btn red" data-demo-exit>Keluar Demo</button>`)}${demoNote()}<div class="dp-grid-3"><section class="dp-card"><h3>🧪 Data Latihan</h3><p>Transaksi, stok, absensi, jadwal, dan pengajuan pada Mode Demo tidak memengaruhi toko.</p></section><section class="dp-card"><h3>↻ Reset Kapan Saja</h3><p>Gunakan Management Akun untuk mengembalikan data contoh ke kondisi awal.</p></section><section class="dp-card"><h3>👥 Pilih Peran</h3><p>Ganti akun Demo untuk melihat perbedaan akses Owner Pusat, Owner Cabang, Admin, dan Kasir.</p></section><section class="dp-card"><h3>🧩 3 Mode Interaktif</h3><p>Kafe memakai menu visual + Soft Stock, Warung memakai daftar cepat tanpa gambar + Soft Stock, dan Toko Ritel memakai Strict Stock.</p></section><section class="dp-card"><h3>ℹ️ Bukan 100%</h3><p>Tampilan dan fitur Demo tetap dapat disederhanakan atau dibatasi dan tidak mewakili 100% aplikasi sebenarnya.</p></section><section class="dp-card"><h3>🔒 Tindakan Dibatasi</h3><p>Fitur cloud, pembayaran, perangkat, dan tindakan berisiko tidak menjalankan operasi nyata.</p></section></div></div>`;}
@@ -490,7 +644,16 @@
       btn.setAttribute("aria-label","Keluar dari Mode Demo");
       btn.addEventListener("click",event=>{event.preventDefault();event.stopPropagation();exit();},{once:true});
     });
-    document.querySelectorAll("[data-go]").forEach(btn=>btn.addEventListener("click",()=>{state.page=btn.dataset.go;save(state);render(state);}));
+    document.querySelectorAll("[data-go]").forEach(btn=>btn.addEventListener("click",()=>{
+      const routeId=btn.dataset.go;
+      if(!routeAllowed(profile,routeId)){
+        toast("Akun ini tidak memiliki akses ke menu tersebut.","error");
+        return;
+      }
+      state.page=routeId;
+      save(state);
+      render(state);
+    }));
 
     // Kasir parity
     document.querySelectorAll("[data-demo-select-product]").forEach(btn=>btn.addEventListener("click",()=>{state.demoSelectedProductId=btn.dataset.demoSelectProduct;const p=state.products.find(x=>x.id===state.demoSelectedProductId);const input=document.getElementById("demoProductSearch");if(input&&p)input.value=p.name;save(state);}));
@@ -498,7 +661,20 @@
     document.querySelectorAll("[data-demo-qty]").forEach(btn=>btn.addEventListener("click",()=>{const input=document.getElementById("demoQty");if(input)input.value=btn.dataset.demoQty;}));
     document.getElementById("demoAddSelectedBtn")?.addEventListener("click",()=>{const query=String(document.getElementById("demoProductSearch")?.value||"").trim().toLowerCase();let p=state.products.find(x=>x.id===state.demoSelectedProductId);if(!p&&query)p=state.products.find(x=>String(x.name).toLowerCase().includes(query)||String(x.barcode).toLowerCase()===query);if(!p){toast("Pilih barang terlebih dahulu.","warn");return;}const qty=Math.max(.25,Number(document.getElementById("demoQty")?.value)||1);const cfg=modeConfig(state.storeMode);if(cfg.strictStock&&Number(p.stock||0)<qty){toast(`Stok ${p.name} tidak cukup pada mode Toko Ritel.`,"error");return;}if(!cfg.strictStock&&Number(p.stock||0)<qty)toast(`${cfg.stockLabel}: catatan stok ${p.name} kurang, transaksi Demo tetap dapat dilanjutkan.`,"warn");let row=state.cart.find(x=>x.id===p.id);if(row){if(cfg.strictStock&&row.qty+qty>p.stock){toast("Jumlah keranjang melebihi stok Demo.","warn");return;}row.qty+=qty;}else state.cart.push({id:p.id,name:p.name,price:p.price,qty});save(state);render(state);});
     document.getElementById("demoClearCartBtn")?.addEventListener("click",()=>{state.cart=[];state.demoCash=0;state.demoDiscount=0;save(state);render(state);});
-    document.getElementById("demoDiscountInput")?.addEventListener("change",e=>{const raw=String(e.target.value||"").trim();const subtotal=state.cart.reduce((s,r)=>s+r.price*r.qty,0);state.demoDiscount=raw.endsWith("%")?Math.round(subtotal*(Number(raw.slice(0,-1))||0)/100):Math.max(0,Number(raw)||0);save(state);render(state);});
+    document.getElementById("demoDiscountInput")?.addEventListener("change",e=>{
+      const raw=String(e.target.value||"").trim();
+      const subtotal=state.cart.reduce((s,r)=>s+r.price*r.qty,0);
+      let discount=0;
+      if(raw.endsWith("%")){
+        const percent=Math.max(0,Math.min(100,Number(raw.slice(0,-1))||0));
+        discount=Math.round(subtotal*percent/100);
+      }else{
+        discount=Math.max(0,Number(raw)||0);
+      }
+      state.demoDiscount=Math.min(subtotal,discount);
+      save(state);
+      render(state);
+    });
     document.getElementById("demoCashReceived")?.addEventListener("change",e=>{state.demoCash=Math.max(0,Number(e.target.value)||0);save(state);render(state);});
     document.querySelectorAll("[data-demo-cash]").forEach(btn=>btn.addEventListener("click",()=>{const subtotal=state.cart.reduce((s,r)=>s+r.price*r.qty,0);const total=Math.max(0,subtotal-Number(state.demoDiscount||0));state.demoCash=btn.dataset.demoCash==="exact"?total:total+Number(btn.dataset.demoCash||0);save(state);render(state);}));
     const checkoutDemo=(method)=>{if(!state.cart.length)return;const subtotal=state.cart.reduce((s,x)=>s+x.price*x.qty,0),total=Math.max(0,subtotal-Number(state.demoDiscount||0));if(method==="Tunai"&&Number(state.demoCash||0)<total){toast("Uang diterima belum mencukupi total tagihan.","warn");return;}const cfg=modeConfig(state.storeMode);for(const row of state.cart){const p=state.products.find(x=>x.id===row.id);if(!p){toast(`Item ${row.name} tidak tersedia.`,"error");return;}if(cfg.strictStock&&row.qty>p.stock){toast(`Stok ${row.name} tidak cukup pada mode Toko Ritel.`,"error");return;}}for(const row of state.cart){state.products.find(x=>x.id===row.id).stock-=row.qty;}persistModeCatalog(state);state.transactions.unshift({id:`LDM-${String(Date.now()).slice(-6)}-${Math.random().toString(36).slice(2,6).toUpperCase()}`,date:shiftDate(0),time:timeNow(),storeCode:profile.storeCode,cashier:profile.name.replace(" Demo",""),method,total,items:state.cart.reduce((s,x)=>s+x.qty,0),mode:state.storeMode});state.cart=[];state.demoCash=0;state.demoDiscount=0;save(state);render(state);toast("Transaksi Demo berhasil disimpan.");};
@@ -508,7 +684,41 @@
     // Barang parity
     document.querySelectorAll("[data-stock]").forEach(btn=>btn.addEventListener("click",()=>{if(profile.role==="kasir")return;const p=state.products.find(x=>x.id===btn.dataset.stock);if(!p)return;p.stock=modeConfig(state.storeMode).strictStock?Math.max(0,Number(p.stock||0)+Number(btn.dataset.delta||0)):Number(p.stock||0)+Number(btn.dataset.delta||0);persistModeCatalog(state);save(state);render(state);toast("Data stok Demo diperbarui.");}));
     document.querySelectorAll("[data-demo-delete-product]").forEach(btn=>btn.addEventListener("click",()=>{if(profile.role==="kasir")return;const i=state.products.findIndex(x=>x.id===btn.dataset.demoDeleteProduct);if(i<0)return;state.products.splice(i,1);persistModeCatalog(state);save(state);render(state);toast("Data item dihapus dari Mode Demo.","warn");}));
-    document.getElementById("demoAddProductBtn")?.addEventListener("click",()=>{if(profile.role==="kasir")return;const name=String(document.getElementById("demoNewName")?.value||"").trim();if(!name){toast("Nama barang wajib diisi.","warn");return;}const sell=Math.max(0,Number(document.getElementById("demoNewSell")?.value)||0),buy=Math.max(0,Number(document.getElementById("demoNewBuy")?.value)||0),stock=Math.max(0,Number(document.getElementById("demoNewStock")?.value)||0);state.products.unshift({id:uid("PRD-DEMO"),barcode:String(document.getElementById("demoNewBarcode")?.value||"-").trim()||"-",name,purchasePrice:buy,price:sell,stock,minStock:Math.max(1,Math.ceil(stock*.15)),unit:document.getElementById("demoNewUnit")?.value||"Pcs",category:document.getElementById("demoNewCategory")?.value||"Sembako",visual:state.storeMode==="cafe"?"🍽️":state.storeMode==="warung"?"🛍️":"📦"});persistModeCatalog(state);save(state);render(state);toast(`${modeConfig(state.storeMode).productName} Demo berhasil ditambahkan.`);});
+    document.getElementById("demoAddProductBtn")?.addEventListener("click",()=>{
+      if(profile.role==="kasir")return;
+      const name=String(document.getElementById("demoNewName")?.value||"").trim();
+      const barcode=String(document.getElementById("demoNewBarcode")?.value||"-").trim()||"-";
+      const sell=Number(document.getElementById("demoNewSell")?.value);
+      const buy=Number(document.getElementById("demoNewBuy")?.value);
+      const rawStock=Number(document.getElementById("demoNewStock")?.value);
+
+      if(name.length<2){toast("Nama barang/menu minimal 2 karakter.","warn");return;}
+      if(!Number.isFinite(sell)||sell<=0){toast("Harga jual harus lebih dari 0.","warn");return;}
+      if(!Number.isFinite(buy)||buy<0){toast("Harga beli/modal tidak valid.","warn");return;}
+      if(!Number.isFinite(rawStock)||rawStock<0){toast("Stok awal tidak valid.","warn");return;}
+      if(barcode!=="-"&&state.products.some(item=>String(item.barcode||"").toLowerCase()===barcode.toLowerCase())){
+        toast("Barcode/kode tersebut sudah dipakai pada mode Demo ini.","warn");
+        return;
+      }
+
+      const stock=Math.max(0,rawStock);
+      state.products.unshift({
+        id:uid("PRD-DEMO"),
+        barcode,
+        name,
+        purchasePrice:buy,
+        price:sell,
+        stock,
+        minStock:Math.max(1,Math.ceil(stock*.15)),
+        unit:document.getElementById("demoNewUnit")?.value||"Pcs",
+        category:document.getElementById("demoNewCategory")?.value||"Sembako",
+        visual:state.storeMode==="cafe"?"🍽️":state.storeMode==="warung"?"🛍️":"📦"
+      });
+      persistModeCatalog(state);
+      save(state);
+      render(state);
+      toast(`${modeConfig(state.storeMode).productName} Demo berhasil ditambahkan.`);
+    });
     document.getElementById("demoInventorySearch")?.addEventListener("input",e=>{const q=String(e.target.value||"").toLowerCase();document.querySelectorAll("[data-demo-product-card]").forEach(card=>{card.style.display=!q||String(card.dataset.productSearch||"").includes(q)?"":"none";});});
 
     // Laporan parity
@@ -524,9 +734,91 @@
     document.getElementById("demoCheckOutBtn")?.addEventListener("click",()=>attendanceAction(state,profile,"out"));
 
     // Master Shift parity
-    document.getElementById("demoMasterEmployee")?.addEventListener("change",e=>{state.masterEmployeeId=e.target.value;save(state);render(state);});
-    document.getElementById("demoApplyMonthBtn")?.addEventListener("click",()=>{const employeeId=document.getElementById("demoMasterEmployee")?.value,emp=employeeById(state,employeeId);if(!emp)return;if(profile.scope!=="network"&&emp.storeCode!==profile.storeCode){toast("Owner Cabang tidak boleh mengubah cabang lain.","error");return;}const d=new Date(),year=d.getFullYear(),month=d.getMonth(),days=new Date(year,month+1,0).getDate(),shift=document.getElementById("demoMasterShift")?.value||"SHIFT_1",start=document.getElementById("demoMasterStart")?.value||"08:00",end=document.getElementById("demoMasterEnd")?.value||"16:00";state.schedules=state.schedules.filter(r=>!(r.employeeId===employeeId&&new Date(r.workDate+'T12:00:00').getMonth()===month&&new Date(r.workDate+'T12:00:00').getFullYear()===year));for(let day=1;day<=days;day++){const wd=new Date(year,month,day).getDay(),workDate=`${year}-${pad(month+1)}-${pad(day)}`;state.schedules.push({employeeId,workDate,status:wd===0?"OFF":"WORK",shift,start,end,tolerance:30,note:wd===0?"Hari libur":"Template Demo"});}save(state);render(state);toast("Template jadwal Demo diterapkan ke bulan ini.");});
-    document.getElementById("demoSaveScheduleBtn")?.addEventListener("click",()=>toast("Jadwal bulan tersimpan pada sesi Demo."));
+    document.getElementById("demoMasterEmployee")?.addEventListener("change",e=>{
+      state.masterEmployeeId=e.target.value;
+      save(state);
+      render(state);
+    });
+    document.getElementById("demoMasterMonth")?.addEventListener("change",e=>{
+      state.masterMonth=monthParts(e.target.value).key;
+      save(state);
+      render(state);
+    });
+    document.querySelector("[data-demo-master-refresh]")?.addEventListener("click",()=>{
+      save(state);
+      render(state);
+      toast("Tampilan Master Shift Demo dimuat ulang.");
+    });
+    const syncMasterTemplate=()=>{
+      const template=state.masterTemplate||{};
+      template.shift=document.getElementById("demoMasterShift")?.value||"SHIFT_1";
+      template.start=document.getElementById("demoMasterStart")?.value||"08:00";
+      template.end=document.getElementById("demoMasterEnd")?.value||"16:00";
+      template.tolerance=Math.max(0,Math.min(180,Number(document.getElementById("demoMasterTolerance")?.value)||0));
+      template.weekdays=[...document.querySelectorAll("[data-demo-master-weekday]:checked")]
+        .map(input=>Number(input.dataset.demoMasterWeekday))
+        .filter(day=>day>=0&&day<=6);
+      state.masterTemplate=template;
+      save(state);
+      return template;
+    };
+    ["demoMasterShift","demoMasterStart","demoMasterEnd","demoMasterTolerance"].forEach(id=>{
+      document.getElementById(id)?.addEventListener("change",syncMasterTemplate);
+    });
+    document.querySelectorAll("[data-demo-master-weekday]").forEach(input=>input.addEventListener("change",syncMasterTemplate));
+    document.getElementById("demoApplyMonthBtn")?.addEventListener("click",()=>{
+      const employeeId=document.getElementById("demoMasterEmployee")?.value;
+      const emp=employeeById(state,employeeId);
+      if(!emp)return;
+      if(profile.scope!=="network"&&emp.storeCode!==profile.storeCode){
+        toast("Owner Cabang tidak boleh mengubah cabang lain.","error");
+        return;
+      }
+
+      const selectedMonth=monthParts(document.getElementById("demoMasterMonth")?.value||state.masterMonth);
+      state.masterMonth=selectedMonth.key;
+      const template=syncMasterTemplate();
+      if(!template.weekdays.length){
+        toast("Pilih minimal satu hari kerja sebelum menerapkan template.","warn");
+        return;
+      }
+      if(template.start===template.end){
+        toast("Jam masuk dan jam keluar tidak boleh sama.","warn");
+        return;
+      }
+
+      const days=new Date(Date.UTC(selectedMonth.year,selectedMonth.month+1,0)).getUTCDate();
+      state.schedules=state.schedules.filter(row=>{
+        const match=String(row.workDate||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        return !(
+          row.employeeId===employeeId &&
+          match &&
+          Number(match[1])===selectedMonth.year &&
+          Number(match[2])===selectedMonth.month+1
+        );
+      });
+
+      for(let day=1;day<=days;day++){
+        const date=new Date(Date.UTC(selectedMonth.year,selectedMonth.month,day,12,0,0));
+        const weekday=date.getUTCDay();
+        const workDate=`${selectedMonth.year}-${pad(selectedMonth.month+1)}-${pad(day)}`;
+        const isWork=template.weekdays.includes(weekday);
+        state.schedules.push({
+          employeeId,
+          workDate,
+          status:isWork?"WORK":"OFF",
+          shift:template.shift,
+          start:template.start,
+          end:template.end,
+          tolerance:template.tolerance,
+          note:isWork?"Template Demo":"Hari libur"
+        });
+      }
+      save(state);
+      render(state);
+      toast(`Template jadwal Demo diterapkan ke ${selectedMonth.key}.`);
+    });
+    document.getElementById("demoSaveScheduleBtn")?.addEventListener("click",()=>toast("Jadwal bulan sudah tersimpan pada sesi Demo."));
     document.getElementById("demoSaveLeaveBtn")?.addEventListener("click",()=>{const emp=employeeById(state,document.getElementById("demoMasterEmployee")?.value);if(!emp)return;emp.annualLeave=Math.max(0,Math.min(366,Number(document.getElementById("demoAnnualLeave")?.value)||0));save(state);render(state);toast("Hak cuti Demo diperbarui.");});
 
     // Ketidakhadiran
@@ -549,24 +841,57 @@
   }
 
   function bootLogin(){
+    const params=new URLSearchParams(window.location.search);
+    const notice=document.getElementById("demoLoginNotice");
+    const reason=params.get("reason")||consumeNotice();
+    let message="";
+    if(params.get("exited")==="1")message="Mode Demo sudah ditutup. Pilih akun untuk memulai sesi latihan baru.";
+    else if(reason==="expired")message="Sesi Demo sebelumnya sudah kedaluwarsa setelah tidak digunakan.";
+    else if(reason==="migrated")message="Data Demo lama sudah disesuaikan ke versi terbaru.";
+    else if(reason==="invalid")message="Data sesi Demo sebelumnya tidak valid dan sudah dipisahkan demi keamanan.";
+
+    if(notice&&message){
+      notice.textContent=message;
+      notice.hidden=false;
+    }
+
     document.querySelectorAll("[data-demo-profile]").forEach(btn=>btn.addEventListener("click",()=>start(btn.dataset.demoProfile)));
   }
   function bootApp(){
-    let state=read();if(!state){location.replace("demo-login.html");return;}
+    let state=read();
+    if(!state){
+      const reason=consumeNotice()||"missing";
+      location.replace(`demo-login.html?reason=${encodeURIComponent(reason)}`);
+      return;
+    }
     render(state);
-    const sidebar=document.getElementById("demoSidebar"),overlay=document.getElementById("demoNavOverlay"),mega=document.getElementById("demoMegaShell"),trigger=document.getElementById("demoMegaTrigger");
-    const openMenu=()=>{sidebar?.classList.add("active");overlay?.classList.add("active");};
-    const closeMenu=()=>{sidebar?.classList.remove("active");overlay?.classList.remove("active");};
+
+    const sidebar=document.getElementById("demoSidebar");
+    const overlay=document.getElementById("demoNavOverlay");
+    const mega=document.getElementById("demoMegaShell");
+    const trigger=document.getElementById("demoMegaTrigger");
+    const mobileTrigger=document.getElementById("demoOpenMenu");
+
+    const openMenu=()=>{
+      sidebar?.classList.add("active");
+      overlay?.classList.add("active");
+      mobileTrigger?.setAttribute("aria-expanded","true");
+    };
+    const closeMenu=()=>{
+      sidebar?.classList.remove("active");
+      overlay?.classList.remove("active");
+      mobileTrigger?.setAttribute("aria-expanded","false");
+    };
     const openMega=()=>{mega?.classList.add("open");trigger?.setAttribute("aria-expanded","true");};
     const closeMega=()=>{mega?.classList.remove("open");trigger?.setAttribute("aria-expanded","false");};
     const toggleMega=()=>mega?.classList.contains("open")?closeMega():openMega();
     const goRoute=routeId=>{
-      const route=ROUTES.find(r=>r.id===routeId),profile=currentProfile(state);
-      if(!route||!route.roles.includes(profile.role)){toast("Akun ini tidak memiliki akses ke menu tersebut.","error");return;}
+      const profile=currentProfile(state);
+      if(!routeAllowed(profile,routeId)){toast("Akun ini tidak memiliki akses ke menu tersebut.","error");return;}
       state.page=route.id;save(state);render(state);closeMega();closeMenu();window.scrollTo({top:0,behavior:"smooth"});
     };
 
-    document.getElementById("demoOpenMenu")?.addEventListener("click",openMenu);
+    mobileTrigger?.addEventListener("click",openMenu);
     document.getElementById("demoCloseMenu")?.addEventListener("click",closeMenu);
     overlay?.addEventListener("click",closeMenu);
     trigger?.addEventListener("click",toggleMega);
@@ -594,10 +919,29 @@
       if(mega?.classList.contains("open")&&!e.target.closest("#demoMegaShell"))closeMega();
     });
     document.querySelectorAll(".demo-modal").forEach(modal=>modal.addEventListener("click",e=>{if(e.target===modal)modal.hidden=true;}));
+
+    document.addEventListener("keydown",event=>{
+      if(event.key!=="Escape")return;
+      const openModalEl=[...document.querySelectorAll(".demo-modal")].find(modal=>!modal.hidden);
+      if(openModalEl){openModalEl.hidden=true;return;}
+      if(mega?.classList.contains("open")){closeMega();return;}
+      if(sidebar?.classList.contains("active"))closeMenu();
+    });
+
+    const verifySessionAlive=()=>{
+      if(Number(state.expiresAt||0)>Date.now())return true;
+      rememberNotice("expired");
+      try{sessionStorage.removeItem(STATE_KEY);}catch(_){}
+      location.replace("demo-login.html?reason=expired");
+      return false;
+    };
+    const sessionTimer=window.setInterval(verifySessionAlive,SESSION_CHECK_MS);
+    window.addEventListener("pagehide",()=>window.clearInterval(sessionTimer),{once:true});
+    document.addEventListener("visibilitychange",()=>{if(!document.hidden)verifySessionAlive();});
   }
 
   function boot(){if(document.body.classList.contains("demo-login-page"))bootLogin();else if(document.body.classList.contains("demo-app"))bootApp();}
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
 
-  window.LDMDemoAccount=Object.freeze({VERSION,STATE_KEY,PROFILES,start,reset,exit});
+  window.LDMDemoAccount=Object.freeze({VERSION,STATE_KEY,PROFILES,start,reset,exit,readState:()=>read(),routeAllowed:(profileId,routeId)=>routeAllowed(PROFILES[profileId]||PROFILES["owner-pusat"],routeId),timezone:DEMO_TZ});
 })();
