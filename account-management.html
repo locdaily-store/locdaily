@@ -3,11 +3,11 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.16.1"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.16.2-final"></script>
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
     <script src="js/storage-quota-guard.js?v=27.7.1"></script>
     <script defer src="js/storage-health-monitor.js?v=27.9.0-v28.16.1-runtimefix"></script>
-<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=27.9.0-v28.16.0-security"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
+<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=27.9.0-v28.16.2-final"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
 <script defer src="js/qa-runtime.js?v=19.0"></script>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Management Akun - LocDailyMar</title>
@@ -37,7 +37,7 @@
 <div class="card"><h2>🔑 Ganti Password Akun Saya</h2><p>Fitur ini tersedia untuk Owner, Admin, dan Kasir pada akun masing-masing.</p><div class="password-box"><div class="field"><label>Password Baru</label><input id="ownPassword" type="password" minlength="8" autocomplete="new-password"></div><div class="field"><label>Ulangi Password</label><input id="ownPassword2" type="password" minlength="8" autocomplete="new-password"></div><button onclick="changePassword()">Ubah Password Saya</button></div></div>
 <div id="message" class="card" style="display:none"></div></div>
 <div class="modal" id="editModal"><div class="modal-card"><div class="top"><div><h2>Edit Profil Akun</h2><p id="editEmail" class="muted"></p></div><button class="danger" onclick="closeEdit()">✕</button></div><div class="form-grid"><div class="field"><label>Username</label><input id="editUsername"></div><div class="field"><label>Nama Tampilan</label><input id="editDisplay"></div><div class="field"><label>Hak Akses</label><select id="editRole"><option value="owner">Owner</option><option value="admin">Admin</option><option value="kasir">Kasir</option></select></div><div class="field"><label>Status</label><select id="editActive"><option value="true">Aktif</option><option value="false">Nonaktif</option></select></div><div class="field full"><div class="actions"><button class="success" onclick="saveEdit()">💾 Simpan</button><button class="secondary" onclick="sendResetSelected()">✉ Reset Password</button><button class="danger" onclick="deleteSelected()">🗑 Hapus Akun</button></div></div></div><div class="notice" style="margin-top:12px">Jika akun sudah mempunyai histori transaksi atau absensi, tombol Hapus akan menonaktifkan akses akun agar histori lama tetap aman. Akun tanpa histori dapat dihapus sepenuhnya.</div></div></div>
-<script src="js/account-management-page-v2829.js?v=27.9.0-account-quota-v2841"></script>
+<script src="js/account-management-page-v2829.js?v=27.9.0-v28.16.2-final"></script>
 
 <script src="js/store-mode.js?v=27.9.0-systemui24"></script>
 <script src="js/system-theme-sync-v2824.js?v=27.9.0-systemui24"></script>

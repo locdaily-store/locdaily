@@ -3,11 +3,11 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.16.1"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.16.2-final"></script>
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
     <script src="js/storage-quota-guard.js?v=27.7.1"></script>
     <script defer src="js/storage-health-monitor.js?v=27.9.0-v28.16.1-runtimefix"></script>
-<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=27.9.0-v28.16.0-security"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
+<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=27.9.0-v28.16.2-final"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
 <script defer src="js/qa-runtime.js?v=19.0"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1567,16 +1567,16 @@
     <script src="js/role-access-guard-v28120.js?v=27.9.0-v28.12.0"></script>
 <script src="js/cloud-session-guard.js?v=15.0"></script>
     
-    <script src="js/products-service.js?v=21.0"></script>
-    <script src="js/products-bootstrap.js?v=7.0"></script>
+    <script src="js/products-service.js?v=27.9.0-v28.16.2-final"></script>
+    <script src="js/products-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
     
     <script src="js/returns-service.js?v=10.0"></script>
-    <script src="js/returns-bootstrap.js?v=10.0"></script>
+    <script src="js/returns-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
 
 
     
     <script src="js/reporting-service.js?v=27.7.1"></script>
-    <script src="js/reporting-bootstrap.js?v=25.2.1"></script>
+    <script src="js/reporting-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
 <script src="js/license-v2-config.js?v=27.9.0-v28.13.1"></script>
 <script src="js/license-v2-client.js?v=25.2.0"></script>
 <script defer src="js/license-v2-guard.js?v=25.2.0"></script>
@@ -2050,9 +2050,7 @@
 
         function isiDropdownKasir() {
             const selectKasir = document.getElementById("selectKasir");
-            const daftarAkun = JSON.parse(localStorage.getItem("daftarAkun")) || [
-                { username: "admin", role: "owner", password: "admin" }
-            ];
+            const daftarAkun = window.LDMDataSafe.readArray("daftarAkun");
 
             selectKasir.innerHTML = "";
             let matchFound = false;
@@ -2590,7 +2588,7 @@
         function hitungOmzetKasirTerpilih() {
             const selectedUser = document.getElementById("selectKasir").value;
             const selectedShift = document.getElementById("selectShift").value;
-            const laporanAll = JSON.parse(localStorage.getItem("laporan")) || JSON.parse(localStorage.getItem("dataLaporan")) || [];
+            const laporanAll = (window.LDMDataSafe.readArray("laporan").length ? window.LDMDataSafe.readArray("laporan") : window.LDMDataSafe.readArray("dataLaporan"));
             const targetDate = selectedFilterDate;
 
             let gross = 0;
@@ -3778,7 +3776,7 @@ function terapkanPermissionUI() {
 }
 
         function cekPeringatanStok() {
-            const dataBarang = JSON.parse(localStorage.getItem("dataBarang")) || [];
+            const dataBarang = window.LDMDataSafe.readArray("dataBarang");
             const stokMenipis = dataBarang.some(b => Number(b.stok || 0) <= 9);
             const badge = document.getElementById("navBadge");
             if (badge) {

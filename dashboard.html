@@ -3,11 +3,11 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.16.1"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.16.2-final"></script>
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
     <script src="js/storage-quota-guard.js?v=27.7.1"></script>
     <script defer src="js/storage-health-monitor.js?v=27.9.0-v28.16.1-runtimefix"></script>
-<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=27.9.0-v28.16.0-security"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
+<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=27.9.0-v28.16.2-final"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
 <script defer src="js/qa-runtime.js?v=19.0"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -3256,23 +3256,23 @@ body.dark-mode
     <script src="js/role-access-guard-v28120.js?v=27.9.0-v28.12.0"></script>
 <script src="js/cloud-session-guard.js?v=15.0"></script>
     
-    <script src="js/attendance-service.js?v=9.1"></script>
-    <script src="js/attendance-bootstrap.js?v=9.0"></script>
+    <script src="js/attendance-service.js?v=27.9.0-v28.16.2-final"></script>
+    <script src="js/attendance-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
     
-    <script src="js/products-service.js?v=21.0"></script>
-    <script src="js/products-bootstrap.js?v=7.0"></script>
+    <script src="js/products-service.js?v=27.9.0-v28.16.2-final"></script>
+    <script src="js/products-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
     
     <script src="js/returns-service.js?v=10.0"></script>
-    <script src="js/returns-bootstrap.js?v=10.0"></script>
+    <script src="js/returns-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
 
     
     <script src="js/stock-opname-service.js?v=10.0"></script>
-    <script src="js/stock-opname-bootstrap.js?v=10.0"></script>
+    <script src="js/stock-opname-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
 
     
     <script src="js/reporting-service.js?v=27.7.1"></script>
     <script src="js/dashboard-report-source.js?v=27.7.2"></script>
-    <script src="js/reporting-bootstrap.js?v=25.2.1"></script>
+    <script src="js/reporting-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
 <style id="ldmCompactRangeAndSalesAssistantStyle">
     /* Rentang tanggal selalu satu baris; form dipindahkan ke modal ringkas. */
     #dashboardRangeFilter{
@@ -5327,7 +5327,7 @@ function logout() {
 }
             function proteksiHalamanKasir() {
                 const loggedUser = localStorage.getItem("username") || localStorage.getItem("activeUsername") || localStorage.getItem("loggedInUser");
-                const logAbsensi = JSON.parse(localStorage.getItem("dataAbsensi")) || [];
+                const logAbsensi = window.LDMDataSafe.readArray("dataAbsensi");
                 const tglToday = getTanggalWITA();
 
                 const userTodayLogs = logAbsensi.filter(a => 
@@ -5397,7 +5397,7 @@ function logout() {
 
         function verifikasiAksesKasir(e) {
             const loggedUser = localStorage.getItem("username") || localStorage.getItem("activeUsername") || localStorage.getItem("loggedInUser");
-            const logAbsensi = JSON.parse(localStorage.getItem("dataAbsensi")) || [];
+            const logAbsensi = window.LDMDataSafe.readArray("dataAbsensi");
             const tglToday = getTanggalWITA();
 
             const userTodayLogs = logAbsensi.filter(a => a.username && a.username.toLowerCase() === loggedUser.toLowerCase() && a.tanggal === tglToday);
@@ -6566,7 +6566,7 @@ function hapusAkun(idx) {
         }
 
         function cekPeringatanStok() {
-            const dataBarang = JSON.parse(localStorage.getItem("dataBarang")) || [];
+            const dataBarang = window.LDMDataSafe.readArray("dataBarang");
             const stokMenipis = dataBarang.some(b => Number(b.stok || 0) <= 9);
             const badge = document.getElementById("navBadge");
             if (badge) {
@@ -9537,7 +9537,7 @@ function batasiTampilanOmzetDashboard() {
         function renderOwner(options = {}) {
             const laporanAll = getDashboardPeriodRows();
             const operasionalAll = JSON.parse(localStorage.getItem("operasional")) || [];
-            const masterBarang = JSON.parse(localStorage.getItem("dataBarang")) || [];
+            const masterBarang = window.LDMDataSafe.readArray("dataBarang");
 
             const txtJudulLabel = getLabelPeriodeAktif();
 
@@ -9711,7 +9711,7 @@ function batasiTampilanOmzetDashboard() {
 
             const laporanAll = getDashboardMonthlyRows(targetMonth);
             const operasionalAll = JSON.parse(localStorage.getItem("operasional")) || [];
-            const masterBarang = JSON.parse(localStorage.getItem("dataBarang")) || [];
+            const masterBarang = window.LDMDataSafe.readArray("dataBarang");
 
             const laporanBulan = laporanAll.filter(t => parseTanggalData(t).startsWith(targetMonth));
             const operasionalBulan = operasionalAll.filter(op => parseTanggalData(op).startsWith(targetMonth));

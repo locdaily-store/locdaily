@@ -100,17 +100,33 @@
     }catch(error){window.alert(error.message||String(error));}
   }
 
+  let booting=false;
+  let bound=false;
+  let retryTimer=null;
   async function boot(){
-    if(!window.LDMWorkforce)return;
+    if(booting)return;
+    if(!window.LDMWorkforce){ scheduleRetry(); return; }
+    booting=true;
     try{
       await window.LDMWorkforce.context();
-      $("absenceForm").addEventListener("submit",submit);
-      $("absenceReload").addEventListener("click",loadInbox);
-      $("absenceStore").addEventListener("change",()=>{loadInbox();$("absenceScope").textContent=$("absenceStore").value?"Cabang Dipilih":"Semua Cabang";});
+      if(!bound){
+        $("absenceForm").addEventListener("submit",submit);
+        $("absenceReload").addEventListener("click",loadInbox);
+        $("absenceStore").addEventListener("change",()=>{loadInbox();$("absenceScope").textContent=$("absenceStore").value?"Cabang Dipilih":"Semua Cabang";});
+        bound=true;
+      }
       await Promise.all([loadCandidates(),loadMine()]);
       await loadOwnerStores();
-    }catch(error){message("Halaman Ketidakhadiran belum dapat dimuat. "+(error.message||String(error)),"danger");}
+    }catch(error){
+      message("Halaman Ketidakhadiran belum dapat dimuat. "+(error.message||String(error)),"danger");
+      scheduleRetry();
+    }finally{booting=false;}
   }
-
+  function scheduleRetry(){
+    if(retryTimer)return;
+    retryTimer=window.setTimeout(()=>{retryTimer=null;boot();},900);
+  }
+  window.addEventListener("ldm-cloud-auth-ready",boot);
+  window.addEventListener("online",boot);
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
 })();

@@ -628,6 +628,12 @@
         const context =
             await getContext();
 
+        if(!context?.profile?.store_id){
+            throw new Error(
+                "Store ID pada sesi Cloud Barang belum tersedia."
+            );
+        }
+
         const rows =
             await fetchAll();
 
@@ -640,6 +646,11 @@
             setCache(
                 rows
             );
+        }else{
+            const currentCache=readCache();
+            window.dispatchEvent(new CustomEvent("ldm-products-cache-updated",{
+                detail:{count:currentCache.length,source:"existing-cache"}
+            }));
         }
 
         await startRealtime();

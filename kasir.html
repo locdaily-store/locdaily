@@ -3,11 +3,11 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.16.1"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.16.2-final"></script>
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
     <script src="js/storage-quota-guard.js?v=27.7.1"></script>
     <script defer src="js/storage-health-monitor.js?v=27.9.0-v28.16.1-runtimefix"></script>
-<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=27.9.0-v28.16.0-security"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
+<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=27.9.0-v28.16.2-final"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
 <script defer src="js/qa-runtime.js?v=19.0"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1571,18 +1571,18 @@
 <script src="js/cloud-session-guard.js?v=17.0"></script>
     <script src="js/recovery-service.js?v=17.0"></script>
     
-    <script src="js/attendance-service.js?v=9.1"></script>
-    <script src="js/attendance-bootstrap.js?v=9.0"></script>
+    <script src="js/attendance-service.js?v=27.9.0-v28.16.2-final"></script>
+    <script src="js/attendance-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
     
     <script src="js/promo-pricing.js?v=21.0"></script>
     
-    <script src="js/products-service.js?v=21.0"></script>
+    <script src="js/products-service.js?v=27.9.0-v28.16.2-final"></script>
     <script src="js/transactions-service.js?v=16.0"></script>
     <script src="js/peripheral-setup.js?v=27.9.0-commercial04-integrated2"></script>
-    <script src="js/products-bootstrap.js?v=7.0"></script>
+    <script src="js/products-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
     
     <script src="js/returns-service.js?v=10.0"></script>
-    <script src="js/returns-bootstrap.js?v=10.0"></script>
+    <script src="js/returns-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
 
 </head>
 <body>
@@ -3032,7 +3032,7 @@ function renderMenuVisualMode(){
     panel.style.display=show ? "block" : "none";
     if(!show) return;
 
-    const data=JSON.parse(localStorage.getItem("dataBarang")||"[]");
+    const data=window.LDMDataSafe.readArray("dataBarang");
     const title=document.getElementById("ldmVisualMenuTitle");
     const hint=document.getElementById("ldmVisualMenuHint");
     if(title) title.textContent=mode==="cafe" ? "☕ Menu Kafe" : "🍜 Menu Cepat Warung";
@@ -3068,7 +3068,7 @@ function pilihKategoriMenuMode(category){
 }
 
 function tambahItemDariMenuMode(index){
-    const data=JSON.parse(localStorage.getItem("dataBarang")||"[]");
+    const data=window.LDMDataSafe.readArray("dataBarang");
     if(!data[index]) return;
     document.getElementById("selectedBarangIndex").value=String(index);
     document.getElementById("inputCariBarang").value=data[index].nama||"";
@@ -3089,7 +3089,7 @@ function filterBarang() {
     activeDropdownIndex = -1;
 
     const dataBarang =
-        JSON.parse(localStorage.getItem("dataBarang")) || [];
+        window.LDMDataSafe.readArray("dataBarang");
     const isRetailMode = !window.LDMStoreMode || window.LDMStoreMode.isRetail();
     const showVisual = window.LDMStoreMode && window.LDMStoreMode.supportsProductImages();
 
@@ -3209,7 +3209,7 @@ function filterBarang() {
         }
 
         function pilihBarang(index) {
-            let dataBarang = JSON.parse(localStorage.getItem("dataBarang")) || [];
+            let dataBarang = window.LDMDataSafe.readArray("dataBarang");
             let barang = dataBarang[index];
             if (!barang) return;
 
@@ -3268,7 +3268,7 @@ function filterBarang() {
 
 function tambahItem() {
     let idx = document.getElementById("selectedBarangIndex").value;
-    let dataBarang = JSON.parse(localStorage.getItem("dataBarang")) || [];
+    let dataBarang = window.LDMDataSafe.readArray("dataBarang");
 
     // Jika belum memilih dari dropdown,
     // coba cari berdasarkan nama atau barcode
@@ -3522,7 +3522,7 @@ function tambahItem() {
             const cartItem = keranjang[index];
             if (!cartItem) return;
 
-            const products = JSON.parse(localStorage.getItem("dataBarang") || "[]");
+            const products = window.LDMDataSafe.readArray("dataBarang");
             const product = products.find(row =>
                 (cartItem.productId && row.id === cartItem.productId) ||
                 (cartItem.barcode && String(row.barcode || "") === String(cartItem.barcode)) ||
@@ -3711,7 +3711,7 @@ function tambahItem() {
         function simpanKeLaporan(metode, detailKombinasi = null, cloudResult = null) {
             checkAndResetLaporan24Jam();
 
-            let dataLaporan = JSON.parse(localStorage.getItem("laporan")) || JSON.parse(localStorage.getItem("dataLaporan")) || [];
+            let dataLaporan = (window.LDMDataSafe.readArray("laporan").length ? window.LDMDataSafe.readArray("laporan") : window.LDMDataSafe.readArray("dataLaporan"));
             let kasirAktif = localStorage.getItem("currentUser") || localStorage.getItem("username") || "Owner";
             let namaBarangStr = keranjang.map(k => `${k.nama} (${k.qty} ${k.satuan})`).join(", ");
             

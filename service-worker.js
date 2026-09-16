@@ -1,4 +1,4 @@
-// Build: 27.9.0-v28.16.1 Runtime Rendering Recovery Hotfix
+// Build: 27.9.0-v28.16.2 Cloud Data Rendering & Bootstrap Recovery FINAL
 "use strict";
 
 importScripts("./js/app-version.js");

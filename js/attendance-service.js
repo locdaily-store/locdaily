@@ -306,13 +306,33 @@
             Array.isArray(data)
                 ? data
                 : []
-        ).map(
+        )
+        .map(
             row => ({
-                id: row.id,
-                username: row.username,
-                role: row.role
+                id: row && row.id,
+                username: String(row && row.username || "").trim(),
+                role: String(row && row.role || "").trim().toLowerCase(),
+                display_name: String(row && (row.display_name || row.username) || "").trim()
             })
-        );
+        )
+        .filter(profile => profile.id && profile.username);
+
+        if(profiles.length === 0){
+            const previous = readProfilesCache();
+            if(previous.length > 0){
+                console.warn(
+                    "Cloud profile Absensi mengembalikan 0 baris. Cache terakhir dipertahankan dan akan dicoba ulang."
+                );
+                window.dispatchEvent(new CustomEvent("ldm-attendance-profiles-updated",{
+                    detail:{count:previous.length,source:"fallback-cache"}
+                }));
+                return previous;
+            }
+
+            throw new Error(
+                "Daftar profil Absensi kosong untuk sesi Cloud aktif. Sinkronisasi akan dicoba ulang."
+            );
+        }
 
         localStorage.setItem(
             PROFILE_CACHE_KEY,
@@ -1011,6 +1031,12 @@
     async function bootstrap(){
         const context =
             await getContext();
+
+        if(!context?.profile?.store_id){
+            throw new Error(
+                "Store ID pada sesi Cloud Absensi belum tersedia."
+            );
+        }
 
         const profiles =
             await fetchProfiles();

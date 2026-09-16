@@ -5,6 +5,18 @@
         return window.LDMProcurement && typeof window.LDMProcurement.saveSupplier === "function";
     }
 
+    function esc(value){
+        if(window.LDMSecurity?.escapeHTML){
+            return window.LDMSecurity.escapeHTML(value);
+        }
+        return String(value ?? "")
+            .replace(/&/g,"&amp;")
+            .replace(/</g,"&lt;")
+            .replace(/>/g,"&gt;")
+            .replace(/"/g,"&quot;")
+            .replace(/'/g,"&#039;");
+    }
+
     globalThis.saveSupplier = async function(ev){
         if(ev && typeof ev.preventDefault === "function") ev.preventDefault();
         if(!ready()){

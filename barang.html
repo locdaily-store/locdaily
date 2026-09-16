@@ -3,11 +3,11 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.16.1"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.16.2-final"></script>
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
     <script src="js/storage-quota-guard.js?v=27.7.1"></script>
     <script defer src="js/storage-health-monitor.js?v=27.9.0-v28.16.1-runtimefix"></script>
-<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=27.9.0-v28.16.0-security"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
+<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=27.9.0-v28.16.2-final"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
 <script defer src="js/qa-runtime.js?v=19.0"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -2490,8 +2490,8 @@
     <script src="js/role-access-guard-v28120.js?v=27.9.0-v28.12.0"></script>
 <script src="js/cloud-session-guard.js?v=17.0"></script>
     
-    <script src="js/attendance-service.js?v=9.1"></script>
-    <script src="js/attendance-bootstrap.js?v=9.0"></script>
+    <script src="js/attendance-service.js?v=27.9.0-v28.16.2-final"></script>
+    <script src="js/attendance-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
     
     <script src="js/unit-conversion.js?v=20.0"></script>
     
@@ -2499,8 +2499,8 @@
     
     <script src="js/primary-owner-service.js?v=28.11.0"></script>
     
-    <script src="js/products-service.js?v=28.11.0"></script>
-    <script src="js/products-bootstrap.js?v=7.0"></script>
+    <script src="js/products-service.js?v=27.9.0-v28.16.2-final"></script>
+    <script src="js/products-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
 
 <script src="js/license-v2-config.js?v=27.9.0-v28.13.1"></script>
 <script src="js/license-v2-client.js?v=25.2.0"></script>
@@ -3204,7 +3204,7 @@ if (!session) {
 
 const loggedUser =
     session.username;
-        const logAbsensi = JSON.parse(localStorage.getItem("dataAbsensi")) || [];
+        const logAbsensi = window.LDMDataSafe.readArray("dataAbsensi");
         const tglToday = getTanggalWITA();
 
         const userTodayLogs = logAbsensi.filter(a => a.username && a.username.toLowerCase() === loggedUser.toLowerCase() && a.tanggal === tglToday);
@@ -3744,6 +3744,34 @@ function CekPromoTersedia(item) {
         return tglStr;
     }
 
+    function bacaDataBarangAman() {
+        const fallback = Array.isArray(defaultBarang) ? defaultBarang : [];
+        const source = window.LDMProducts && typeof window.LDMProducts.readCache === "function"
+            ? window.LDMProducts.readCache()
+            : (window.LDMDataSafe?.readArray
+                ? window.LDMDataSafe.readArray("dataBarang", fallback)
+                : fallback);
+
+        return (Array.isArray(source) ? source : [])
+            .filter(item => item && typeof item === "object")
+            .map(item => ({
+                ...item,
+                nama: String(item.nama ?? item.name ?? "").trim() || "(Barang tanpa nama)",
+                barcode: item.barcode == null ? "" : String(item.barcode),
+                kategori: String(item.kategori ?? item.category ?? "General").trim() || "General",
+                satuan: String(item.satuan ?? item.unit ?? "Pcs").trim() || "Pcs"
+            }));
+    }
+
+    function tampilkanStatusDataBarang(message, tipe="warning") {
+        const list = document.getElementById("listBarang");
+        if(!list) return;
+        const cache = bacaDataBarangAman();
+        if(cache.length > 0) return;
+        const icon = tipe === "danger" ? "⚠️" : "ℹ️";
+        list.innerHTML = `<div style="grid-column:1/-1;padding:18px;border:1px solid var(--border-color);border-radius:12px;color:var(--text-color);background:var(--card-bg);">${icon} ${esc(message)}</div>`;
+    }
+
     function muatBarang() {
         let role = (localStorage.getItem("userRole") || localStorage.getItem("role") || "admin").toLowerCase();
         let isOwner = role === "owner" && document.documentElement.dataset.ldmCatalogEditor === "true";
@@ -3765,11 +3793,12 @@ function CekPromoTersedia(item) {
             barangGrid.classList.remove("full-width");
         }
 
-        let rawData = localStorage.getItem("dataBarang");
-        let data = rawData ? JSON.parse(rawData) : defaultBarang;
-        
-        if (!rawData) {
+        const rawData = localStorage.getItem("dataBarang");
+        let data = bacaDataBarangAman();
+
+        if (!rawData && data.length === 0 && Array.isArray(defaultBarang) && defaultBarang.length > 0) {
             simpanKeStorage(defaultBarang);
+            data = bacaDataBarangAman();
         }
 
         let dataDenganIndex = data.map((item, index) => ({ ...item, originalIndex: index }));
@@ -3779,9 +3808,9 @@ function CekPromoTersedia(item) {
 
         let keyword = document.getElementById("searchInput").value.toLowerCase();
         let dataFiltered = dataDenganIndex.filter(item => {
-            let matchNama = item.nama.toLowerCase().includes(keyword);
-            let matchBarcode = item.barcode ? item.barcode.toString().toLowerCase().includes(keyword) : false;
-            let matchKategori = item.kategori ? item.kategori.toLowerCase().includes(keyword) : false;
+            let matchNama = String(item.nama || "").toLowerCase().includes(keyword);
+            let matchBarcode = item.barcode ? String(item.barcode).toLowerCase().includes(keyword) : false;
+            let matchKategori = item.kategori ? String(item.kategori).toLowerCase().includes(keyword) : false;
             return matchNama || matchBarcode || matchKategori;
         });
 
@@ -3792,14 +3821,17 @@ function CekPromoTersedia(item) {
             if (isWarningA && !isWarningB) return -1;
             if (!isWarningA && isWarningB) return 1;
 
-            return a.nama.localeCompare(b.nama, 'id', { sensitivity: 'base' });
+            return String(a.nama || '').localeCompare(String(b.nama || ''), 'id', { sensitivity: 'base' });
         });
 
         let div = document.getElementById("listBarang");
         div.innerHTML = "";
 
         if (dataFiltered.length === 0) {
-            div.innerHTML = `<p style="text-align: center; color: #94a3b8; padding: 20px 0; grid-column: 1/-1;">Barang tidak ditemukan...</p>`;
+            const message = data.length === 0
+                ? "Data Barang belum tersedia. Sinkronisasi Cloud sedang dicoba otomatis."
+                : "Barang tidak ditemukan...";
+            div.innerHTML = `<p style="text-align: center; color: #94a3b8; padding: 20px 0; grid-column: 1/-1;">${esc(message)}</p>`;
             return;
         }
 
@@ -4045,7 +4077,7 @@ function pilihGambarProdukMode(index) {
 }
 
 async function hapusGambarProdukMode(index) {
-    const data = JSON.parse(localStorage.getItem("dataBarang") || "[]");
+    const data = window.LDMDataSafe.readArray("dataBarang");
     const product = data[Number(index)];
     if (!product || !window.LDMProductVisuals) return;
     try {
@@ -4060,7 +4092,7 @@ async function hapusGambarProdukMode(index) {
 document.getElementById("ldmProductImagePicker")?.addEventListener("change", async function(event){
     const file = event.target.files && event.target.files[0];
     if (!file || ldmProductImageTargetIndex === null) return;
-    const data = JSON.parse(localStorage.getItem("dataBarang") || "[]");
+    const data = window.LDMDataSafe.readArray("dataBarang");
     const product = data[ldmProductImageTargetIndex];
     if (!product || !window.LDMProductVisuals) return;
     try {
@@ -4215,7 +4247,7 @@ function catatKartuStokMutasi(payload = {}) {
             return tampilkanNotifikasi("Data Belum Lengkap", "Harap lengkapi Nama, Harga Beli, dan Harga Jual!", "⚠️");
         }
 
-        let data = JSON.parse(localStorage.getItem("dataBarang")) || defaultBarang;
+        let data = bacaDataBarangAman();
 
         if (inputBarcode && data.some(b => b.barcode === inputBarcode)) {
             return tampilkanNotifikasi("Barcode Duplikat", "Kode Barcode sudah terdaftar pada barang lain!", "⚠️");
@@ -4539,7 +4571,7 @@ function catatKartuStokMutasi(payload = {}) {
 }
 
     function bukaModalEdit(index) {
-        let data = JSON.parse(localStorage.getItem("dataBarang")) || defaultBarang;
+        let data = bacaDataBarangAman();
         let item = data[index];
 
         document.getElementById("editIndex").value = index;
@@ -4560,7 +4592,7 @@ function catatKartuStokMutasi(payload = {}) {
         if (!requireOwnerBarangAction()) return;
 
         let index = document.getElementById("editIndex").value;
-        let data = JSON.parse(localStorage.getItem("dataBarang")) || defaultBarang;
+        let data = bacaDataBarangAman();
 
         data[index].barcode = document.getElementById("editBarcode").value.trim();
         data[index].nama = document.getElementById("editNama").value.trim();
@@ -4583,7 +4615,7 @@ function catatKartuStokMutasi(payload = {}) {
 
     /* FUNGSI PROMO DISKON BARANG */
     function bukaModalPromo(index) {
-        let data = JSON.parse(localStorage.getItem("dataBarang")) || defaultBarang;
+        let data = bacaDataBarangAman();
         let item = data[index];
 
         if (!item) {
@@ -4632,7 +4664,7 @@ function catatKartuStokMutasi(payload = {}) {
 
     function updatePromoPreview() {
         const index = Number(document.getElementById("promoIndex").value);
-        const data = JSON.parse(localStorage.getItem("dataBarang")) || defaultBarang;
+        const data = bacaDataBarangAman();
         const item = data[index] || {};
         const hargaNormal = Math.max(0, Number(item.harga) || 0);
         const hargaBeli = Math.max(0, Number(item.hargaBeli) || 0);
@@ -4662,7 +4694,7 @@ function catatKartuStokMutasi(payload = {}) {
         if (!requireOwnerBarangAction()) return;
 
         let index = Number(document.getElementById("promoIndex").value);
-        let data = JSON.parse(localStorage.getItem("dataBarang")) || defaultBarang;
+        let data = bacaDataBarangAman();
 
         if (!data[index]) {
             return tampilkanNotifikasi("Barang Tidak Ditemukan", "Data barang yang dipilih tidak tersedia.", "⚠️");
@@ -4690,7 +4722,7 @@ function catatKartuStokMutasi(payload = {}) {
         if (!requireOwnerBarangAction()) return;
 
         let index = document.getElementById("promoIndex").value;
-        let data = JSON.parse(localStorage.getItem("dataBarang")) || defaultBarang;
+        let data = bacaDataBarangAman();
 
         if (data[index].promo) {
             delete data[index].promo;
@@ -6586,6 +6618,14 @@ document.addEventListener(
 
 
 <script>
+window.addEventListener("ldm-products-ready",()=>{
+    if(typeof muatBarang==="function") muatBarang();
+});
+window.addEventListener("ldm-products-bootstrap-error",event=>{
+    const message=event?.detail?.message || "Data Barang belum berhasil tersambung ke Cloud. Sistem akan mencoba ulang otomatis.";
+    tampilkanStatusDataBarang(message,"danger");
+});
+
 window.addEventListener(
     "ldm-products-cache-updated",
     function(){

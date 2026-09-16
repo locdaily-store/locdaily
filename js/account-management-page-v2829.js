@@ -495,6 +495,15 @@
     reactivateAt,changePassword
   });
 
+  let lifecycleRetryTimer=null;
+  const lifecycleRefresh=()=>{
+    window.clearTimeout(lifecycleRetryTimer);
+    lifecycleRetryTimer=window.setTimeout(()=>refreshAll().catch(()=>undefined),120);
+  };
+  window.addEventListener("ldm-cloud-auth-ready",lifecycleRefresh);
+  window.addEventListener("online",lifecycleRefresh);
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)lifecycleRefresh();});
+
   if(document.readyState==="loading"){
     document.addEventListener("DOMContentLoaded",refreshAll,{once:true});
   }else{

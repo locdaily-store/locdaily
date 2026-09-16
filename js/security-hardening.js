@@ -1,7 +1,7 @@
 (function(){
     "use strict";
 
-    const VERSION = "28.16.0";
+    const VERSION = "28.16.2-final";
     const DANGEROUS_URL = /^\s*(?:javascript|vbscript):/i;
 
     function escapeHTML(value){
@@ -38,6 +38,38 @@
             if(/^(?:\.\/|\.\.\/|\/|[A-Za-z0-9_.~-]+(?:\/|$))/.test(raw)) return raw;
         }
         return "";
+    }
+
+    function readArray(key, fallback=[]){
+        try{
+            const raw=localStorage.getItem(String(key||""));
+            if(raw===null || raw==="") return Array.isArray(fallback) ? [...fallback] : [];
+            const parsed=JSON.parse(raw);
+            if(Array.isArray(parsed)) return parsed;
+            window.dispatchEvent(new CustomEvent("ldm-data-cache-warning",{
+                detail:{key:String(key||""),reason:"not_array"}
+            }));
+            return Array.isArray(fallback) ? [...fallback] : [];
+        }catch(error){
+            console.warn(`Cache ${String(key||"")} tidak dapat dibaca:`,error);
+            window.dispatchEvent(new CustomEvent("ldm-data-cache-warning",{
+                detail:{key:String(key||""),reason:"invalid_json",message:error?.message||String(error)}
+            }));
+            return Array.isArray(fallback) ? [...fallback] : [];
+        }
+    }
+
+    function readObject(key, fallback={}){
+        try{
+            const raw=localStorage.getItem(String(key||""));
+            if(raw===null || raw==="") return fallback && typeof fallback==="object" ? {...fallback} : {};
+            const parsed=JSON.parse(raw);
+            if(parsed && typeof parsed==="object" && !Array.isArray(parsed)) return parsed;
+            return fallback && typeof fallback==="object" ? {...fallback} : {};
+        }catch(error){
+            console.warn(`Cache ${String(key||"")} tidak dapat dibaca:`,error);
+            return fallback && typeof fallback==="object" ? {...fallback} : {};
+        }
     }
 
     function stripLegacyCredentialFields(account){
@@ -181,12 +213,21 @@
         escapeAttr,
         inlineJsString,
         safeUrl,
+        readArray,
+        readObject,
         stripLegacyCredentialFields,
         retireLegacyCredentials,
         diagnostics,
         hardenExternalLinks,
         hardenForms,
         hardenUrls
+    });
+    if(typeof globalThis.esc !== "function"){
+        globalThis.esc=escapeHTML;
+    }
+    globalThis.LDMDataSafe=Object.freeze({
+        readArray,
+        readObject
     });
     if(document.readyState === "loading") document.addEventListener("DOMContentLoaded",boot,{once:true});
     else boot();

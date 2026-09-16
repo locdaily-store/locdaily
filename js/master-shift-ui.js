@@ -222,20 +222,31 @@
     $("masterClear").addEventListener("click",clearSchedule);
   }
 
+  let booting=false;
+  let bound=false;
+  let retryTimer=null;
   async function boot(){
-    if(!window.LDMWorkforce)return;
-    $("masterMonth").value=monthNow();
-    $("masterLeaveYear").value=monthNow().slice(0,4);
+    if(booting)return;
+    if(!window.LDMWorkforce){ scheduleRetry(); return; }
+    booting=true;
+    $("masterMonth").value=$("masterMonth").value||monthNow();
+    $("masterLeaveYear").value=$("masterLeaveYear").value||monthNow().slice(0,4);
     try{
       await window.LDMWorkforce.context();
       if(role()!=="owner"){deny();return;}
-      bind();
+      if(!bound){bind();bound=true;}
       await loadStores();
     }catch(error){
       if(/OWNER_REQUIRED|FORBIDDEN|role Owner/i.test(String(error?.message||error))){deny();return;}
       notify("Master Shift belum dapat dimuat. "+(error.message||String(error)),"danger");
-    }
+      scheduleRetry();
+    }finally{booting=false;}
   }
-
+  function scheduleRetry(){
+    if(retryTimer)return;
+    retryTimer=window.setTimeout(()=>{retryTimer=null;boot();},900);
+  }
+  window.addEventListener("ldm-cloud-auth-ready",boot);
+  window.addEventListener("online",boot);
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
 })();

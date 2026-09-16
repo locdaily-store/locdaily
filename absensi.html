@@ -3,11 +3,11 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.16.1"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.16.2-final"></script>
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
     <script src="js/storage-quota-guard.js?v=27.7.1"></script>
     <script defer src="js/storage-health-monitor.js?v=27.9.0-v28.16.1-runtimefix"></script>
-<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=27.9.0-v28.16.0-security"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
+<script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=27.9.0-v28.16.2-final"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
 <script defer src="js/qa-runtime.js?v=19.0"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -2217,11 +2217,11 @@
     <!-- V28.5.1: Workforce enforcement + Master Shift + Ketidakhadiran -->
     <script src="js/attendance-workforce-service.js?v=28.5.1"></script>
     
-    <script src="js/attendance-service.js?v=28.5.0"></script>
-    <script src="js/attendance-bootstrap.js?v=9.0"></script>
+    <script src="js/attendance-service.js?v=27.9.0-v28.16.2-final"></script>
+    <script src="js/attendance-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
     
-    <script src="js/products-service.js?v=21.0"></script>
-    <script src="js/products-bootstrap.js?v=7.0"></script>
+    <script src="js/products-service.js?v=27.9.0-v28.16.2-final"></script>
+    <script src="js/products-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
 
 <script src="js/license-v2-config.js?v=27.9.0-v28.13.1"></script>
 <script src="js/license-v2-client.js?v=25.2.0"></script>
@@ -2955,7 +2955,7 @@ if (!session) {
 
 const loggedUser =
     session.username;
-            const logAbsensi = JSON.parse(localStorage.getItem("dataAbsensi")) || [];
+            const logAbsensi = window.LDMDataSafe.readArray("dataAbsensi");
             const tglToday = getTanggalWITA();
 
             const userTodayLogs = logAbsensi.filter(a => 
@@ -3025,38 +3025,44 @@ const loggedUser =
         }
 
         function getDatabaseAkun() {
-            try {
-                const cloudProfiles =
-                    JSON.parse(
-                        localStorage.getItem(
-                            "ldmAttendanceProfiles"
-                        ) || "[]"
-                    );
-
-                if (
-                    Array.isArray(cloudProfiles) &&
-                    cloudProfiles.length > 0
-                ) {
-                    return cloudProfiles;
-                }
-            } catch (error) {
-                console.warn(
-                    "Cache profile Absensi tidak dapat dibaca:",
-                    error
-                );
-            }
-
-            // Compatibility fallback selama bootstrap cloud belum selesai.
-            let akunList =
-                JSON.parse(
-                    localStorage.getItem(
-                        "daftarAkun"
-                    )
-                ) || [];
-
-            return Array.isArray(akunList)
-                ? akunList
+            const cloudProfiles = window.LDMDataSafe?.readArray
+                ? window.LDMDataSafe.readArray("ldmAttendanceProfiles")
                 : [];
+
+            const legacyAccounts = window.LDMDataSafe?.readArray
+                ? window.LDMDataSafe.readArray("daftarAkun")
+                : [];
+
+            const source = cloudProfiles.length > 0
+                ? cloudProfiles
+                : legacyAccounts;
+
+            const seen = new Set();
+            return source
+                .filter(account => account && typeof account === "object")
+                .map(account => {
+                    const username = String(account.username || "").trim();
+                    const role = String(account.role || "").trim().toLowerCase();
+                    const displayName = String(
+                        account.display_name ||
+                        account.namaKaryawan ||
+                        account.displayName ||
+                        username
+                    ).trim();
+
+                    return {
+                        ...account,
+                        username,
+                        role,
+                        display_name: displayName || username
+                    };
+                })
+                .filter(account => {
+                    const key = account.username.toLowerCase();
+                    if(!key || seen.has(key)) return false;
+                    seen.add(key);
+                    return true;
+                });
         }
 
         function getTanggalWITA(dateObj = new Date()) {
@@ -3227,6 +3233,16 @@ const loggedUser =
 
             select.innerHTML = "";
 
+            if(visibleAccounts.length === 0){
+                const opt=document.createElement("option");
+                opt.value="";
+                opt.disabled=true;
+                opt.selected=true;
+                opt.innerText="Data akun belum tersedia · sinkronisasi Cloud sedang dicoba";
+                select.appendChild(opt);
+                return;
+            }
+
             visibleAccounts.forEach(
                 account => {
                     const opt =
@@ -3237,8 +3253,10 @@ const loggedUser =
                     opt.value =
                         account.username;
 
-                    opt.innerText =
-                        account.username;
+                    const label = String(account.display_name || account.username || "").trim();
+                    opt.innerText = label && label !== account.username
+                        ? `${label} (${account.username})`
+                        : account.username;
 
                     select.appendChild(
                         opt
@@ -3261,10 +3279,10 @@ const loggedUser =
             const username = document.getElementById("selectAkunAbsen").value;
             if (!username) return;
 
-            const logAbsensi = JSON.parse(localStorage.getItem("dataAbsensi")) || [];
+            const logAbsensi = window.LDMDataSafe.readArray("dataAbsensi");
             const tglToday = getTanggalWITA();
 
-            const userTodayLogs = logAbsensi.filter(a => a.username.toString().trim().toLowerCase() === username.toString().trim().toLowerCase() && a.tanggal === tglToday);
+            const userTodayLogs = logAbsensi.filter(a => String(a?.username || "").trim().toLowerCase() === String(username || "").trim().toLowerCase() && a?.tanggal === tglToday);
             const hasDoneToday = userTodayLogs.some(a => a.jenis === "Sakit" || a.jenis === "Izin");
             const hasMasuk = userTodayLogs.some(a => a.jenis === "Masuk" || a.jenis === "Hadir");
             const hasKeluar = userTodayLogs.some(a => a.jenis === "Keluar");
@@ -3511,13 +3529,15 @@ const loggedUser =
         function renderStatusAkun() {
             const container = document.getElementById("accountStatusGrid");
             const akunList = getDatabaseAkun();
-            const logAbsensi = JSON.parse(localStorage.getItem("dataAbsensi")) || [];
+            const logAbsensi = window.LDMDataSafe.readArray("dataAbsensi");
             const tglToday = getTanggalWITA();
 
             container.innerHTML = "";
 
             akunList.forEach(acc => {
-                const userLogs = logAbsensi.filter(a => a.username.toString().trim().toLowerCase() === acc.username.toString().trim().toLowerCase() && a.tanggal === tglToday);
+                const accountUsername=String(acc && acc.username || "").trim();
+                if(!accountUsername) return;
+                const userLogs = logAbsensi.filter(a => String(a && a.username || "").trim().toLowerCase() === accountUsername.toLowerCase() && a.tanggal === tglToday);
                 
                 let badgeHTML = `<span class="badge-status badge-belum">Belum Absen</span>`;
                 let infoSub = "Belum ada presensi";
@@ -3558,7 +3578,7 @@ const loggedUser =
             const selectedUser = document.getElementById("selectAkunAbsen").value;
             if (!selectedUser) return;
 
-            const logAbsensi = JSON.parse(localStorage.getItem("dataAbsensi")) || [];
+            const logAbsensi = window.LDMDataSafe.readArray("dataAbsensi");
             const tglToday = getTanggalWITA();
 
             const activeRole = getActiveUserRole();
@@ -3675,7 +3695,7 @@ const loggedUser =
 }
 
         function bukaModalSurat(idAbsen) {
-            const logAbsensi = JSON.parse(localStorage.getItem("dataAbsensi")) || [];
+            const logAbsensi = window.LDMDataSafe.readArray("dataAbsensi");
             const item = logAbsensi.find(a => a.id == idAbsen);
             if (item && item.surat) {
                 document.getElementById("imgSuratFull").src = item.surat;
@@ -3710,7 +3730,7 @@ const loggedUser =
 }
 
         function cekPeringatanStok() {
-            const dataBarang = JSON.parse(localStorage.getItem("dataBarang")) || [];
+            const dataBarang = window.LDMDataSafe.readArray("dataBarang");
             const badge = document.getElementById("navBadge");
             const adaStokMata = dataBarang.some(b => Number(b.stok || 0) <= 2);
             if (badge) badge.style.display = adaStokMata ? "flex" : "none";
@@ -5705,6 +5725,22 @@ document.addEventListener(
 
 
 <script>
+window.addEventListener("ldm-cloud-accounts-updated",async()=>{
+    try{
+        if(window.LDMAttendance?.fetchProfiles){
+            await window.LDMAttendance.fetchProfiles();
+        }
+    }catch(error){
+        console.warn("Refresh profil Absensi setelah perubahan akun gagal:",error);
+    }
+});
+
+window.addEventListener("ldm-attendance-bootstrap-error",event=>{
+    console.warn("Data Absensi belum siap:",event?.detail?.message || event);
+    if(typeof populateSelectAkun==="function") populateSelectAkun();
+    if(typeof renderStatusAkun==="function") renderStatusAkun();
+});
+
 window.addEventListener(
     "ldm-attendance-profiles-updated",
     function(){
