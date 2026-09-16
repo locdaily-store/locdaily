@@ -1,9 +1,9 @@
 (function(root){
     "use strict";
     const INFO=Object.freeze({
-        appVersion:"27.9.0-v28.16.4",
-        buildVersion:"V28.16.4",
-        buildName:"Demo Mode Reliability & Parity Hardening"
+        appVersion:"27.9.0-v28.16.5",
+        buildVersion:"V28.16.5",
+        buildName:"Demo Interaction Recovery & Runtime Stabilization"
     });
     root.LDM_VERSION_INFO=INFO;
     root.LDM_APP_VERSION=INFO.appVersion;

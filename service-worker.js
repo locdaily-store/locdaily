@@ -1,4 +1,4 @@
-// Build: 27.9.0-v28.16.4 Demo Mode Reliability & Parity Hardening
+// Build: 27.9.0-v28.16.5 Demo Interaction Recovery & Runtime Stabilization
 "use strict";
 
 importScripts("./js/app-version.js");
