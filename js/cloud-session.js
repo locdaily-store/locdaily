@@ -37,6 +37,9 @@
     }
 
     function clearCompatibilityCache(){
+        try{
+            window.LDMCloudAuth?.invalidateFastCache?.();
+        }catch(error){}
         CACHE_KEYS.forEach(
             key =>
                 localStorage.removeItem(
@@ -323,7 +326,10 @@
 
         const context =
             await window.LDMCloudAuth
-                .getContext();
+                .getContext({
+                    forceRemote:
+                        options.forceRemote === true
+                });
 
         if(!context){
             throw new Error(
@@ -340,7 +346,10 @@
         ){
             try{
                 await window.LDMCloudAuth
-                    .registerCurrentDevice();
+                    .registerCurrentDevice({
+                        force:
+                            options.forceDeviceRegistration === true
+                    });
             }catch(error){
                 console.warn(
                     "Registrasi device gagal:",

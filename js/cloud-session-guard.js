@@ -278,7 +278,9 @@
             await window.LDMCloudSession
                 .ensureAuthenticated({
                     registerDevice:
-                        true
+                        true,
+                    forceRemote:
+                        false
                 });
 
         const role =
@@ -314,7 +316,9 @@
         ){
             const deviceAccess =
                 await window.LDMCloudAuth
-                    .getCurrentDeviceAccess();
+                    .getCurrentDeviceAccess({
+                        force:false
+                    });
 
             const deviceStatus =
                 String(
@@ -322,6 +326,8 @@
                     deviceAccess.status ||
                     "unknown"
                 ).toLowerCase();
+
+            window.LDM_CURRENT_DEVICE_ACCESS=deviceAccess;
 
             if(deviceStatus !== "active"){
                 root.classList.remove(
@@ -349,6 +355,7 @@
 
         publishVerifiedContext(context);
         patchLogoutFunctions();
+        installForegroundSecurityHooks();
 
         root.classList.remove(
             "ldm-cloud-auth-pending",
@@ -365,7 +372,126 @@
             )
         );
 
+        scheduleBackgroundSecurityRevalidate(context);
+
         return context;
+    }
+
+    let backgroundSecurityCheckRunning=false;
+    const BACKGROUND_VERIFY_KEY="ldmCloudBackgroundVerifyV28163";
+    const BACKGROUND_VERIFY_MIN_GAP_MS=3500;
+
+    function lastBackgroundVerify(){
+        try{
+            return Number(sessionStorage.getItem(BACKGROUND_VERIFY_KEY)||0);
+        }catch(error){
+            return 0;
+        }
+    }
+
+    function markBackgroundVerify(){
+        try{
+            sessionStorage.setItem(BACKGROUND_VERIFY_KEY,String(Date.now()));
+        }catch(error){}
+    }
+
+    function sameSecurityIdentity(a,b){
+        return Boolean(
+            a?.user?.id &&
+            b?.user?.id &&
+            String(a.user.id)===String(b.user.id) &&
+            String(a?.profile?.store_id||"")===String(b?.profile?.store_id||"") &&
+            String(a?.profile?.role||"").toLowerCase()===String(b?.profile?.role||"").toLowerCase()
+        );
+    }
+
+    async function backgroundSecurityRevalidate(initialContext){
+        if(backgroundSecurityCheckRunning || navigator.onLine===false)return;
+        if(Date.now()-lastBackgroundVerify()<BACKGROUND_VERIFY_MIN_GAP_MS)return;
+
+        backgroundSecurityCheckRunning=true;
+
+        try{
+            const freshContext=
+                await window.LDMCloudSession.ensureAuthenticated({
+                    registerDevice:false,
+                    forceRemote:true
+                });
+
+            const pageName=String(
+                window.location.pathname.split("/").pop()||""
+            ).toLowerCase();
+
+            if(
+                pageName!=="device-access.html" &&
+                window.LDMCloudAuth?.getCurrentDeviceAccess
+            ){
+                const freshDevice=
+                    await window.LDMCloudAuth.getCurrentDeviceAccess({
+                        force:true
+                    });
+
+                window.LDM_CURRENT_DEVICE_ACCESS=freshDevice;
+
+                const status=String(freshDevice?.status||"unknown").toLowerCase();
+                if(status!=="active"){
+                    root.classList.remove("ldm-cloud-auth-pending","secure-page-pending");
+                    window.location.replace("device-access.html");
+                    return;
+                }
+            }
+
+            markBackgroundVerify();
+
+            if(!sameSecurityIdentity(initialContext,freshContext)){
+                // Role/store/user berubah di server. Reload sekali agar seluruh
+                // role/license guard dibangun ulang dari konteks terbaru.
+                window.location.reload();
+                return;
+            }
+
+            publishVerifiedContext(freshContext);
+            window.dispatchEvent(new CustomEvent("ldm-cloud-auth-revalidated",{
+                detail:freshContext
+            }));
+        }catch(error){
+            // Handoff hanya mempercepat UI. Semua RPC/data tetap diverifikasi
+            // server-side. Gangguan jaringan background tidak menghapus sesi.
+            console.warn("Cloud Auth background revalidation:",error);
+        }finally{
+            backgroundSecurityCheckRunning=false;
+        }
+    }
+
+    function scheduleBackgroundSecurityRevalidate(context){
+        if(!context?._ldmFastHandoff)return;
+
+        const start=()=>backgroundSecurityRevalidate(context);
+
+        if(typeof window.requestIdleCallback==="function"){
+            window.requestIdleCallback(start,{timeout:900});
+        }else{
+            window.setTimeout(start,180);
+        }
+    }
+
+    let foregroundSecurityHooksInstalled=false;
+    function installForegroundSecurityHooks(){
+        if(foregroundSecurityHooksInstalled)return;
+        foregroundSecurityHooksInstalled=true;
+
+        const revalidateIfVisible=()=>{
+            if(document.hidden || navigator.onLine===false)return;
+            if(Date.now()-lastBackgroundVerify()<30000)return;
+            const context=window.LDM_CLOUD_CONTEXT;
+            if(context?.user?.id){
+                backgroundSecurityRevalidate(context);
+            }
+        };
+
+        document.addEventListener("visibilitychange",revalidateIfVisible,{passive:true});
+        window.addEventListener("focus",revalidateIfVisible,{passive:true});
+        window.addEventListener("online",revalidateIfVisible,{passive:true});
     }
 
     async function bootWithOfflineFallback(){
@@ -420,7 +546,8 @@
         Object.freeze({
             boot,
             patchLogoutFunctions,
-            isJwtIssuedAtFutureError
+            isJwtIssuedAtFutureError,
+            backgroundSecurityRevalidate
         });
 
     /*
