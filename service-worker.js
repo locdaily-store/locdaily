@@ -1,4 +1,4 @@
-// Build: 27.9.0-v28.17.1 Master Shift Absence Policy Simplification
+// Build: 27.9.0-v28.17.1 UI Placement + Deploy FIX4
 "use strict";
 
 importScripts("./js/app-version.js");

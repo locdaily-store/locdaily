@@ -43,6 +43,7 @@
         <img class="wf-brand-logo" data-ldm-brand-logo src="locdailymar-logo.png" alt="Logo LocDailyMar">
         <div class="wf-hero-copy">
           <h1>🗓️ Master Shift</h1>
+          <!-- V28.17.1 UI FIX4: Batas Konfirmasi berada paling bawah halaman -->
           <p>Atur jadwal kerja, hari libur, cuti, dan batas konfirmasi ketidakhadiran dari satu halaman.</p>
         </div>
       </div>
@@ -62,41 +63,6 @@
         <div class="wf-field wf-col-4"><label for="masterMonth">Bulan</label><input id="masterMonth" type="month"></div>
         <div class="wf-field wf-col-4"><label for="masterUser">Akun Karyawan</label><select id="masterUser"></select></div>
       </div>
-    </section>
-
-    <section class="wf-card" id="masterAbsencePolicy">
-      <div class="wf-card-head">
-        <div>
-          <h2>⏱️ Batas Konfirmasi Ketidakhadiran</h2>
-          <p>Berlaku untuk cabang yang dipilih. Hitungannya dimulai setelah jam masuk + toleransi shift.</p>
-        </div>
-        <span class="wf-tag">Per Cabang</span>
-      </div>
-      <form id="masterAbsencePolicyForm">
-        <div class="wf-grid">
-          <div class="wf-field wf-col-3">
-            <label for="masterAbsenceWindow">Batas waktu</label>
-            <input id="masterAbsenceWindow" type="number" min="1" max="7" step="1" value="1" required>
-          </div>
-          <div class="wf-field wf-col-3">
-            <label for="masterAbsenceUnit">Satuan</label>
-            <select id="masterAbsenceUnit">
-              <option value="days">Hari</option>
-              <option value="hours">Jam</option>
-            </select>
-          </div>
-          <div class="wf-col-3">
-            <label for="masterAbsenceApplyOpen" style="display:flex;gap:8px;align-items:center;min-height:100%;padding-top:22px">
-              <input id="masterAbsenceApplyOpen" type="checkbox" style="width:auto">
-              <span>Perbarui juga kasus yang masih menunggu</span>
-            </label>
-          </div>
-          <div class="wf-col-3 wf-actions end">
-            <button id="masterAbsenceSave" class="wf-btn primary" type="submit">Simpan</button>
-          </div>
-        </div>
-        <div id="masterAbsenceInfo" class="wf-notice" style="margin-top:10px">Memuat batas konfirmasi...</div>
-      </form>
     </section>
 
     <section class="wf-stats" aria-label="Ringkasan jadwal">
@@ -159,6 +125,40 @@
           <tbody id="masterScheduleBody"><tr><td colspan="5">Memuat...</td></tr></tbody>
         </table>
       </div>
+    </section>
+
+    <section class="wf-card" id="masterAbsencePolicy" data-ui-placement="bottom">
+      <div class="wf-card-head">
+        <div>
+          <h2>⏱️ Batas Konfirmasi</h2>
+          <p>Atur batas waktu konfirmasi ketidakhadiran untuk cabang yang dipilih. Waktu dihitung setelah jam masuk + toleransi shift.</p>
+        </div>
+      </div>
+      <form id="masterAbsencePolicyForm">
+        <div class="wf-grid">
+          <div class="wf-field wf-col-4">
+            <label for="masterAbsenceWindow">Batas waktu</label>
+            <input id="masterAbsenceWindow" type="number" min="1" max="7" step="1" value="1" required>
+          </div>
+          <div class="wf-field wf-col-4">
+            <label for="masterAbsenceUnit">Satuan</label>
+            <select id="masterAbsenceUnit">
+              <option value="days">Hari</option>
+              <option value="hours">Jam</option>
+            </select>
+          </div>
+          <div class="wf-col-4 wf-actions end">
+            <button id="masterAbsenceSave" class="wf-btn primary" type="submit">Simpan Batas</button>
+          </div>
+          <div class="wf-col-12">
+            <label for="masterAbsenceApplyOpen" style="display:flex;gap:8px;align-items:center">
+              <input id="masterAbsenceApplyOpen" type="checkbox" style="width:auto">
+              <span>Terapkan juga ke kasus yang masih menunggu konfirmasi</span>
+            </label>
+          </div>
+        </div>
+        <div id="masterAbsenceInfo" class="wf-notice" style="margin-top:10px">Memuat batas konfirmasi...</div>
+      </form>
     </section>
   </main>
 
