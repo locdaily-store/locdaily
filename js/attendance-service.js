@@ -753,6 +753,10 @@
                 preserveLegacy:false
             });
 
+            window.dispatchEvent(new CustomEvent("ldm-attendance-recorded",{
+                detail:{userId:target.id,attendanceType:type,date}
+            }));
+
             return data;
 
         }catch(error){

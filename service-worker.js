@@ -1,4 +1,4 @@
-// Build: 27.9.0-v28.16.5 Demo Interaction Recovery & Runtime Stabilization
+// Build: 27.9.0-v28.17.0 Ketidakhadiran Confirmation Deadline & Dynamic Menu
 "use strict";
 
 importScripts("./js/app-version.js");

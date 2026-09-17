@@ -16,7 +16,7 @@
     const wrap=document.createElement("div");
     wrap.id="ldmWorkforceQuickLinks";
     wrap.className="ldm-workforce-quick-links";
-    wrap.innerHTML=`${role()==="owner"?'<a class="ldm-exception-link owner" href="master-shift.html">🗓️ Master Shift <span aria-hidden="true">→</span></a>':""}<a class="ldm-exception-link" href="ketidakhadiran.html">📋 Ketidakhadiran <span aria-hidden="true">→</span></a>`;
+    wrap.innerHTML=`${role()==="owner"?'<a class="ldm-exception-link owner" href="master-shift.html">🗓️ Master Shift <span aria-hidden="true">→</span></a>':""}<a id="ldmAbsenceQuickLink" class="ldm-exception-link" href="ketidakhadiran.html" ${role()==="owner"?"":"hidden"}>📋 Ketidakhadiran <span aria-hidden="true">→</span></a>`;
     anchor.parentNode.insertBefore(wrap,anchor);
   }
 
@@ -91,10 +91,20 @@
     setTimeout(applyAttendanceScheduleRule,400);
   }
 
+  function applyAbsenceMenuState(event){
+    const link=$("ldmAbsenceQuickLink");
+    if(!link)return;
+    if(role()==="owner"){link.hidden=false;return;}
+    const state=event?.detail||window.LDM_ABSENCE_MENU_STATE||{};
+    link.hidden=state.show_menu!==true;
+  }
+
   function boot(){
     insertWorkforceLinks();
     bindAttendanceRule();
+    applyAbsenceMenuState();
   }
+  window.addEventListener("ldm-absence-menu-state",applyAbsenceMenuState);
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
   window.LDMAttendanceWorkforceUI=Object.freeze({refreshScheduleRule:applyAttendanceScheduleRule});
 })();

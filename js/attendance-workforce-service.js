@@ -87,13 +87,17 @@
     return Array.isArray(data)?data:[];
   }
 
+  async function menuState(){
+    return one(await rpc("ldm_attendance_menu_state"))||{};
+  }
+
   async function explanationCandidates(days=62){
-    const data=await rpc("ldm_attendance_explanation_candidates",{p_days:Number(days)||62});
+    const data=await rpc("ldm_attendance_confirmation_candidates_v2",{p_days:Number(days)||62});
     return Array.isArray(data)?data:[];
   }
 
   async function submitExplanation({date,reason,explanation}={}){
-    return rpc("ldm_attendance_submit_explanation",{
+    return rpc("ldm_attendance_submit_explanation_v2",{
       p_attendance_date:date,
       p_reason_category:reason,
       p_explanation:String(explanation||"").trim()
@@ -101,17 +105,29 @@
   }
 
   async function myExplanations(){
-    const data=await rpc("ldm_attendance_my_explanations");
+    const data=await rpc("ldm_attendance_my_absence_cases");
     return Array.isArray(data)?data:[];
   }
 
   async function explanationInbox({storeId=null}={}){
-    const data=await rpc("ldm_attendance_explanation_inbox",{p_store_id:storeId||null});
+    const data=await rpc("ldm_attendance_absence_inbox",{p_store_id:storeId||null});
     return Array.isArray(data)?data:[];
   }
 
+  async function absenceSettings({storeId=null}={}){
+    return one(await rpc("ldm_attendance_absence_settings",{p_store_id:storeId||null}))||{};
+  }
+
+  async function updateAbsenceSettings({storeId=null,minutes,applyToOpen=false}={}){
+    return rpc("ldm_attendance_update_absence_settings",{
+      p_store_id:storeId||null,
+      p_confirmation_window_minutes:Number(minutes),
+      p_apply_to_open:Boolean(applyToOpen)
+    });
+  }
+
   async function reviewExplanation({id,note=""}={}){
-    return rpc("ldm_attendance_review_explanation",{
+    return rpc("ldm_attendance_review_explanation_v2",{
       p_explanation_id:id,
       p_review_note:String(note||"").trim()||null
     });
@@ -123,7 +139,7 @@
 
   window.LDMWorkforce=Object.freeze({
     context,stores,accounts,scheduleMonth,saveMonth,setLeaveEntitlement,
-    scheduleForUser,expectedStatus,explanationCandidates,submitExplanation,
-    myExplanations,explanationInbox,reviewExplanation
+    scheduleForUser,expectedStatus,menuState,explanationCandidates,submitExplanation,
+    myExplanations,explanationInbox,absenceSettings,updateAbsenceSettings,reviewExplanation
   });
 })();

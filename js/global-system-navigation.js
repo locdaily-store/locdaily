@@ -2,7 +2,7 @@
     "use strict";
     if(window.LDM_PUBLIC_GUIDE_MODE===true)return;
 
-    const NAV_VERSION="27.9.0-audit-remediation-v28130";
+    const NAV_VERSION="27.9.0-v28.17.0";
     const EOD_KEYS=["laporan","dataLaporan","shiftClosingLog","dataRetur"];
 
     /*
@@ -137,6 +137,9 @@
     let resolvedCloudStore="";
     let resolvingCloudRole=false;
     let resolvedLicenseState=null;
+    let absenceMenuState=null;
+    let absenceMenuSyncing=false;
+    let absenceMenuTimer=0;
 
     function normalizeRole(value){
         const role=String(value||"").trim().toLowerCase();
@@ -368,6 +371,7 @@
 
     function routeAllowed(route,role,eodReady){
         if(!role||!route.roles.includes(role))return false;
+        if(normalizedPage(route.page)==="ketidakhadiran.html" && role!=="owner" && absenceMenuState?.show_menu!==true)return false;
 
         const licenseState=licenseFeatureAllowed(route.feature);
 
@@ -692,6 +696,39 @@
         });
     }
 
+
+    async function syncAbsenceMenuState(forceRender=false){
+        const role=currentRole();
+        if(!role)return null;
+        if(role==="owner"){
+            const next={show_menu:true,pending_count:0,submitted_count:0};
+            const changed=JSON.stringify(next)!==JSON.stringify(absenceMenuState);
+            absenceMenuState=next;
+            window.LDM_ABSENCE_MENU_STATE=next;
+            window.dispatchEvent(new CustomEvent("ldm-absence-menu-state",{detail:next}));
+            if(forceRender||changed)render();
+            return next;
+        }
+        if(absenceMenuSyncing)return absenceMenuState;
+        if(!window.LDMSupabase||typeof window.LDMSupabase.createClient!=="function"||!window.LDMCloudSession)return absenceMenuState;
+        absenceMenuSyncing=true;
+        try{
+            await window.LDMCloudSession.ensureAuthenticated({registerDevice:false});
+            const {data,error}=await window.LDMSupabase.createClient().rpc("ldm_attendance_menu_state");
+            if(error)throw error;
+            const next=(Array.isArray(data)?data[0]:data)||{show_menu:false,pending_count:0,submitted_count:0};
+            const changed=JSON.stringify(next)!==JSON.stringify(absenceMenuState);
+            absenceMenuState=next;
+            window.LDM_ABSENCE_MENU_STATE=next;
+            window.dispatchEvent(new CustomEvent("ldm-absence-menu-state",{detail:next}));
+            if(forceRender||changed)render();
+            return next;
+        }catch(error){
+            return absenceMenuState;
+        }finally{
+            absenceMenuSyncing=false;
+        }
+    }
     function render(){
         addStylesheet();
         applyModeContext();
@@ -772,12 +809,18 @@
         };
         run();
 
+        syncAbsenceMenuState(false);
         if(!eodPollTimer){
             eodPollTimer=window.setInterval(()=>{
                 if(!document.hidden){
                     try{syncEodAvailability(false)}catch(error){}
                 }
             },2500);
+        }
+        if(!absenceMenuTimer){
+            absenceMenuTimer=window.setInterval(()=>{
+                if(!document.hidden)syncAbsenceMenuState(false);
+            },60000);
         }
     }
 
@@ -789,15 +832,16 @@
         if(["headerConfig","userRole","role","currentUser","activeUser","ldmCloudStoreName","ldmStoreOperationalMode","ldmLicenseV2Cache"].includes(event.key))render();
         if(EOD_KEYS.includes(event.key))syncEodAvailability(false);
     });
-    window.addEventListener("focus",()=>syncEodAvailability(false));
-    document.addEventListener("visibilitychange",()=>{if(!document.hidden)syncEodAvailability(false)});
+    window.addEventListener("focus",()=>{syncEodAvailability(false);syncAbsenceMenuState(false)});
+    document.addEventListener("visibilitychange",()=>{if(!document.hidden){syncEodAvailability(false);syncAbsenceMenuState(false)}});
     window.addEventListener("ldm-role-access-ready",event=>{
         resolvedCloudRole=normalizeRole(event?.detail?.role||window.LDM_VERIFIED_ROLE);
         render();
         syncEodAvailability(false);
     });
-    window.addEventListener("ldm-cloud-session-ready",()=>{render();syncEodAvailability(false)});
+    window.addEventListener("ldm-cloud-session-ready",()=>{render();syncEodAvailability(false);syncAbsenceMenuState(false)});
     window.addEventListener("ldm-store-mode-change",()=>{render();syncBadges();});
+    window.addEventListener("ldm-attendance-recorded",()=>syncAbsenceMenuState(true));
     window.addEventListener("ldm-primary-owner-ready",event=>applyPrimaryOwnerRoutes(event.detail));
     window.addEventListener("ldm-license-v2-ready",event=>{
         resolvedLicenseState=event?.detail||resolvedLicenseState;
@@ -819,6 +863,7 @@
         refreshContext,
         getVisibleRoutes:(role,eodReady)=>visibleRoutes(normalizeRole(role),Boolean(eodReady)).map(route=>({...route})),
         checkEodAvailability:syncEodAvailability,
+        syncAbsenceMenuState,
         calculateEodReadiness,
         openMobileDrawer,
         closeMobileDrawer

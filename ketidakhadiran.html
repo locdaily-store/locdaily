@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.16.5"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.17.0"></script>
 <script src="js/navigation-performance.js?v=27.9.0-v28.16.3" defer></script>
 
   <meta charset="UTF-8">
@@ -18,7 +18,7 @@
   <link id="ldmGlobalNavigationCSS" rel="stylesheet" href="css/global-responsive-navigation.css?v=27.9.0-systemui25-v2851">
   <link id="ldmStoreModesGlobalCSS" rel="stylesheet" href="css/store-modes.css?v=27.9.0-systemui25-v2851">
   <link id="ldmSystemDashboardUICSS" rel="stylesheet" href="css/system-dashboard-ui.css?v=27.9.0-systemui25-v2851">
-  <link rel="stylesheet" href="css/workforce-dashboard-pages.css?v=28.5.1">
+  <link rel="stylesheet" href="css/workforce-dashboard-pages.css?v=28.17.0">
 
   <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
   <script src="js/local-time.js?v=26.4.0"></script>
@@ -31,7 +31,7 @@
   <script src="js/cloud-session.js?v=27.9.0-v28.16.3-navfast"></script>
   <script src="js/role-access-guard-v28120.js?v=27.9.0-v28.12.0"></script>
 <script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
-  <script src="js/attendance-workforce-service.js?v=28.5.1"></script>
+  <script src="js/attendance-workforce-service.js?v=28.17.0"></script>
   <script src="js/license-v2-config.js?v=27.9.0-v28.13.1"></script>
   <script src="js/license-v2-client.js?v=28.5.0"></script>
   <script defer src="js/license-v2-guard.js?v=28.5.1"></script>
@@ -43,7 +43,7 @@
         <img class="wf-brand-logo" data-ldm-brand-logo src="locdailymar-logo.png" alt="Logo LocDailyMar">
         <div class="wf-hero-copy">
           <h1>📋 Ketidakhadiran</h1>
-          <p>Jelaskan jadwal kerja yang terlewat. Hari Libur dan Cuti Tahunan tidak dianggap sebagai ketidakhadiran.</p>
+          <p>Konfirmasi hanya muncul ketika jadwal kerja terlewat tanpa presensi. Hari Libur dan Cuti Tahunan tidak dianggap sebagai ketidakhadiran.</p>
         </div>
       </div>
       <div class="wf-hero-actions"><a class="wf-link-btn soft" href="absensi.html">← Absensi</a></div>
@@ -53,15 +53,17 @@
       <div class="wf-stat"><span>Perlu Dijelaskan</span><strong id="absenceCandidateCount">0</strong></div>
       <div class="wf-stat"><span>Sudah Dikirim</span><strong id="absenceSubmittedCount">0</strong></div>
       <div class="wf-stat"><span>Sudah Ditinjau</span><strong id="absenceReviewedCount">0</strong></div>
+      <div class="wf-stat"><span>Tanpa Konfirmasi</span><strong id="absenceFinalAbsentCount">0</strong></div>
       <div class="wf-stat"><span>Role Aktif</span><strong id="absenceRole">-</strong></div>
       <div class="wf-stat"><span>Cakupan</span><strong id="absenceScope">Akun Saya</strong></div>
     </section>
 
     <div class="wf-layout-2">
       <section class="wf-card">
-        <div class="wf-card-head"><div><h2>Kirim Penjelasan</h2><p>Form hanya menampilkan tanggal kerja yang sudah melewati batas jam masuk tetapi belum mempunyai Absen Masuk, Izin, atau Sakit.</p></div></div>
+        <div class="wf-card-head"><div><h2>Konfirmasi Ketidakhadiran</h2><p>Form hanya muncul untuk jadwal kerja yang melewati jam masuk + toleransi tanpa Absen Masuk, Izin, atau Sakit. Konfirmasi harus dikirim sebelum deadline.</p></div></div>
         <form id="absenceForm">
           <div class="wf-field"><label for="absenceDate">Tanggal kerja</label><select id="absenceDate" required></select></div>
+          <div id="absenceDeadlineBox" class="wf-notice" style="margin-top:10px" hidden><strong>Batas konfirmasi:</strong> <span id="absenceDeadlineText">-</span></div>
           <div class="wf-field" style="margin-top:10px"><label for="absenceReason">Jenis ketidakhadiran</label>
             <select id="absenceReason" required>
               <option value="SAKIT_KONDISI">Sakit / kondisi kesehatan</option>
@@ -80,14 +82,32 @@
       </section>
 
       <section class="wf-card">
-        <div class="wf-card-head"><div><h2>Riwayat Saya</h2><p>Pengajuan tidak mengubah status menjadi hadir. Ini tetap menjadi catatan pertanggungjawaban untuk ditinjau Owner.</p></div></div>
+        <div class="wf-card-head"><div><h2>Riwayat Saya</h2><p>Konfirmasi tidak mengubah status menjadi hadir. Jika deadline terlewat tanpa konfirmasi, sistem menetapkannya sebagai Tidak Hadir, bukan Cuti atau Libur.</p></div></div>
         <div id="absenceMine" class="wf-list"><div class="wf-empty">Memuat riwayat...</div></div>
       </section>
     </div>
 
+
+    <section class="wf-card" id="absenceOwnerSettings" hidden>
+      <div class="wf-card-head">
+        <div><h2>⏱️ Batas Konfirmasi Ketidakhadiran</h2><p>Owner menentukan berapa lama karyawan dapat memberi konfirmasi setelah jam masuk + toleransi shift terlewati.</p></div>
+        <span class="wf-tag">Owner Only</span>
+      </div>
+      <form id="absenceSettingsForm">
+        <div class="wf-grid">
+          <div class="wf-field wf-col-4"><label for="absenceSettingsStore">Cabang</label><select id="absenceSettingsStore"></select></div>
+          <div class="wf-field wf-col-4"><label for="absenceWindowHours">Batas konfirmasi (jam)</label><input id="absenceWindowHours" type="number" min="0.5" max="168" step="0.5" value="24" required></div>
+          <div class="wf-col-4 wf-actions end"><button id="absenceSettingsSave" class="wf-btn primary" type="submit">Simpan Batas Waktu</button></div>
+        </div>
+        <label style="display:flex;gap:8px;align-items:flex-start;margin-top:12px"><input id="absenceApplyOpen" type="checkbox" style="width:auto;margin-top:3px"><span>Terapkan batas baru juga ke kasus yang masih menunggu konfirmasi. Jika tidak dicentang, kasus terbuka mempertahankan deadline lamanya.</span></label>
+        <div id="absenceSettingsInfo" class="wf-notice" style="margin-top:10px">Memuat pengaturan...</div>
+        <div id="absenceSettingsMessage" class="wf-notice" style="margin-top:10px">Batas minimum 30 menit dan maksimum 168 jam.</div>
+      </form>
+    </section>
+
     <section class="wf-card" id="absenceOwnerInbox" hidden>
       <div class="wf-card-head">
-        <div><h2>📥 Tinjauan Ketidakhadiran</h2><p>Owner Cabang hanya melihat akun cabangnya. Owner Pusat dapat melihat seluruh cabang dalam network.</p></div>
+        <div><h2>📥 Tinjauan Ketidakhadiran</h2><p>Owner dapat melihat kasus Menunggu Konfirmasi, Konfirmasi Dikirim, Tidak Hadir Tanpa Konfirmasi, dan Sudah Ditinjau. Owner Cabang tetap hanya melihat cabangnya.</p></div>
         <span class="wf-tag">Owner Only</span>
       </div>
       <div class="wf-grid">
@@ -99,8 +119,8 @@
   </main>
 
   <script src="js/system-theme-sync-v2824.js?v=27.9.0-systemui25-v2851"></script>
-  <script src="js/ketidakhadiran-ui.js?v=27.9.0-v28.16.2-final"></script>
-  <script src="js/global-system-navigation.js?v=27.9.0-v28.13.1"></script>
+  <script src="js/ketidakhadiran-ui.js?v=27.9.0-v28.17.0"></script>
+  <script src="js/global-system-navigation.js?v=27.9.0-v28.17.0"></script>
   <script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
 <script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
 </body>
