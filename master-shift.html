@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.17.0"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.17.1"></script>
 <script src="js/navigation-performance.js?v=27.9.0-v28.16.3" defer></script>
 
   <meta charset="UTF-8">
@@ -18,7 +18,7 @@
   <link id="ldmGlobalNavigationCSS" rel="stylesheet" href="css/global-responsive-navigation.css?v=27.9.0-systemui25-v2851">
   <link id="ldmStoreModesGlobalCSS" rel="stylesheet" href="css/store-modes.css?v=27.9.0-systemui25-v2851">
   <link id="ldmSystemDashboardUICSS" rel="stylesheet" href="css/system-dashboard-ui.css?v=27.9.0-systemui25-v2851">
-  <link rel="stylesheet" href="css/workforce-dashboard-pages.css?v=28.17.0">
+  <link rel="stylesheet" href="css/workforce-dashboard-pages.css?v=28.17.1">
 
   <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
   <script src="js/local-time.js?v=26.4.0"></script>
@@ -43,7 +43,7 @@
         <img class="wf-brand-logo" data-ldm-brand-logo src="locdailymar-logo.png" alt="Logo LocDailyMar">
         <div class="wf-hero-copy">
           <h1>🗓️ Master Shift</h1>
-          <p>Atur jadwal kerja bulanan, jam masuk-keluar, hari libur, dan cuti tahunan dari satu halaman.</p>
+          <p>Atur jadwal kerja, hari libur, cuti, dan batas konfirmasi ketidakhadiran dari satu halaman.</p>
         </div>
       </div>
       <div class="wf-hero-actions">
@@ -62,6 +62,41 @@
         <div class="wf-field wf-col-4"><label for="masterMonth">Bulan</label><input id="masterMonth" type="month"></div>
         <div class="wf-field wf-col-4"><label for="masterUser">Akun Karyawan</label><select id="masterUser"></select></div>
       </div>
+    </section>
+
+    <section class="wf-card" id="masterAbsencePolicy">
+      <div class="wf-card-head">
+        <div>
+          <h2>⏱️ Batas Konfirmasi Ketidakhadiran</h2>
+          <p>Berlaku untuk cabang yang dipilih. Hitungannya dimulai setelah jam masuk + toleransi shift.</p>
+        </div>
+        <span class="wf-tag">Per Cabang</span>
+      </div>
+      <form id="masterAbsencePolicyForm">
+        <div class="wf-grid">
+          <div class="wf-field wf-col-3">
+            <label for="masterAbsenceWindow">Batas waktu</label>
+            <input id="masterAbsenceWindow" type="number" min="1" max="7" step="1" value="1" required>
+          </div>
+          <div class="wf-field wf-col-3">
+            <label for="masterAbsenceUnit">Satuan</label>
+            <select id="masterAbsenceUnit">
+              <option value="days">Hari</option>
+              <option value="hours">Jam</option>
+            </select>
+          </div>
+          <div class="wf-col-3">
+            <label for="masterAbsenceApplyOpen" style="display:flex;gap:8px;align-items:center;min-height:100%;padding-top:22px">
+              <input id="masterAbsenceApplyOpen" type="checkbox" style="width:auto">
+              <span>Perbarui juga kasus yang masih menunggu</span>
+            </label>
+          </div>
+          <div class="wf-col-3 wf-actions end">
+            <button id="masterAbsenceSave" class="wf-btn primary" type="submit">Simpan</button>
+          </div>
+        </div>
+        <div id="masterAbsenceInfo" class="wf-notice" style="margin-top:10px">Memuat batas konfirmasi...</div>
+      </form>
     </section>
 
     <section class="wf-stats" aria-label="Ringkasan jadwal">
@@ -128,7 +163,7 @@
   </main>
 
   <script src="js/system-theme-sync-v2824.js?v=27.9.0-systemui25-v2851"></script>
-  <script src="js/master-shift-ui.js?v=27.9.0-v28.16.2-final"></script>
+  <script src="js/master-shift-ui.js?v=27.9.0-v28.17.1"></script>
   <script src="js/global-system-navigation.js?v=27.9.0-v28.17.0"></script>
   <script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
 <script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>

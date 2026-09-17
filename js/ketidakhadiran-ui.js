@@ -123,60 +123,18 @@
 
   async function loadOwnerStores(){
     if(role()!=="owner")return;
-    $("absenceOwnerSettings").hidden=false;
     $("absenceOwnerInbox").hidden=false;
     ownerStores=await window.LDMWorkforce.stores();
     const select=$("absenceStore");
     const all=ownerStores.length>1?'<option value="">Semua cabang</option>':"";
     select.innerHTML=all+ownerStores.map(store=>`<option value="${esc(store.store_id)}">${esc(store.store_name)} (${esc(store.store_code)})${store.is_primary?" · Pusat":""}</option>`).join("");
-    const settingsSelect=$("absenceSettingsStore");
-    settingsSelect.innerHTML=ownerStores.map(store=>`<option value="${esc(store.store_id)}">${esc(store.store_name)} (${esc(store.store_code)})${store.is_primary?" · Pusat":""}</option>`).join("");
     if(ownerStores.length===1){
       select.value=ownerStores[0].store_id;
-      settingsSelect.value=ownerStores[0].store_id;
       $("absenceScope").textContent="Cabang Ini";
     }else{
       $("absenceScope").textContent="Semua Cabang";
-      const current=ownerStores.find(s=>s.is_current)||ownerStores[0];
-      if(current)settingsSelect.value=current.store_id;
     }
-    await Promise.all([loadInbox(),loadOwnerSettings()]);
-  }
-
-  async function loadOwnerSettings(){
-    if(role()!=="owner")return;
-    const storeId=$("absenceSettingsStore").value||null;
-    if(!storeId)return;
-    const data=await window.LDMWorkforce.absenceSettings({storeId});
-    $("absenceWindowHours").value=(Number(data.confirmation_window_minutes)||1440)/60;
-    $("absenceSettingsInfo").textContent=`Batas aktif: ${Number(data.confirmation_window_minutes)||1440} menit (${Number(data.confirmation_window_hours)||24} jam). Berlaku setelah jam masuk + toleransi shift.`;
-  }
-
-  async function saveOwnerSettings(event){
-    event.preventDefault();
-    const storeId=$("absenceSettingsStore").value||null;
-    const hours=Number($("absenceWindowHours").value);
-    if(!Number.isFinite(hours)||hours<0.5||hours>168){
-      $("absenceSettingsMessage").textContent="Batas harus antara 0,5 sampai 168 jam.";
-      $("absenceSettingsMessage").className="wf-notice danger";
-      return;
-    }
-    const button=$("absenceSettingsSave");
-    button.disabled=true;
-    try{
-      const result=await window.LDMWorkforce.updateAbsenceSettings({
-        storeId,minutes:Math.round(hours*60),applyToOpen:$("absenceApplyOpen").checked
-      });
-      $("absenceSettingsMessage").className="wf-notice success";
-      $("absenceSettingsMessage").textContent=result?.applied_to_open
-        ?`Pengaturan disimpan. ${Number(result.open_cases_updated)||0} kasus terbuka ikut diperbarui.`
-        :"Pengaturan disimpan. Kasus baru akan menggunakan batas waktu ini; kasus terbuka mempertahankan deadline sebelumnya.";
-      await Promise.all([loadOwnerSettings(),loadInbox(),loadCandidates(),loadMine()]);
-      await refreshMenuState();
-    }catch(error){
-      $("absenceSettingsMessage").className="wf-notice danger";
-      $("absenceSettingsMessage").textContent=error.message||String(error);
-    }finally{button.disabled=false;}
+    await loadInbox();
   }
 
   async function loadInbox(){
@@ -223,8 +181,6 @@
         $("absenceDate").addEventListener("change",showSelectedDeadline);
         $("absenceReload").addEventListener("click",loadInbox);
         $("absenceStore").addEventListener("change",()=>{loadInbox();$("absenceScope").textContent=$("absenceStore").value?"Cabang Dipilih":"Semua Cabang";});
-        $("absenceSettingsStore").addEventListener("change",loadOwnerSettings);
-        $("absenceSettingsForm").addEventListener("submit",saveOwnerSettings);
         bound=true;
       }
       await Promise.all([loadCandidates(),loadMine()]);

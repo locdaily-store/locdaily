@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.17.0"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.17.1"></script>
 <script src="js/navigation-performance.js?v=27.9.0-v28.16.3" defer></script>
 
   <meta charset="UTF-8">
@@ -18,7 +18,7 @@
   <link id="ldmGlobalNavigationCSS" rel="stylesheet" href="css/global-responsive-navigation.css?v=27.9.0-systemui25-v2851">
   <link id="ldmStoreModesGlobalCSS" rel="stylesheet" href="css/store-modes.css?v=27.9.0-systemui25-v2851">
   <link id="ldmSystemDashboardUICSS" rel="stylesheet" href="css/system-dashboard-ui.css?v=27.9.0-systemui25-v2851">
-  <link rel="stylesheet" href="css/workforce-dashboard-pages.css?v=28.17.0">
+  <link rel="stylesheet" href="css/workforce-dashboard-pages.css?v=28.17.1">
 
   <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
   <script src="js/local-time.js?v=26.4.0"></script>
@@ -87,27 +87,9 @@
       </section>
     </div>
 
-
-    <section class="wf-card" id="absenceOwnerSettings" hidden>
-      <div class="wf-card-head">
-        <div><h2>⏱️ Batas Konfirmasi Ketidakhadiran</h2><p>Owner menentukan berapa lama karyawan dapat memberi konfirmasi setelah jam masuk + toleransi shift terlewati.</p></div>
-        <span class="wf-tag">Owner Only</span>
-      </div>
-      <form id="absenceSettingsForm">
-        <div class="wf-grid">
-          <div class="wf-field wf-col-4"><label for="absenceSettingsStore">Cabang</label><select id="absenceSettingsStore"></select></div>
-          <div class="wf-field wf-col-4"><label for="absenceWindowHours">Batas konfirmasi (jam)</label><input id="absenceWindowHours" type="number" min="0.5" max="168" step="0.5" value="24" required></div>
-          <div class="wf-col-4 wf-actions end"><button id="absenceSettingsSave" class="wf-btn primary" type="submit">Simpan Batas Waktu</button></div>
-        </div>
-        <label style="display:flex;gap:8px;align-items:flex-start;margin-top:12px"><input id="absenceApplyOpen" type="checkbox" style="width:auto;margin-top:3px"><span>Terapkan batas baru juga ke kasus yang masih menunggu konfirmasi. Jika tidak dicentang, kasus terbuka mempertahankan deadline lamanya.</span></label>
-        <div id="absenceSettingsInfo" class="wf-notice" style="margin-top:10px">Memuat pengaturan...</div>
-        <div id="absenceSettingsMessage" class="wf-notice" style="margin-top:10px">Batas minimum 30 menit dan maksimum 168 jam.</div>
-      </form>
-    </section>
-
     <section class="wf-card" id="absenceOwnerInbox" hidden>
       <div class="wf-card-head">
-        <div><h2>📥 Tinjauan Ketidakhadiran</h2><p>Owner dapat melihat kasus Menunggu Konfirmasi, Konfirmasi Dikirim, Tidak Hadir Tanpa Konfirmasi, dan Sudah Ditinjau. Owner Cabang tetap hanya melihat cabangnya.</p></div>
+        <div><h2>📥 Tinjauan Ketidakhadiran</h2><p>Owner meninjau kasus di sini. Pengaturan batas konfirmasi sekarang berada di Master Shift agar jadwal dan aturan kehadiran tetap satu tempat.</p></div>
         <span class="wf-tag">Owner Only</span>
       </div>
       <div class="wf-grid">
@@ -119,7 +101,7 @@
   </main>
 
   <script src="js/system-theme-sync-v2824.js?v=27.9.0-systemui25-v2851"></script>
-  <script src="js/ketidakhadiran-ui.js?v=27.9.0-v28.17.0"></script>
+  <script src="js/ketidakhadiran-ui.js?v=27.9.0-v28.17.1"></script>
   <script src="js/global-system-navigation.js?v=27.9.0-v28.17.0"></script>
   <script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
 <script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>

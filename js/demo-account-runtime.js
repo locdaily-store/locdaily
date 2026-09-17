@@ -162,6 +162,7 @@
       masterEmployeeId:"",
       masterMonth:currentMonthKey(),
       masterTemplate:{shift:"SHIFT_1",start:"08:00",end:"16:00",tolerance:15,weekdays:[1,2,3,4,5,6]},
+      absencePolicy:{value:1,unit:"days"},
       cart:[],
       products:clone(modeCatalogs.retail),
       modeCatalogs,
@@ -256,6 +257,13 @@
       weekdays:Array.isArray(template.weekdays)&&template.weekdays.length
         ? [...new Set(template.weekdays.map(Number).filter(day=>day>=0&&day<=6))]
         : [1,2,3,4,5,6]
+    };
+    const policy=isPlainObject(source.absencePolicy)?source.absencePolicy:{};
+    state.absencePolicy={
+      unit:policy.unit==="hours"?"hours":"days",
+      value:policy.unit==="hours"
+        ? Math.max(0.5,Math.min(168,Number(policy.value)||24))
+        : Math.max(1,Math.min(7,Math.round(Number(policy.value)||1)))
     };
     state.version=VERSION;
     state.createdAt=Number(source.createdAt)||Date.now();
@@ -508,10 +516,17 @@
     const work=rows.filter(r=>r.status==="WORK").length;
     const off=rows.filter(r=>r.status==="OFF").length;
     const leave=rows.filter(r=>r.status==="ANNUAL_LEAVE").length;
+    const policy=isPlainObject(state.absencePolicy)?state.absencePolicy:{value:1,unit:"days"};
+    const policyUnit=policy.unit==="hours"?"hours":"days";
+    const policyValue=policyUnit==="hours"
+      ? Math.max(0.5,Math.min(168,Number(policy.value)||24))
+      : Math.max(1,Math.min(7,Math.round(Number(policy.value)||1)));
+    const policyLabel=`${policyValue} ${policyUnit==="days"?"Hari":"Jam"}`;
     const scopeLabel=profile.scope==="network"?"Semua Cabang / Network":storeLabel(profile.storeCode);
 
-    return `<div class="wf-shell"><header class="wf-hero"><div class="wf-hero-main"><div class="wf-hero-copy"><h1>🗓️ Master Shift</h1><p>Atur jadwal kerja bulanan, jam masuk-keluar, hari libur, dan cuti tahunan dari satu halaman.</p></div></div><div class="wf-hero-actions"><span class="wf-pill">🔒 Owner Only</span><button class="wf-link-btn soft" type="button" data-go="absensi">← Absensi</button></div></header>${demoNote().replace("dp-demo-note","dp-demo-note dp-demo-workforce-note")}
+    return `<div class="wf-shell"><header class="wf-hero"><div class="wf-hero-main"><div class="wf-hero-copy"><h1>🗓️ Master Shift</h1><p>Atur jadwal kerja, hari libur, cuti, dan batas konfirmasi ketidakhadiran dari satu halaman.</p></div></div><div class="wf-hero-actions"><span class="wf-pill">🔒 Owner Only</span><button class="wf-link-btn soft" type="button" data-go="absensi">← Absensi</button></div></header>${demoNote().replace("dp-demo-note","dp-demo-note dp-demo-workforce-note")}
       <section class="wf-card"><div class="wf-card-head"><div><h2>Pilih Jadwal</h2><p>Tentukan cabang, bulan, dan akun. Owner Cabang hanya melihat cabangnya sendiri.</p></div><button class="wf-btn soft" type="button" data-demo-master-refresh>↻ Muat Ulang</button></div><div class="wf-grid"><div class="wf-field wf-col-4"><label>Cakupan</label><select disabled><option>${esc(scopeLabel)}</option></select></div><div class="wf-field wf-col-4"><label>Bulan</label><input id="demoMasterMonth" type="month" value="${esc(selectedMonth.key)}"></div><div class="wf-field wf-col-4"><label>Akun Karyawan</label><select id="demoMasterEmployee">${emps.map(e=>`<option value="${esc(e.id)}" ${e.id===selected?"selected":""}>${esc(e.name.replace(" Demo",""))} · ${esc(roleLabel(e.role))}</option>`).join("")}</select></div></div></section>
+      <section class="wf-card"><div class="wf-card-head"><div><h2>⏱️ Batas Konfirmasi Ketidakhadiran</h2><p>Atur batas sesudah jam masuk + toleransi. Bisa memakai satuan Jam atau Hari.</p></div><span class="wf-tag">Per Cabang</span></div><div class="wf-grid"><div class="wf-field wf-col-3"><label>Batas waktu</label><input id="demoAbsencePolicyValue" type="number" value="${policyValue}" min="${policyUnit==="days"?1:0.5}" max="${policyUnit==="days"?7:168}" step="${policyUnit==="days"?1:0.5}"></div><div class="wf-field wf-col-3"><label>Satuan</label><select id="demoAbsencePolicyUnit"><option value="days" ${policyUnit==="days"?"selected":""}>Hari</option><option value="hours" ${policyUnit==="hours"?"selected":""}>Jam</option></select></div><div class="wf-col-6 wf-actions end"><button class="wf-btn primary" type="button" id="demoSaveAbsencePolicyBtn">Simpan</button></div></div><div class="wf-notice" style="margin-top:10px">Aktif: ${esc(policyLabel)} setelah jam masuk + toleransi.</div></section>
       <section class="wf-stats"><div class="wf-stat"><span>Hari Kerja</span><strong>${work}</strong></div><div class="wf-stat"><span>Hari Libur</span><strong>${off}</strong></div><div class="wf-stat"><span>Cuti Bulan Ini</span><strong>${leave}</strong></div><div class="wf-stat"><span>Hak Cuti Tahunan</span><strong>${Number(emp?.annualLeave||0)}</strong></div><div class="wf-stat"><span>Sisa Cuti</span><strong>${Math.max(0,Number(emp?.annualLeave||0)-leave)}</strong></div></section>
       <div class="wf-layout-2"><section class="wf-card"><div class="wf-card-head"><div><h2>Template Cepat</h2><p>Hari kerja, shift, toleransi, dan jam yang dipilih benar-benar digunakan saat template diterapkan.</p></div></div><div class="wf-field"><label>Hari kerja</label><div class="wf-weekdays">${[["Sen",1],["Sel",2],["Rab",3],["Kam",4],["Jum",5],["Sab",6],["Min",0]].map(([label,day])=>`<label class="wf-weekday"><input type="checkbox" data-demo-master-weekday="${day}" ${weekdays.includes(day)?"checked":""}> ${label}</label>`).join("")}</div></div><div class="wf-grid" style="margin-top:10px"><div class="wf-field wf-col-6"><label>Shift</label><select id="demoMasterShift"><option value="SHIFT_1" ${template.shift==="SHIFT_1"?"selected":""}>Shift 1</option><option value="SHIFT_2" ${template.shift==="SHIFT_2"?"selected":""}>Shift 2</option><option value="FULL_DAY" ${template.shift==="FULL_DAY"?"selected":""}>Full Day</option></select></div><div class="wf-field wf-col-6"><label>Toleransi terlambat</label><input id="demoMasterTolerance" type="number" min="0" max="180" value="${Number(template.tolerance||0)}"></div><div class="wf-field wf-col-6"><label>Jam masuk</label><input id="demoMasterStart" type="time" value="${esc(template.start||"08:00")}"></div><div class="wf-field wf-col-6"><label>Jam keluar</label><input id="demoMasterEnd" type="time" value="${esc(template.end||"16:00")}"></div></div><div class="wf-actions" style="margin-top:12px"><button class="wf-btn primary" type="button" id="demoApplyMonthBtn">Terapkan ke Bulan</button></div></section>
       <section class="wf-card"><div class="wf-card-head"><div><h2>Hak Cuti Tahunan</h2><p>Hak cuti mengikuti tahun pada bulan yang sedang dipilih.</p></div></div><div class="wf-grid"><div class="wf-field wf-col-6"><label>Hak cuti / tahun</label><input id="demoAnnualLeave" type="number" min="0" max="366" value="${Number(emp?.annualLeave||0)}"></div><div class="wf-field wf-col-6"><label>Tahun</label><input type="text" readonly value="${selectedMonth.year}"></div><div class="wf-col-12"><div class="wf-notice">Hak ${Number(emp?.annualLeave||0)} hari · terpakai ${leave} hari · sisa ${Math.max(0,Number(emp?.annualLeave||0)-leave)} hari.</div></div></div><div class="wf-actions" style="margin-top:12px"><button class="wf-btn soft" type="button" id="demoSaveLeaveBtn">Simpan Hak Cuti</button></div><div class="wf-divider"></div><div class="wf-notice">Owner Pusat boleh membiarkan jadwal akunnya sendiri kosong. Akun lain tetap wajib memiliki jadwal lengkap untuk setiap tanggal dalam bulan.</div></section></div>
@@ -757,6 +772,32 @@
       save(state);
       render(state);
       toast("Tampilan Master Shift Demo dimuat ulang.");
+    });
+    document.getElementById("demoAbsencePolicyUnit")?.addEventListener("change",e=>{
+      const input=document.getElementById("demoAbsencePolicyValue");
+      if(!input)return;
+      if(e.target.value==="days"){
+        input.min="1";input.max="7";input.step="1";
+        input.value=String(Math.max(1,Math.min(7,Math.round(Number(input.value)||1))));
+      }else{
+        input.min="0.5";input.max="168";input.step="0.5";
+        input.value=String(Math.max(0.5,Math.min(168,Number(input.value)||24)));
+      }
+    });
+    document.getElementById("demoSaveAbsencePolicyBtn")?.addEventListener("click",()=>{
+      const unit=document.getElementById("demoAbsencePolicyUnit")?.value==="hours"?"hours":"days";
+      const raw=Number(document.getElementById("demoAbsencePolicyValue")?.value);
+      const valid=unit==="days"
+        ? Number.isInteger(raw)&&raw>=1&&raw<=7
+        : Number.isFinite(raw)&&raw>=0.5&&raw<=168;
+      if(!valid){
+        toast(unit==="days"?"Batas Demo harus 1-7 hari.":"Batas Demo harus 0,5-168 jam.","warn");
+        return;
+      }
+      state.absencePolicy={value:raw,unit};
+      save(state);
+      render(state);
+      toast(`Batas konfirmasi Demo disimpan: ${raw} ${unit==="days"?"hari":"jam"}.`);
     });
     const syncMasterTemplate=()=>{
       const template=state.masterTemplate||{};

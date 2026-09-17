@@ -9,6 +9,12 @@
   };
   const monthNow=()=>{const p=nowParts();return `${p.year}-${p.month}`;};
   const dayName=date=>new Intl.DateTimeFormat("id-ID",{weekday:"short",day:"2-digit",month:"short",timeZone:"UTC"}).format(new Date(`${date}T00:00:00Z`));
+  const formatWindow=minutes=>{
+    const value=Math.max(30,Number(minutes)||1440);
+    if(value%1440===0)return `${value/1440} hari`;
+    const hours=value/60;
+    return `${Number.isInteger(hours)?hours:Number(hours.toFixed(1))} jam`;
+  };
 
   let stores=[];
   let accounts=[];
@@ -91,13 +97,91 @@
     updateStats();
   }
 
+  function syncAbsenceUnitLimits(convert=false){
+    const unit=$("masterAbsenceUnit").value;
+    const input=$("masterAbsenceWindow");
+    const previous=input.dataset.unit||unit;
+    let value=Number(input.value);
+    if(convert&&previous!==unit){
+      if(previous==="days"&&unit==="hours")value=(Number.isFinite(value)?value:1)*24;
+      if(previous==="hours"&&unit==="days")value=Math.ceil((Number.isFinite(value)?value:24)/24);
+    }
+    if(unit==="days"){
+      input.min="1"; input.max="7"; input.step="1";
+      input.value=String(Math.max(1,Math.min(7,Math.round(value)||1)));
+    }else{
+      input.min="0.5"; input.max="168"; input.step="0.5";
+      input.value=String(Math.max(0.5,Math.min(168,Number.isFinite(value)?value:24)));
+    }
+    input.dataset.unit=unit;
+  }
+
+  async function loadAbsencePolicy(){
+    const box=$("masterAbsenceInfo");
+    const storeId=$("masterStore").value;
+    if(!storeId||!box)return;
+    box.className="wf-notice";
+    box.textContent="Memuat batas konfirmasi...";
+    try{
+      const data=await window.LDMWorkforce.absenceSettings({storeId});
+      const minutes=Math.max(30,Number(data.confirmation_window_minutes)||1440);
+      if(minutes%1440===0){
+        $("masterAbsenceUnit").value="days";
+        $("masterAbsenceWindow").value=String(minutes/1440);
+      }else{
+        $("masterAbsenceUnit").value="hours";
+        $("masterAbsenceWindow").value=String(Number((minutes/60).toFixed(1)));
+      }
+      $("masterAbsenceWindow").dataset.unit=$("masterAbsenceUnit").value;
+      syncAbsenceUnitLimits();
+      const store=stores.find(item=>item.store_id===storeId);
+      box.textContent=`Aktif${store?` untuk ${store.store_name}`:""}: ${formatWindow(minutes)} setelah jam masuk + toleransi.`;
+    }catch(error){
+      box.className="wf-notice danger";
+      box.textContent="Batas konfirmasi belum dapat dimuat. "+(error.message||String(error));
+    }
+  }
+
+  async function saveAbsencePolicy(event){
+    event.preventDefault();
+    const storeId=$("masterStore").value;
+    if(!storeId)return;
+    const unit=$("masterAbsenceUnit").value;
+    const value=Number($("masterAbsenceWindow").value);
+    const box=$("masterAbsenceInfo");
+    const valid=unit==="days"
+      ? Number.isInteger(value)&&value>=1&&value<=7
+      : Number.isFinite(value)&&value>=0.5&&value<=168;
+    if(!valid){
+      box.className="wf-notice danger";
+      box.textContent=unit==="days"?"Batas hari harus 1 sampai 7 hari.":"Batas jam harus 0,5 sampai 168 jam.";
+      return;
+    }
+    const minutes=Math.round(value*(unit==="days"?1440:60));
+    const button=$("masterAbsenceSave");
+    button.disabled=true;
+    try{
+      const result=await window.LDMWorkforce.updateAbsenceSettings({
+        storeId,minutes,applyToOpen:$("masterAbsenceApplyOpen").checked
+      });
+      box.className="wf-notice success";
+      box.textContent=result?.applied_to_open
+        ?`Disimpan: ${formatWindow(minutes)}. ${Number(result.open_cases_updated)||0} kasus yang masih menunggu ikut diperbarui.`
+        :`Disimpan: ${formatWindow(minutes)}. Berlaku untuk kasus baru; kasus yang sudah menunggu tetap memakai deadline sebelumnya.`;
+      $("masterAbsenceApplyOpen").checked=false;
+    }catch(error){
+      box.className="wf-notice danger";
+      box.textContent=error.message||String(error);
+    }finally{button.disabled=false;}
+  }
+
   async function loadStores(){
     stores=await window.LDMWorkforce.stores();
     const select=$("masterStore");
     select.innerHTML=stores.map(store=>`<option value="${esc(store.store_id)}">${esc(store.store_name)} (${esc(store.store_code)})${store.is_primary?" · Pusat":""}</option>`).join("");
     const current=localStorage.getItem("ldmCloudStoreId");
     if(current&&stores.some(store=>store.store_id===current))select.value=current;
-    await loadAccounts();
+    await Promise.all([loadAccounts(),loadAbsencePolicy()]);
   }
 
   async function loadAccounts(preferredUserId=""){
@@ -212,10 +296,12 @@
   }
 
   function bind(){
-    $("masterStore").addEventListener("change",()=>loadAccounts().catch(error=>notify(error.message||String(error),"danger")));
+    $("masterStore").addEventListener("change",()=>Promise.all([loadAccounts(),loadAbsencePolicy()]).catch(error=>notify(error.message||String(error),"danger")));
     $("masterMonth").addEventListener("change",()=>loadAccounts(selectedAccount?.user_id||"").catch(error=>notify(error.message||String(error),"danger")));
     $("masterUser").addEventListener("change",()=>selectAccount(true));
     $("masterReload").addEventListener("click",()=>loadStores().catch(error=>notify(error.message||String(error),"danger")));
+    $("masterAbsenceUnit").addEventListener("change",()=>syncAbsenceUnitLimits(true));
+    $("masterAbsencePolicyForm").addEventListener("submit",saveAbsencePolicy);
     $("masterApplyTemplate").addEventListener("click",applyTemplate);
     $("masterSave").addEventListener("click",saveSchedule);
     $("masterSaveLeave").addEventListener("click",saveLeave);

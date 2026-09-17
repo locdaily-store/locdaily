@@ -1,4 +1,4 @@
-// Build: 27.9.0-v28.17.0 Ketidakhadiran Confirmation Deadline & Dynamic Menu
+// Build: 27.9.0-v28.17.1 Master Shift Absence Policy Simplification
 "use strict";
 
 importScripts("./js/app-version.js");
