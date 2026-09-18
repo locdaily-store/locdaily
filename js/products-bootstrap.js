@@ -1,12 +1,41 @@
 (function(){
     "use strict";
 
-    const VERSION="27.9.0-v28.16.2";
+    const VERSION="27.9.0-v28.18.1";
     let running=false;
     let ready=false;
     let retryTimer=null;
     let pendingRetryReason="";
     let attempt=0;
+
+    const PRODUCT_PAGES=new Set([
+        "purchase-order.html",
+        "backup & restore.html",
+        "barang.html",
+        "dashboard.html",
+        "goods.receipt.html",
+        "kartu-stok.html",
+        "kasir.html",
+        "laporan.html",
+        "retur.html",
+        "shift-closing.html",
+        "stock-opname.html"
+    ]);
+
+    function currentPage(){
+        try{
+            return decodeURIComponent(String(window.location.pathname.split("/").pop()||"")).trim().toLowerCase();
+        }catch(_error){
+            return String(window.location.pathname.split("/").pop()||"").trim().toLowerCase();
+        }
+    }
+
+    function pageNeedsProducts(){
+        const explicit=document.documentElement?.getAttribute("data-requires-products");
+        if(explicit==="true") return true;
+        if(explicit==="false") return false;
+        return PRODUCT_PAGES.has(currentPage());
+    }
 
     function apiReady(){
         return Boolean(window.LDMProducts && typeof window.LDMProducts.bootstrap === "function");
@@ -31,6 +60,12 @@
 
     async function boot(trigger="initial"){
         if(ready) return;
+        if(!pageNeedsProducts()){
+            ready=true;
+            attempt=0;
+            pendingRetryReason="";
+            return;
+        }
         if(running){
             pendingRetryReason=trigger || pendingRetryReason || "retry-after-running";
             return;

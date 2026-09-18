@@ -1,4 +1,4 @@
-// Build: 27.9.0-v28.18.0 Primary Owner Catalog Governance + LocDaily Rebrand
+// Build: 27.9.0-v28.18.1 Product Permission Compatibility Hotfix
 "use strict";
 
 importScripts("./js/app-version.js");

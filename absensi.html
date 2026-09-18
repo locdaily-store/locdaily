@@ -3,8 +3,8 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.18.0"></script>
-  <script src="js/brand-migration-v28180.js?v=27.9.0-v28.18.0"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.18.1"></script>
+  <script src="js/brand-migration-v28180.js?v=27.9.0-v28.18.1"></script>
 <script src="js/navigation-performance.js?v=27.9.0-v28.16.3" defer></script>
 
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
@@ -2223,8 +2223,6 @@
     <script src="js/attendance-service.js?v=27.9.0-v28.17.0"></script>
     <script src="js/attendance-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
     
-    <script src="js/products-service.js?v=27.9.0-v28.18.0"></script>
-    <script src="js/products-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
 
 <script src="js/license-v2-config.js?v=27.9.0-v28.13.1"></script>
 <script src="js/license-v2-client.js?v=25.2.0"></script>
@@ -3733,10 +3731,10 @@ const loggedUser =
 }
 
         function cekPeringatanStok() {
-            const dataBarang = window.LDMDataSafe.readArray("dataBarang");
+            // V28.18.1: halaman Absensi tidak memuat katalog produk.
+            // Badge stok hanya dihitung pada halaman yang memang membutuhkan data Barang.
             const badge = document.getElementById("navBadge");
-            const adaStokMata = dataBarang.some(b => Number(b.stok || 0) <= 2);
-            if (badge) badge.style.display = adaStokMata ? "flex" : "none";
+            if (badge) badge.style.display = "none";
         }
 
         document.addEventListener("DOMContentLoaded", function() {
@@ -5788,7 +5786,7 @@ window.addEventListener(
 </script>
 
 <script src="js/attendance-workforce-ui.js?v=28.17.0"></script>
-<script src="js/global-system-navigation.js?v=27.9.0-v28.18.0"></script>
+<script src="js/global-system-navigation.js?v=27.9.0-v28.18.1"></script>
 <script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
 <script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
 </body>
