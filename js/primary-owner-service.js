@@ -86,6 +86,37 @@
             p_enabled:Boolean(enabled)
         });
     }
+    async function branchCatalog(storeId){
+        if(!storeId)throw new Error("Cabang tujuan belum dipilih.");
+        return rpc("ldm_primary_owner_branch_catalog",{p_store_id:storeId});
+    }
+    async function saveCatalogProduct({storeId,product}={}){
+        if(!storeId)throw new Error("Toko tujuan belum dipilih.");
+        if(!product||typeof product!=="object")throw new Error("Data item belum lengkap.");
+        return rpc("ldm_primary_owner_upsert_catalog_product",{
+            p_store_id:storeId,p_product:product
+        });
+    }
+    async function deleteCatalogProduct({storeId,productId}={}){
+        if(!storeId||!productId)throw new Error("Item yang akan dihapus belum dipilih.");
+        return rpc("ldm_primary_owner_delete_catalog_product",{
+            p_store_id:storeId,p_product_id:productId
+        });
+    }
+    async function catalogRequests({status="PENDING",limit=200}={}){
+        return rpc("ldm_primary_owner_catalog_requests",{
+            p_status:status,p_limit:Number(limit)||200
+        });
+    }
+    async function reviewCatalogRequest({requestId,decision,product={},reviewNote=""}={}){
+        if(!requestId)throw new Error("Pengajuan belum dipilih.");
+        return rpc("ldm_primary_owner_review_catalog_request",{
+            p_request_id:requestId,
+            p_decision:String(decision||"").toUpperCase(),
+            p_product:product||{},
+            p_review_note:String(reviewNote||"").trim()||null
+        });
+    }
     async function updateAccount(value={}){
         return rpc("ldm_primary_owner_update_account",{
             p_user_id:value.userId,p_store_id:value.storeId,
@@ -143,8 +174,7 @@
         }
         inspect.forEach(node=>{
             const text=String(node.textContent||"").trim().toLowerCase();
-            if(procurementOwner && /^(subtotal|subtotal estimasi|total nilai|total estimasi)$/.test(text))return;
-            if(text.startsWith("harga beli") || text==="harga estimasi" || /^(hpp|profit bersih|profit setelah hpp|margin keuntungan)$/.test(text)){
+            if(text.startsWith("harga beli") || text==="harga estimasi" || /^(hpp|profit bersih|profit setelah hpp|margin keuntungan|subtotal|subtotal estimasi|total nilai|total estimasi)$/.test(text)){
                 const target=node.closest("th,.field,.form-group,.card,.summary-item")||node;
                 target.classList.add("ldm-finance-restricted");
             }
@@ -168,9 +198,7 @@
             "purchasePrice","unitCostSnapshot","hargaModal","hpp","grossProfit","netProfit",
             "profitBersih","profitSetelahHpp"
         ]);
-        if(!procurementOwner){
-            ["line_subtotal","total_value","subtotal","totalNilai"].forEach(key=>sensitive.add(key));
-        }
+        ["line_subtotal","total_value","subtotal","totalNilai"].forEach(key=>sensitive.add(key));
         const clean=value=>{
             if(Array.isArray(value))return value.map(clean);
             if(!value||typeof value!=="object")return value;
@@ -249,6 +277,7 @@
     window.LDMPrimaryOwner=Object.freeze({
         context,isPrimaryOwner,report,accounts,updateAccount,
         canManageCatalog,catalogStatus,syncCatalog,syncAllCatalog,setCatalogSync,
+        branchCatalog,saveCatalogProduct,deleteCatalogProduct,catalogRequests,reviewCatalogRequest,
         applyPrivacy,initialize
     });
 })();

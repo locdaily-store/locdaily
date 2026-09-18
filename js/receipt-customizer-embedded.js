@@ -1,7 +1,7 @@
 (function(){
     "use strict";
     const VERSION="27.9.0-commercial04-receipt1";
-    const DEFAULTS=Object.freeze({namaToko:"LocDailyMar POS",subHeader:"Frozen Food",footer:"-- Terima Kasih --"});
+    const DEFAULTS=Object.freeze({namaToko:"LocDaily POS",subHeader:"Frozen Food",footer:"-- Terima Kasih --"});
     const $=id=>document.getElementById(id);
     function safeParse(raw){try{return JSON.parse(raw)}catch(_){return null}}
     function clean(value,max=300){return String(value??"").trim().slice(0,max)}

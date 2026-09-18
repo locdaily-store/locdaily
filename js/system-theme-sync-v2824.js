@@ -250,7 +250,7 @@
         document.querySelectorAll("[data-ldm-brand-logo]").forEach(node=>{
             if(!(node instanceof HTMLImageElement))return;
             if(!node.dataset.ldmDefaultLogo){
-                node.dataset.ldmDefaultLogo=node.getAttribute("src")||"locdailymar-logo.png";
+                node.dataset.ldmDefaultLogo=node.getAttribute("src")||"locdaily-logo.png";
             }
             if(config.logoData){
                 node.src=config.logoData;

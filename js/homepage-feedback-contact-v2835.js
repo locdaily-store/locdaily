@@ -8,8 +8,8 @@
   const BUILTIN_FALLBACK={
     version:"1.1",
     remote:{enabled:true,url:"https://vplweadbeujidsoponrl.supabase.co/functions/v1/ldm-public-contact",timeout_ms:7000},
-    whatsapp:{enabled:true,number:"6287874352468",display:"+62 878-7435-2468",label:"WhatsApp Support",greeting:"Halo Tim LocDailyMar, saya ingin bertanya mengenai layanan LocDailyMar."},
-    email:{enabled:false,address:"",label:"Email Support",subject:"Pertanyaan mengenai LocDailyMar"},
+    whatsapp:{enabled:true,number:"6287874352468",display:"+62 878-7435-2468",label:"WhatsApp Support",greeting:"Halo Tim LocDaily, saya ingin bertanya mengenai layanan LocDaily."},
+    email:{enabled:false,address:"",label:"Email Support",subject:"Pertanyaan mengenai LocDaily"},
     support_center:{enabled:true,label:"Pusat Bantuan & Support"},guide:{enabled:true,label:"Panduan Pengguna"},license:{enabled:true,label:"Lisensi & Paket"}
   };
   const FALLBACK=window.LDMPublicContactConfig||BUILTIN_FALLBACK;
@@ -42,13 +42,13 @@
         number:phone(wa.number)||phone(bwa.number),
         display:clean(wa.display,40)||clean(bwa.display,40),
         label:clean(wa.label,60)||clean(bwa.label,60)||"WhatsApp Support",
-        greeting:clean(wa.greeting,240)||clean(bwa.greeting,240)||"Halo Tim LocDailyMar, saya ingin bertanya mengenai layanan LocDailyMar."
+        greeting:clean(wa.greeting,240)||clean(bwa.greeting,240)||"Halo Tim LocDaily, saya ingin bertanya mengenai layanan LocDaily."
       },
       email:{
         enabled:bool(em.enabled,bool(bem.enabled,false)),
         address:clean(em.address,160).toLowerCase()||clean(bem.address,160).toLowerCase(),
         label:clean(em.label,60)||clean(bem.label,60)||"Email Support",
-        subject:clean(em.subject,160)||clean(bem.subject,160)||"Pertanyaan mengenai LocDailyMar"
+        subject:clean(em.subject,160)||clean(bem.subject,160)||"Pertanyaan mengenai LocDaily"
       },
       support_center:{enabled:bool(sp.enabled,bool(bsp.enabled,true)),label:clean(sp.label,70)||clean(bsp.label,70)||"Pusat Bantuan & Support"},
       guide:{enabled:bool(gd.enabled,bool(bgd.enabled,true)),label:clean(gd.label,70)||clean(bgd.label,70)||"Panduan Pengguna"},
@@ -74,9 +74,9 @@
     return true;
   }
   function feedbackText(data){return [
-    "Halo Tim LocDailyMar, saya ingin memberikan Feedback & Masukan.","",
+    "Halo Tim LocDaily, saya ingin memberikan Feedback & Masukan.","",
     `Kategori: ${CATEGORY_LABELS[data.category]||"Lainnya"}`,`Judul: ${data.subject}`,data.name?`Nama: ${data.name}`:"","",
-    "Masukan:",data.message,"","Dikirim dari Homepage LocDailyMar."
+    "Masukan:",data.message,"","Dikirim dari Homepage LocDaily."
   ].filter(Boolean).join("\n")}
 
   function cfg(){return activeConfig||normalize(FALLBACK,FALLBACK)}

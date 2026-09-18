@@ -63,7 +63,7 @@
 
             request.onsuccess = () => resolve(request.result);
             request.onerror = () => reject(request.error || new Error("Penyimpanan lokal tidak dapat dibuka."));
-            request.onblocked = () => reject(new Error("Pembaruan penyimpanan lokal terhalang tab lain. Tutup tab LocDailyMar lain lalu coba lagi."));
+            request.onblocked = () => reject(new Error("Pembaruan penyimpanan lokal terhalang tab lain. Tutup tab LocDaily lain lalu coba lagi."));
         });
 
         return dbPromise;
@@ -979,7 +979,7 @@
             return;
         }
         navigator.serviceWorker.register("service-worker.js", {scope:"./",updateViaCache:"none"})
-            .catch(error => console.warn("Service Worker LocDailyMar gagal didaftarkan:", error));
+            .catch(error => console.warn("Service Worker LocDaily gagal didaftarkan:", error));
     }
 
     function boot(){

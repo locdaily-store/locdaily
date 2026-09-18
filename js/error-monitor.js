@@ -233,11 +233,11 @@
         capture,
         flush,
         pendingCount: () => queue.length,
-        test: () => capture("Uji Monitoring LocDailyMar — event sintetis, bukan error aplikasi.",{
+        test: () => capture("Uji Monitoring LocDaily — event sintetis, bukan error aplikasi.",{
             action:"monitoring_test",
             severity:"warning",
             error_name:"MonitoringTest",
-            message:"Uji Monitoring LocDailyMar — event sintetis, bukan error aplikasi."
+            message:"Uji Monitoring LocDaily — event sintetis, bukan error aplikasi."
         })
     });
 })();

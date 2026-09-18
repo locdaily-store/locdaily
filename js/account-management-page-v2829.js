@@ -268,7 +268,7 @@
       const identity=$("identity");
       if(identity){
         identity.textContent=[
-          currentContext?.profile?.store_name||"LocDailyMar",
+          currentContext?.profile?.store_name||"LocDaily",
           currentContext?.profile?.store_code||"-",
           `${currentContext?.profile?.username||"-"} (${currentRole.toUpperCase()})`
         ].join(" • ");

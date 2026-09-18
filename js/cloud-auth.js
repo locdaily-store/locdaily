@@ -67,7 +67,7 @@
 
     function getDeviceName(){
         const platform=navigator.userAgentData?.platform || navigator.platform || "Browser";
-        return `LocDailyMar - ${platform}`;
+        return `LocDaily - ${platform}`;
     }
 
     function getPlatformInfo(){

@@ -473,12 +473,12 @@
         root.style.setProperty("--nav-desktop-bg",dark&&headerColor==="#0d2240"?"#1e293b":headerColor);
         root.style.setProperty("--accent-color",accent);
         document.querySelectorAll("[data-ldm-brand-title]").forEach(node=>{
-            node.textContent=config.judul||"LocDailyMar";
+            node.textContent=config.judul||"LocDaily";
             if(config.warnaJudul)node.style.color=config.warnaJudul;
             if(config.warnaOutline)node.style.textShadow=`1px 1px 0 ${config.warnaOutline}`;
         });
         document.querySelectorAll("[data-ldm-brand-subtitle]").forEach(node=>{
-            node.textContent=config.subJudul||"LocDailyMar";
+            node.textContent=config.subJudul||"LocDaily";
             node.style.color=accent;
         });
         document.querySelectorAll("[data-ldm-brand-logo]").forEach(node=>{
@@ -621,7 +621,7 @@
         drawer.className="ldm-global-mobile-drawer";
         drawer.setAttribute("aria-label","Menu navigasi HP");
         const profile=modeProfile();
-        drawer.innerHTML=`<div class="ldm-global-mobile-head"><strong>☰ Menu LocDailyMar</strong><button type="button" class="ldm-global-mobile-close" aria-label="Tutup menu">✕</button></div><div class="ldm-global-mobile-context"><strong>${esc(sessionName())} · ${esc(role)}</strong><span data-ldm-store-name>${esc(storeName())}</span><span class="ldm-global-mobile-mode">${profile.icon} ${esc(profile.label)}</span></div>${groupedHTML(routes,"mobile")}`;
+        drawer.innerHTML=`<div class="ldm-global-mobile-head"><strong>☰ Menu LocDaily</strong><button type="button" class="ldm-global-mobile-close" aria-label="Tutup menu">✕</button></div><div class="ldm-global-mobile-context"><strong>${esc(sessionName())} · ${esc(role)}</strong><span data-ldm-store-name>${esc(storeName())}</span><span class="ldm-global-mobile-mode">${profile.icon} ${esc(profile.label)}</span></div>${groupedHTML(routes,"mobile")}`;
         document.body.append(overlay,drawer);
 
         drawer.querySelector(".ldm-global-mobile-close").addEventListener("click",closeMobileDrawer);

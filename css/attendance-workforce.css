@@ -1,4 +1,4 @@
-/* LocDailyMar V28.5.1 - attendance schedule enforcement + links */
+/* LocDaily V28.5.1 - attendance schedule enforcement + links */
 .ldm-schedule-rule{display:none;margin:0 0 14px;padding:11px 12px;border-radius:12px;font-size:.84rem;line-height:1.5}
 .ldm-schedule-rule.show{display:block}.ldm-schedule-rule.work{background:#ecfdf5;border:1px solid #bbf7d0;color:#166534}.ldm-schedule-rule.off{background:#f8fafc;border:1px solid #cbd5e1;color:#475569}.ldm-schedule-rule.blocked{background:#fff1f2;border:1px solid #fecdd3;color:#9f1239}
 body.dark-mode .ldm-schedule-rule.work{background:#052e1b;border-color:#166534;color:#bbf7d0}body.dark-mode .ldm-schedule-rule.off{background:#1e293b;border-color:#475569;color:#cbd5e1}body.dark-mode .ldm-schedule-rule.blocked{background:#450a0a;border-color:#991b1b;color:#fecaca}

@@ -99,7 +99,7 @@
                 resolve(db);
             };
             request.onerror = () => reject(request.error || new Error('Penyimpanan lokal gagal dibuka.'));
-            request.onblocked = () => reject(new Error('Pembaruan penyimpanan lokal terhalang tab LocDailyMar lain. Tutup tab lain lalu coba kembali.'));
+            request.onblocked = () => reject(new Error('Pembaruan penyimpanan lokal terhalang tab LocDaily lain. Tutup tab lain lalu coba kembali.'));
         });
 
         return dbPromise;
@@ -392,7 +392,7 @@
         });
         if (options.cleanup !== false) {
             await cleanupTransactions(options).catch(error => {
-                console.warn('[LocDailyMar] Cleanup transaction archive dilewati:', error);
+                console.warn('[LocDaily] Cleanup transaction archive dilewati:', error);
             });
         }
         return { written: records.length };
@@ -649,7 +649,7 @@
          */
         setTimeout(() => {
             autoCleanupTransactions().catch(error => {
-                console.warn('[LocDailyMar] Auto cleanup arsip transaksi lokal dilewati:', error);
+                console.warn('[LocDaily] Auto cleanup arsip transaksi lokal dilewati:', error);
             });
         }, 0);
 
@@ -667,7 +667,7 @@
         return ready()
             .then(() => putRaw(storageKey, value, options))
             .catch(error => {
-                console.warn('[LocDailyMar] Sinkronisasi penyimpanan lokal gagal:', storageKey, error);
+                console.warn('[LocDaily] Sinkronisasi penyimpanan lokal gagal:', storageKey, error);
                 return null;
             });
     }
@@ -722,7 +722,7 @@
     });
 
     ready().catch(error => {
-        console.warn('[LocDailyMar] Storage Engine 27.9.0-storage-archive-v2826 tidak dapat diinisialisasi:', error);
+        console.warn('[LocDaily] Storage Engine 27.9.0-storage-archive-v2826 tidak dapat diinisialisasi:', error);
         window.dispatchEvent(new CustomEvent('ldm:indexeddb-error', {
             detail: { message: String(error && error.message || error) }
         }));

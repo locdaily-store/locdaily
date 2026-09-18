@@ -3,7 +3,8 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.17.1"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.18.0"></script>
+  <script src="js/brand-migration-v28180.js?v=27.9.0-v28.18.0"></script>
 <script src="js/navigation-performance.js?v=27.9.0-v28.16.3" defer></script>
 
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
@@ -13,7 +14,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <title>Lisensi & Paket · LocDailyMar</title>
+  <title>Lisensi & Paket · LocDaily</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -123,7 +124,7 @@
   <script src="js/security-hardening.js?v=27.9.0-v28.16.2-final"></script>
 </head>
 <body class="ldm-system-page" data-ldm-system-page="license.html" data-ldm-system-label="Lisensi & Paket">
-  <header class="top" data-ldm-system-banner="primary"><div class="topin"><div class="brand">LocDailyMar<small>LISENSI APLIKASI</small></div><div class="top-actions"><a href="homepage.html">← Homepage</a><a href="#ownerLicenseVault">Data Lisensi Saya</a><a href="index.html">Masuk aplikasi</a></div></div></header>
+  <header class="top" data-ldm-system-banner="primary"><div class="topin"><div class="brand">LocDaily<small>LISENSI APLIKASI</small></div><div class="top-actions"><a href="homepage.html">← Homepage</a><a href="#ownerLicenseVault">Data Lisensi Saya</a><a href="index.html">Masuk aplikasi</a></div></div></header>
   <main class="wrap">
     <section class="hero">
       <span class="eyebrow">Lisensi · Paket Berbayar</span>
@@ -139,7 +140,7 @@
 
     <section class="checkout-panel" id="publicCheckoutPanel" hidden>
       <div class="checkout-head">
-        <div><span class="tag" id="checkoutTag">PEMBAYARAN LYNK.ID</span><h2 id="checkoutTitle">Pesan Lisensi LocDailyMar</h2><p id="checkoutDescription">Isi data pelanggan, lalu lanjutkan ke halaman pembayaran Lynk.id. Setelah pembayaran berhasil diverifikasi, hasil ditampilkan di halaman Lisensi.</p></div>
+        <div><span class="tag" id="checkoutTag">PEMBAYARAN LYNK.ID</span><h2 id="checkoutTitle">Pesan Lisensi LocDaily</h2><p id="checkoutDescription">Isi data pelanggan, lalu lanjutkan ke halaman pembayaran Lynk.id. Setelah pembayaran berhasil diverifikasi, hasil ditampilkan di halaman Lisensi.</p></div>
         <button type="button" class="checkout-close" id="checkoutCloseBtn" aria-label="Tutup pembayaran">✕</button>
       </div>
       <div class="checkout-body" id="publicCheckoutBody">
@@ -155,9 +156,9 @@
             <div class="checkout-field"><label>Periode paket</label><select id="checkoutPeriod" required></select><div class="password-help" id="checkoutPeriodSaving" hidden></div></div>
             <div class="checkout-field" id="checkoutGatewayField" hidden><label>Payment Gateway</label><div class="password-help" id="checkoutGatewayHelp">Lynk.id adalah satu-satunya payment gateway aktif.</div></div>
             <div class="checkout-field full" id="checkoutWhatsAppNotice" hidden><div style="border:1px solid #bde3cc;background:#f1fbf5;border-radius:12px;padding:12px 13px;color:#215c39;font-size:12px;line-height:1.55"><strong>💬 Pembayaran sementara via WhatsApp</strong><br>Mode manual cadangan. Password Owner tidak pernah dimasukkan ke pesan WhatsApp.</div></div>
-            <div class="checkout-field full" id="checkoutLynkNotice" hidden><div style="border:1px solid #b8d8f6;background:#f2f8ff;border-radius:12px;padding:12px 13px;color:#214e75;font-size:12px;line-height:1.6"><strong>🔗 Pembayaran via Lynk.id</strong><br>Sebelum Lynk.id dibuka, LocDailyMar membuat <b>pending order</b> di server. Gunakan <b>Email Owner yang sama</b> saat checkout Lynk.id. Setelah pembayaran sukses, sistem mencocokkan transaksi dengan data order. Jika cocok, lisensi aktif otomatis. Data lisensi tetap tersedia di halaman ini dan email konfirmasi dapat dikirim oleh sistem. Data sensitif tetap disamarkan dan dapat dibuka melalui <b>Data Lisensi Saya</b>.</div></div>
+            <div class="checkout-field full" id="checkoutLynkNotice" hidden><div style="border:1px solid #b8d8f6;background:#f2f8ff;border-radius:12px;padding:12px 13px;color:#214e75;font-size:12px;line-height:1.6"><strong>🔗 Pembayaran via Lynk.id</strong><br>Sebelum Lynk.id dibuka, LocDaily membuat <b>pending order</b> di server. Gunakan <b>Email Owner yang sama</b> saat checkout Lynk.id. Setelah pembayaran sukses, sistem mencocokkan transaksi dengan data order. Jika cocok, lisensi aktif otomatis. Data lisensi tetap tersedia di halaman ini dan email konfirmasi dapat dikirim oleh sistem. Data sensitif tetap disamarkan dan dapat dibuka melalui <b>Data Lisensi Saya</b>.</div></div>
           </div>
-          <label class="checkout-agree"><input type="checkbox" id="checkoutAgree"> <span>Saya memastikan Nama, Email Owner, nomor WhatsApp, Store Code, paket, dan periode sudah benar. Saya memahami pembayaran dilakukan melalui Lynk.id dan akses lisensi hanya diberikan setelah pembayaran berhasil dicocokkan dan diverifikasi oleh sistem LocDailyMar.</span></label>
+          <label class="checkout-agree"><input type="checkbox" id="checkoutAgree"> <span>Saya memastikan Nama, Email Owner, nomor WhatsApp, Store Code, paket, dan periode sudah benar. Saya memahami pembayaran dilakukan melalui Lynk.id dan akses lisensi hanya diberikan setelah pembayaran berhasil dicocokkan dan diverifikasi oleh sistem LocDaily.</span></label>
           <div class="checkout-actions">
             <button class="btn primary" type="submit" id="checkoutPayBtn">Lanjut Bayar via Lynk.id</button>
             <button class="btn ghost" type="button" id="checkoutLynkConfirmBtn" hidden>Konfirmasi Manual via WhatsApp</button>
@@ -172,7 +173,7 @@
           <div class="checkout-status" id="publicCheckoutStatus"></div>
           <div class="checkout-security"><b>Keamanan pembayaran Lynk.id:</b> Halaman ini mengarahkan pelanggan ke checkout Lynk.id yang resmi. Password Owner tidak dikirim ke Lynk.id atau WhatsApp. Status pembayaran hanya menjadi lunas setelah transaksi berhasil diverifikasi oleh sistem. Hasil lisensi dapat dilihat kembali melalui panel hasil dan tombol Cek Status Pembayaran.</div>
           <div class="refund-policy-card" id="refundPolicyCard">
-            <strong>↩ Kebijakan Refund LocDailyMar</strong>
+            <strong>↩ Kebijakan Refund LocDaily</strong>
             <ul>
               <li>Refund hanya tersedia dalam bentuk <b>Refund Penuh</b>. Partial refund tidak tersedia.</li>
               <li>Pengajuan harus dilakukan maksimal <b id="refundPolicyDays">24 jam</b> setelah pembayaran terverifikasi.</li>
@@ -181,7 +182,7 @@
               <li>Jika batas 24 jam sudah lewat, form refund otomatis tidak ditampilkan.</li>
               <li>Order yang masih PENDING dibatalkan melalui tombol <b>Batalkan Order Pembayaran</b>, bukan melalui refund.</li>
             </ul>
-            <span id="refundPolicyState">Memuat kebijakan refund LocDailyMar…</span>
+            <span id="refundPolicyState">Memuat kebijakan refund LocDaily…</span>
           </div>
         </form>
         <aside class="checkout-summary">
@@ -190,7 +191,7 @@
           <span>Periode</span><strong id="checkoutPlanPeriod">-</strong>
           <span>Total resmi</span><strong class="checkout-total" id="checkoutPlanAmount">Rp0</strong>
           <span>Proses pembayaran</span><strong id="checkoutGatewaySummary">Lynk.id</strong>
-          <span>Setelah pembayaran</span><strong style="font-size:12px;line-height:1.5">Biarkan halaman LocDailyMar tetap terbuka. Sistem akan memantau status order; setelah pembayaran terverifikasi, lisensi tampil otomatis pada halaman License ini.</strong>
+          <span>Setelah pembayaran</span><strong style="font-size:12px;line-height:1.5">Biarkan halaman LocDaily tetap terbuka. Sistem akan memantau status order; setelah pembayaran terverifikasi, lisensi tampil otomatis pada halaman License ini.</strong>
         </aside>
       </div>
           <section class="license-receipt" id="licenseReceipt" hidden aria-live="polite">
@@ -454,16 +455,16 @@
       cloud_devices:['Perangkat Cloud','Mengatur perangkat yang boleh memakai akun dan toko.'],
       recovery_center:['Recovery Center','Menyelesaikan konflik sinkronisasi dan pemulihan operasional.'],
       app_update:['Aplikasi & Update','Mengelola versi PWA, cache, dan pembaruan aplikasi.'],
-      multi_store:['Multi-Toko & Transfer','Mengelola cabang, pindah toko aktif, transfer stok/karyawan, serta katalog cabang yang aman untuk mode operasional berbeda.'],
+      multi_store:['Multi-Toko & Transfer','Mengelola cabang, pindah toko aktif, transfer stok/karyawan, serta katalog lintas mode yang tetap dikendalikan Owner Pusat.'],
       cloud_control:['Cloud Control','Memantau sinkronisasi dan kontrol cloud tingkat lanjut.'],
-      central_control:['Kontrol Pusat','Laporan jaringan, profit, karyawan, serta sinkronisasi katalog pusat untuk cabang dengan mode yang sama.'],
+      central_control:['Kontrol Pusat','Laporan jaringan, profit, karyawan, sinkronisasi katalog mode sama, serta pengelolaan katalog khusus cabang beda mode oleh Owner Pusat.'],
       eod:['End of Day','Menutup operasional harian setelah seluruh shift selesai.'],
       qa_security:['QA & Security','Menjalankan pemeriksaan kesehatan, keamanan, dan konfigurasi sistem.']
     };
     const PLAN_META={
       WARUNG_KECIL:{tag:'MULAI USAHA',summary:'Operasional inti untuk warung/toko satu cabang yang membutuhkan kasir, stok, absensi, dan laporan.',functions:[['Kasir & stok','Transaksi langsung mengurangi stok dan masuk laporan.'],['Kontrol fisik','Stock Opname dan Kartu Stok membantu mengecek selisih.'],['Operasional dasar','Absensi termasuk Master Shift, cuti tahunan, Ketidakhadiran, retur, closing, backup, dan promo dasar.'],['Akun Dummy Aman','Demo tersedia dengan data contoh tanpa memakai kuota perangkat atau toko. Halaman inti mengikuti susunan visual modul aplikasi utama masing-masing, tetapi tampilan dan fitur Demo tetap dapat berbeda dari penggunaan sebenarnya.'],['Akun & perangkat','Kelola akun karyawan dan hingga 2 perangkat pada satu toko.']]},
       WARUNG_SEDERHANA:{tag:'TRIAL 14 HARI',summary:'Untuk usaha yang mulai membutuhkan supplier, pembelian, biaya operasional, akun cloud, recovery, dan pengelolaan kehadiran terjadwal.',functions:[['Trial 14 hari','Coba gratis dengan kuota 1 perangkat dan 1 toko. Akun Owner dan toko langsung disiapkan setelah pendaftaran berhasil.'],['Pembelian lengkap','Supplier, Purchase Order, dan Penerimaan Barang.'],['Kehadiran terjadwal','Master Shift, cuti tahunan, dan Ketidakhadiran.'],['Akun Dummy Aman','Demo tersedia dengan data contoh tanpa memakai kuota perangkat atau toko. Halaman inti mengikuti susunan visual modul aplikasi utama masing-masing, tetapi tampilan dan fitur Demo tetap dapat berbeda dari penggunaan sebenarnya.'],['Cloud operasional','Paket berbayar mendukung hingga 3 perangkat pada satu toko.'],['Lanjut tanpa kehilangan data','Setelah Trial berakhir, data toko tetap tersimpan dan dapat dilanjutkan dengan paket berbayar.']]},
-      TOKO:{tag:'MULTI CABANG',summary:'Untuk bisnis dengan beberapa cabang yang membutuhkan kontrol pusat, pengawasan kehadiran lintas cabang, transfer stok/karyawan, EOD, dan security QA.',functions:[['Multi-Toko','Kelola hingga 5 toko dengan total 15 perangkat dalam satu jaringan, dengan katalog pusat untuk mode sama dan katalog mandiri untuk mode berbeda.'],['Kehadiran lintas cabang','Owner Cabang melihat cabangnya; Owner Pusat dapat melihat Ketidakhadiran seluruh cabang.'],['Akun Dummy Aman','Demo Owner Pusat, Owner Cabang, Admin, dan Kasir tersedia tanpa memakai kuota perangkat atau toko. Halaman inti mengikuti susunan visual modul aplikasi utama masing-masing, tetapi tampilan dan fitur Demo tetap dapat berbeda dari penggunaan sebenarnya.'],['Transfer cabang','Transfer stok melalui Draft → Dalam Pengiriman → Diterima dan pindahkan Admin/Kasir dengan riwayat perpindahan.'],['Kontrol lanjutan','Kontrol Pusat, sinkronisasi katalog mode-safe, Cloud Control, EOD, QA dan Security dengan pembatasan halaman sesuai role akun.']]}
+      TOKO:{tag:'MULTI CABANG',summary:'Untuk bisnis dengan beberapa cabang yang membutuhkan kontrol pusat, pengawasan kehadiran lintas cabang, transfer stok/karyawan, EOD, dan security QA.',functions:[['Multi-Toko','Kelola hingga 5 toko dengan total 15 perangkat dalam satu jaringan. Mode sama dapat mengikuti katalog pusat; mode berbeda memakai katalog khusus cabang yang master-nya tetap dikendalikan Owner Pusat.'],['Kehadiran lintas cabang','Owner Cabang melihat cabangnya; Owner Pusat dapat melihat Ketidakhadiran seluruh cabang.'],['Akun Dummy Aman','Demo Owner Pusat, Owner Cabang, Admin, dan Kasir tersedia tanpa memakai kuota perangkat atau toko. Halaman inti mengikuti susunan visual modul aplikasi utama masing-masing, tetapi tampilan dan fitur Demo tetap dapat berbeda dari penggunaan sebenarnya.'],['Transfer cabang','Transfer stok melalui Draft → Dalam Pengiriman → Diterima dan pindahkan Admin/Kasir dengan riwayat perpindahan.'],['Kontrol lanjutan','Kontrol Pusat mengelola katalog seluruh cabang. Owner Cabang dapat mengajukan item baru tanpa akses harga beli/HPP, ditambah Cloud Control, EOD, QA dan Security sesuai role akun.']]}
     };
     const PLAN_FEATURES={
       WARUNG_KECIL:['demo_account','dashboard','pos','inventory','stock_card','stock_opname','reports','attendance','returns','shift_closing','backup_restore','basic_promo','cloud_accounts','cloud_devices'],
@@ -574,7 +575,7 @@
 
 <script src="js/store-mode.js?v=27.9.0-systemui24"></script>
 <script src="js/system-theme-sync-v2824.js?v=27.9.0-systemui24"></script>
-<script src="js/global-system-navigation.js?v=27.9.0-v28.17.0"></script>
+<script src="js/global-system-navigation.js?v=27.9.0-v28.18.0"></script>
 <script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
 <script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
 </body>

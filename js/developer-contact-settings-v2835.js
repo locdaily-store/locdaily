@@ -2,8 +2,8 @@
   "use strict";
   const $=id=>document.getElementById(id);
   const DEFAULT={
-    whatsapp:{enabled:true,number:"6287874352468",display:"+62 878-7435-2468",label:"WhatsApp Support",greeting:"Halo Tim LocDailyMar, saya ingin bertanya mengenai layanan LocDailyMar."},
-    email:{enabled:false,address:"",label:"Email Support",subject:"Pertanyaan mengenai LocDailyMar"},
+    whatsapp:{enabled:true,number:"6287874352468",display:"+62 878-7435-2468",label:"WhatsApp Support",greeting:"Halo Tim LocDaily, saya ingin bertanya mengenai layanan LocDaily."},
+    email:{enabled:false,address:"",label:"Email Support",subject:"Pertanyaan mengenai LocDaily"},
     support_center:{enabled:true,label:"Pusat Bantuan & Support"},guide:{enabled:true,label:"Panduan Pengguna"},license:{enabled:true,label:"Lisensi & Paket"}
   };
   let lastServerConfig=null;

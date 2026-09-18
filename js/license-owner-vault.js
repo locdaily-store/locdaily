@@ -203,7 +203,7 @@
 
   function revealText(r){
     return [
-      "LocDailyMar — DATA LISENSI OWNER",
+      "LocDaily — DATA LISENSI OWNER",
       `Paket: ${r.plan_name||r.plan_code||"-"}`,
       `Status: ${r.status||"-"}`,
       `License Key: ${r.license_key||"Tidak tersedia"}`,

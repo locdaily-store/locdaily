@@ -10,10 +10,9 @@
     const LAST_SYNC_KEY =
         "ldmProductsLastSyncAt";
 
-    const CHANNEL_NAME =
-        "ldm-products-realtime-v7";
+    const SAFE_REFRESH_INTERVAL_MS = 15000;
 
-    let channel =
+    let refreshTimer =
         null;
 
     let syncTimer =
@@ -231,6 +230,22 @@
         }
     }
 
+    function scrubSensitiveCostCache(){
+        const items=readCache();
+        if(!items.length)return items;
+        let changed=false;
+        const safe=items.map(item=>{
+            if(!item||typeof item!=="object")return item;
+            const next={...item};
+            if(Number(next.hargaBeli||0)!==0){next.hargaBeli=0;changed=true}
+            if("purchase_price" in next && Number(next.purchase_price||0)!==0){next.purchase_price=0;changed=true}
+            if("hpp" in next && Number(next.hpp||0)!==0){next.hpp=0;changed=true}
+            return next;
+        });
+        if(changed)localStorage.setItem(CACHE_KEY,JSON.stringify(safe));
+        return safe;
+    }
+
     function isEnabled(){
         return localStorage.getItem(
             ENABLED_KEY
@@ -255,8 +270,8 @@
             client();
 
         // Purchase Order dan Goods Receipt memakai endpoint khusus procurement.
-        // Server hanya mengirim harga beli kepada role Owner pada toko aktifnya.
-        // Admin/Kasir tetap menerima nilai 0 sehingga pembatasan tidak bergantung
+        // Server hanya mengirim harga beli kepada Owner Pusat.
+        // Owner Cabang/Admin/Kasir menerima nilai 0 sehingga pembatasan tidak bergantung
         // pada CSS atau localStorage browser.
         const rpcName = isProcurementPage()
             ? "ldm_visible_procurement_products"
@@ -554,74 +569,30 @@
     }
 
     async function startRealtime(){
-        if(channel){
-            return channel;
+        if(refreshTimer){
+            return refreshTimer;
         }
 
-        const context =
-            await getContext();
+        await getContext();
 
-        const storeId =
-            context.profile.store_id;
+        // V28.18.0: tidak lagi subscribe langsung ke tabel products.
+        // Direct SELECT dicabut agar purchase_price tidak dapat dibaca Owner Cabang.
+        // Cache tetap disegarkan lewat RPC aman yang melakukan masking server-side.
+        refreshTimer=setInterval(async()=>{
+            try{
+                await refreshCache();
+            }catch(error){
+                console.error("Refresh aman produk gagal:",error);
+            }
+        },SAFE_REFRESH_INTERVAL_MS);
 
-        if(!storeId){
-            throw new Error(
-                "store_id cloud tidak tersedia."
-            );
-        }
-
-        const supabase =
-            client();
-
-        channel =
-            supabase
-                .channel(
-                    CHANNEL_NAME
-                )
-                .on(
-                    "postgres_changes",
-                    {
-                        event:
-                            "*",
-                        schema:
-                            "public",
-                        table:
-                            "products",
-                        filter:
-                            `store_id=eq.${storeId}`
-                    },
-                    async function(){
-                        try{
-                            await refreshCache();
-                        }catch(error){
-                            console.error(
-                                "Realtime refresh produk gagal:",
-                                error
-                            );
-                        }
-                    }
-                )
-                .subscribe();
-
-        return channel;
+        return refreshTimer;
     }
 
     async function stopRealtime(){
-        if(!channel){
-            return;
-        }
-
-        const supabase =
-            client();
-
-        try{
-            await supabase
-                .removeChannel(
-                    channel
-                );
-        }finally{
-            channel = null;
-        }
+        if(!refreshTimer)return;
+        clearInterval(refreshTimer);
+        refreshTimer=null;
     }
 
     async function bootstrap(){
@@ -633,6 +604,13 @@
                 "Store ID pada sesi Cloud Barang belum tersedia."
             );
         }
+
+        const role=String(context?.profile?.role||"").toLowerCase();
+        let mayViewCost=false;
+        if(role==="owner"){
+            try{mayViewCost=await canManageCatalog(context)}catch(_error){mayViewCost=false}
+        }
+        if(!mayViewCost)scrubSensitiveCostCache();
 
         const rows =
             await fetchAll();
@@ -667,6 +645,7 @@
     window.LDMProducts =
         Object.freeze({
             readCache,
+            scrubSensitiveCostCache,
             isEnabled,
             fetchAll,
             refreshCache,

@@ -1,14 +1,15 @@
 <!DOCTYPE html><html lang="id" class="secure-page-pending"><head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.17.1"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.18.0"></script>
+  <script src="js/brand-migration-v28180.js?v=27.9.0-v28.18.0"></script>
 <script src="js/navigation-performance.js?v=27.9.0-v28.16.3" defer></script>
 
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
     <script src="js/storage-quota-guard.js?v=27.7.1"></script>
     <script defer src="js/storage-health-monitor.js?v=27.9.0-v28.16.1-runtimefix"></script>
 <script src="js/local-time.js?v=26.4.0"></script><meta name="referrer" content="strict-origin-when-cross-origin"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><script src="js/security-hardening.js?v=27.9.0-v28.16.2-final"></script>    <script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
-<script defer src="js/qa-runtime.js?v=19.0"></script><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Backup & Restore - LocDailyMar POS</title><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#0d2240"><link rel="stylesheet" href="style.css"><link rel="icon" type="image/png" href="icon.png"><link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fira+Code:wght@500;700&family=Fredoka:wght@600;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&family=Lato:wght@400;700&family=Lobster&family=Merriweather:wght@400;700&family=Montserrat:wght@400;600;700&family=Nunito:wght@400;700&family=Open+Sans:wght@400;600;700&family=Oswald:wght@500;700&family=Pacifico&family=Playfair+Display:wght@600;800&family=Poppins:wght@400;600;700&family=Raleway:wght@500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"><style>.secure-page-pending body{visibility:hidden!important;}
+<script defer src="js/qa-runtime.js?v=19.0"></script><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Backup & Restore - LocDaily POS</title><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#0d2240"><link rel="stylesheet" href="style.css"><link rel="icon" type="image/png" href="icon.png"><link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fira+Code:wght@500;700&family=Fredoka:wght@600;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&family=Lato:wght@400;700&family=Lobster&family=Merriweather:wght@400;700&family=Montserrat:wght@400;600;700&family=Nunito:wght@400;700&family=Open+Sans:wght@400;600;700&family=Oswald:wght@500;700&family=Pacifico&family=Playfair+Display:wght@600;800&family=Poppins:wght@400;600;700&family=Raleway:wght@500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"><style>.secure-page-pending body{visibility:hidden!important;}
 
         :root {
             --app-font: 'Poppins', sans-serif;
@@ -626,7 +627,7 @@
 
 
 <!-- =========================================================
-     LOCDailyMar RESPONSIVE MEGA MENU
+     LocDaily RESPONSIVE MEGA MENU
      Desktop  : Mega Menu
      HP/Tablet: Hamburger Drawer
      ========================================================= -->
@@ -1543,7 +1544,7 @@
     <script src="js/role-access-guard-v28120.js?v=27.9.0-v28.12.0"></script>
 <script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
     
-    <script src="js/products-service.js?v=27.9.0-v28.16.2-final"></script>
+    <script src="js/products-service.js?v=27.9.0-v28.18.0"></script>
     <script src="js/products-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
 
 <script src="js/license-v2-config.js?v=27.9.0-v28.13.1"></script>
@@ -1563,7 +1564,7 @@
             <a href="eod.html" class="nav-item" data-role-access="owner,admin"><span>🌙</span> End of Day</a>
             <a href="pengeluaran.html" class="nav-item" data-role-access="owner,admin"><span>💸</span> Pengeluaran</a>
             <a href="backup%20%26%20restore.html" class="nav-item active" data-role-access="owner,admin"><span>💾</span> Backup & Restore</a>
-</nav><main class="main-content"><header class="header-app" id="headerApp"><div class="header-brand-container"><button class="btn-toggle-menu" onclick="bukaMenuNavigasi()">☰</button><img id="imgLogoToko" class="header-logo-img" alt="Logo"><div><h1 id="txtJudulToko">LocDailyMar</h1><p id="txtSubJudulToko">Backup Cache Lokal & Cadangan Data Cloud</p></div></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span id="txtUserLoggedIn" style="font-size:.78rem;font-weight:600;background:rgba(255,255,255,.15);padding:4px 10px;border-radius:20px">👤 -</span><button class="btn-header-action btn-header-logout" onclick="logout()">🚪 Logout</button></div></header>
+</nav><main class="main-content"><header class="header-app" id="headerApp"><div class="header-brand-container"><button class="btn-toggle-menu" onclick="bukaMenuNavigasi()">☰</button><img id="imgLogoToko" class="header-logo-img" alt="Logo"><div><h1 id="txtJudulToko">LocDaily</h1><p id="txtSubJudulToko">Backup Cache Lokal & Cadangan Data Cloud</p></div></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span id="txtUserLoggedIn" style="font-size:.78rem;font-weight:600;background:rgba(255,255,255,.15);padding:4px 10px;border-radius:20px">👤 -</span><button class="btn-header-action btn-header-logout" onclick="logout()">🚪 Logout</button></div></header>
 <div class="filter-date-box"><div><span style="color:#64748b;font-size:.75rem">🕒 Waktu WITA:</span> <span class="running-clock-display" id="clockDisplay">00:00:00 WITA</span></div><div style="font-size:.72rem;color:#64748b">🛡️ Simpan salinan data secara berkala</div></div>
 <div class="stats-grid"><div class="stat-box"><span>Jumlah Key Persistent</span><strong id="statKeys">0</strong></div><div class="stat-box"><span>Estimasi Ukuran</span><strong id="statSize">0 KB</strong></div><div class="stat-box"><span>Backup Terakhir</span><strong id="statLast">Belum ada</strong></div><div class="stat-box"><span>Hak Akses Pemulihan</span><strong id="statRole">Owner</strong></div></div>
 <div class="warning-backup"><strong>⚠️</strong> halaman ini hanya Backup/Restore CACHE LOKAL. Data resmi transaksi, stok, absensi, retur, procurement, closing, EOD, laporan, dan pengeluaran berada pada penyimpanan Cloud resmi. Untuk snapshot cloud gunakan <a href="cloud-control-center.html" style="font-weight:800;color:inherit">Pusat Kontrol Data</a>.</div>
@@ -1572,7 +1573,7 @@
 <section class="box-container" style="margin-bottom:15px"><div class="box-title"><span>☁️ Alat Data Cloud</span></div><div style="padding:14px"><p style="font-size:.7rem;color:#64748b;line-height:1.55;margin-bottom:10px">Gunakan Pusat Kontrol Data untuk pemeriksaan kesehatan sistem, riwayat aktivitas, dan Cadangan Data Cloud khusus Owner.</p><a href="cloud-control-center.html" style="display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 14px;border-radius:9px;background:#0d2240;color:#fff;text-decoration:none;font-weight:800">🛡️ Buka Pusat Kontrol Data</a></div></section><section class="box-container"><div class="box-title"><span>📋 Riwayat Backup / Restore</span></div><div class="table-responsive"><table class="log-table"><thead><tr><th>Waktu</th><th>Aksi</th><th>Oleh</th><th>Detail</th></tr></thead><tbody id="historyBody"></tbody></table></div></section>
 </main></div><div class="modal-alert" id="customAlertModal"><div class="modal-alert-content"><div class="modal-alert-icon" id="customAlertIcon">✅</div><div class="modal-alert-title" id="customAlertTitle">Informasi</div><div class="modal-alert-msg" id="customAlertMsg">-</div><button class="btn-modal-ok" onclick="closeAlert()">Tutup</button></div></div>
 <script>
-const DEFAULT_HEADER={judul:"LocDailyMar",subJudul:"POS & Management",warnaJudul:"#ffffff",warnaOutline:"#d99b00",warnaSubJudul:"#ffc107",warnaBgHeader:"#0d2240",fontFamily:"'Poppins', sans-serif",brandFontFamily:"'Poppins', sans-serif",bgPrimary:"#f4f6f9",bgSecondary:"#ffffff",darkMode:false,logoData:null};
+const DEFAULT_HEADER={judul:"LocDaily",subJudul:"POS & Management",warnaJudul:"#ffffff",warnaOutline:"#d99b00",warnaSubJudul:"#ffc107",warnaBgHeader:"#0d2240",fontFamily:"'Poppins', sans-serif",brandFontFamily:"'Poppins', sans-serif",bgPrimary:"#f4f6f9",bgSecondary:"#ffffff",darkMode:false,logoData:null};
 let currentUser="",currentRole="";
 function getTanggalWITA(d=new Date()){return window.LDMLocalTime.dateKey(d)}
 function getWaktuWITA(){return window.LDMLocalTime.timeKey()}
@@ -1596,9 +1597,9 @@ function persistentSnapshot(){const data={};for(let i=0;i<localStorage.length;i+
 function byteSize(str){return new Blob([str]).size}
 function fmtSize(n){return n<1024?`${n} B`:n<1048576?`${(n/1024).toFixed(1)} KB`:`${(n/1048576).toFixed(2)} MB`}
 function addHistory(action,detail){let a=[];try{a=JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');if(!Array.isArray(a))a=[]}catch{a=[]}a.unshift({id:Date.now(),tanggal:getTanggalWITA(),waktu:getWaktuWITA(),action,detail,user:currentUser,role:currentRole});localStorage.setItem(HISTORY_KEY,JSON.stringify(a.slice(0,100)))}
-function downloadBackup(){const payload={format:'LocDailyMarBackup',version:1,createdAt:new Date().toISOString(),createdWITA:`${getTanggalWITA()} ${getWaktuWITA()} WITA`,createdBy:currentUser,role:currentRole,sessionKeysExcluded:[...SESSION_KEYS],data:persistentSnapshot()};const text=JSON.stringify(payload,null,2);const blob=new Blob([text],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`LocDailyMar-Backup-${getTanggalWITA()}_${getWaktuWITA().replaceAll(':','-')}.json`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);localStorage.setItem('lastBackupAt',`${getTanggalWITA()} ${getWaktuWITA()} WITA`);addHistory('BACKUP',`${Object.keys(payload.data).length} key • ${fmtSize(byteSize(text))}`);renderStats();renderHistory();showAlert('Backup Berhasil','File backup JSON sudah dibuat. Simpan file tersebut di lokasi yang aman.','success')}
+function downloadBackup(){const payload={format:'LocDailyBackup',version:1,createdAt:new Date().toISOString(),createdWITA:`${getTanggalWITA()} ${getWaktuWITA()} WITA`,createdBy:currentUser,role:currentRole,sessionKeysExcluded:[...SESSION_KEYS],data:persistentSnapshot()};const text=JSON.stringify(payload,null,2);const blob=new Blob([text],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`LocDaily-Backup-${getTanggalWITA()}_${getWaktuWITA().replaceAll(':','-')}.json`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);localStorage.setItem('lastBackupAt',`${getTanggalWITA()} ${getWaktuWITA()} WITA`);addHistory('BACKUP',`${Object.keys(payload.data).length} key • ${fmtSize(byteSize(text))}`);renderStats();renderHistory();showAlert('Backup Berhasil','File backup JSON sudah dibuat. Simpan file tersebut di lokasi yang aman.','success')}
 function safeParseArray(raw){try{const x=JSON.parse(raw||'[]');return Array.isArray(x)?x.length:0}catch{return 0}}
-async function previewBackupFile(file){pendingBackup=null;const box=document.getElementById('restorePreview'),btn=document.getElementById('restoreBtn');btn.disabled=true;if(!file){box.style.display='none';return}try{const text=await file.text();const p=JSON.parse(text);if(p.format!=='LocDailyMarBackup'||!p.data||typeof p.data!=='object'||Array.isArray(p.data))throw new Error('Format file bukan backup LocDailyMar yang valid.');pendingBackup=p;const info=[`Dibuat: ${escapeHtml(p.createdWITA||p.createdAt||'-')}`,`Jumlah key: ${Object.keys(p.data).length}`,`Barang: ${safeParseArray(p.data.dataBarang)}`,`Laporan: ${safeParseArray(p.data.laporan||p.data.dataLaporan)}`,`Pengeluaran: ${safeParseArray(p.data.operasional)}`,`Closing Shift: ${safeParseArray(p.data.shiftClosingLog)}`,`End of Day: ${safeParseArray(p.data.endOfDayLog)}`];box.innerHTML='<strong>✅ Backup valid</strong><br>'+info.join('<br>');box.style.display='block';btn.disabled=currentRole!=='owner';document.getElementById('restoreOwnerHint').textContent=currentRole==='owner'?'Owner dapat melanjutkan Restore.':'🔒 Admin dapat membuat backup, tetapi Restore hanya dapat dilakukan oleh Owner.'}catch(e){box.innerHTML='<strong style="color:#dc2626">❌ File tidak valid</strong><br>'+escapeHtml(e.message);box.style.display='block';pendingBackup=null}}
+async function previewBackupFile(file){pendingBackup=null;const box=document.getElementById('restorePreview'),btn=document.getElementById('restoreBtn');btn.disabled=true;if(!file){box.style.display='none';return}try{const text=await file.text();const p=JSON.parse(text);if((p.format!=='LocDailyBackup'&&p.format!==('LocDaily'+'MarBackup'))||!p.data||typeof p.data!=='object'||Array.isArray(p.data))throw new Error('Format file bukan backup LocDaily yang valid.');pendingBackup=p;const info=[`Dibuat: ${escapeHtml(p.createdWITA||p.createdAt||'-')}`,`Jumlah key: ${Object.keys(p.data).length}`,`Barang: ${safeParseArray(p.data.dataBarang)}`,`Laporan: ${safeParseArray(p.data.laporan||p.data.dataLaporan)}`,`Pengeluaran: ${safeParseArray(p.data.operasional)}`,`Closing Shift: ${safeParseArray(p.data.shiftClosingLog)}`,`End of Day: ${safeParseArray(p.data.endOfDayLog)}`];box.innerHTML='<strong>✅ Backup valid</strong><br>'+info.join('<br>');box.style.display='block';btn.disabled=currentRole!=='owner';document.getElementById('restoreOwnerHint').textContent=currentRole==='owner'?'Owner dapat melanjutkan Restore.':'🔒 Admin dapat membuat backup, tetapi Restore hanya dapat dilakukan oleh Owner.'}catch(e){box.innerHTML='<strong style="color:#dc2626">❌ File tidak valid</strong><br>'+escapeHtml(e.message);box.style.display='block';pendingBackup=null}}
 async function restoreBackup(){
     if(currentRole!=='owner'){
         showAlert('Akses Ditolak','Restore data hanya dapat dilakukan oleh Owner.','warning');
@@ -1938,7 +1939,7 @@ window.addEventListener('storage',e=>{if(e.key==='headerConfig')muatTema();rende
                 <div class="ldm-mega-panel" id="ldmMegaPanel">
                     <div class="ldm-mega-panel-top">
                         <div>
-                            <strong>Navigasi LocDailyMar</strong>
+                            <strong>Navigasi LocDaily</strong>
                             <p>Semua menu dikelompokkan agar akses desktop lebih cepat dan tidak memenuhi sisi layar.</p>
                         </div>
                         <button type="button" class="ldm-mega-panel-close" id="ldmMegaClose">
@@ -2282,6 +2283,6 @@ window.addEventListener('storage',e=>{if(e.key==='headerConfig')muatTema();rende
 })();
 </script>
 
-<script src="js/global-system-navigation.js?v=27.9.0-v28.17.0"></script><script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
+<script src="js/global-system-navigation.js?v=27.9.0-v28.18.0"></script><script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
 <script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
 </body></html>

@@ -44,13 +44,13 @@
       number: "6287874352468",
       display: "+62 878-7435-2468",
       label: "WhatsApp Support",
-      greeting: "Halo Tim LocDailyMar, saya ingin bertanya mengenai layanan LocDailyMar."
+      greeting: "Halo Tim LocDaily, saya ingin bertanya mengenai layanan LocDaily."
     }),
     email: Object.freeze({
       enabled: false,
       address: "",
       label: "Email Support",
-      subject: "Pertanyaan mengenai LocDailyMar"
+      subject: "Pertanyaan mengenai LocDaily"
     }),
     support_center: Object.freeze({enabled:true,label:"Pusat Bantuan & Support"}),
     guide: Object.freeze({enabled:true,label:"Panduan Pengguna"}),

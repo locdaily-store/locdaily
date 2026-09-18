@@ -3,7 +3,8 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.17.1"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.18.0"></script>
+  <script src="js/brand-migration-v28180.js?v=27.9.0-v28.18.0"></script>
 <script src="js/navigation-performance.js?v=27.9.0-v28.16.3" defer></script>
 
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
@@ -13,7 +14,7 @@
 <script defer src="js/qa-runtime.js?v=19.0"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan - LocDailyMar POS</title>
+    <title>Laporan - LocDaily POS</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0F9D58">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -966,7 +967,7 @@
 
 
 <!-- =========================================================
-     LOCDailyMar RESPONSIVE MEGA MENU
+     LocDaily RESPONSIVE MEGA MENU
      Desktop  : Mega Menu
      HP/Tablet: Hamburger Drawer
      ========================================================= -->
@@ -2055,7 +2056,7 @@
     <script src="js/attendance-service.js?v=27.9.0-v28.16.2-final"></script>
     <script src="js/attendance-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
     
-    <script src="js/products-service.js?v=27.9.0-v28.16.2-final"></script>
+    <script src="js/products-service.js?v=27.9.0-v28.18.0"></script>
     <script src="js/products-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
     
     <script src="js/returns-service.js?v=10.0"></script>
@@ -2100,7 +2101,7 @@
                     <button class="btn-toggle-menu" onclick="toggleMobileMenu()" title="Buka Menu">☰</button>
                     <img id="imgLogoToko" class="header-logo-img" alt="Logo Toko" style="display: none;">
                     <div class="header-title-box">
-                        <h2 id="txtJudulToko">LocDailyMar</h2>
+                        <h2 id="txtJudulToko">LocDaily</h2>
                         <p id="txtSubJudulToko"></p>
                     </div>
                 </div>
@@ -2227,7 +2228,7 @@
 
                 <div class="form-row">
                     <label>Judul Perusahaan / Toko</label>
-                    <input type="text" id="inputJudulToko" placeholder="Contoh: LocDailyMar" oninput="previewRealtimeTheme()">
+                    <input type="text" id="inputJudulToko" placeholder="Contoh: LocDaily" oninput="previewRealtimeTheme()">
                 </div>
 
                 <div class="form-row">
@@ -2325,7 +2326,7 @@
                 
                 <div class="form-row">
                     <label>Nama Toko / Header Struk</label>
-                    <input type="text" id="inputStrukNamaToko" placeholder="Contoh: LocDailyMar POS" oninput="updateLivePreviewStruk()">
+                    <input type="text" id="inputStrukNamaToko" placeholder="Contoh: LocDaily POS" oninput="updateLivePreviewStruk()">
                 </div>
 
                 <div class="form-row">
@@ -2343,7 +2344,7 @@
                 <div class="form-section-title">👁️ Live Preview Tampilan Struk</div>
                 <div class="preview-struk-container">
                     <div class="preview-struk-header">
-                        <h4 id="previewStrukNama" style="font-size:0.85rem; font-weight:700; margin:0;">LocDailyMar POS</h4>
+                        <h4 id="previewStrukNama" style="font-size:0.85rem; font-weight:700; margin:0;">LocDaily POS</h4>
                         <p id="previewStrukSubHeader" style="margin:2px 0; color:#334155; font-size:0.7rem;"></p>
                         <p style="margin-top:4px; font-size:0.68rem; color:#64748b;">02/08/2026, 12:00:00<br><b>Kasir: Owner</b></p>
                     </div>
@@ -2631,7 +2632,7 @@ const loggedUser =
         ];
 
         const defaultHeaderConfig = {
-            judul: "LocDailyMar",
+            judul: "LocDaily",
             subJudul: "Riwayat Transaksi",
             warnaJudul: "#ffffff",
             warnaOutline: "#d99b00",
@@ -2646,7 +2647,7 @@ const loggedUser =
         };
 
         const defaultStrukConfig = {
-            namaToko: "LocDailyMar POS",
+            namaToko: "LocDaily POS",
             subHeader: "",
             footer: "-- Terima Kasih --"
         };
@@ -2875,7 +2876,7 @@ function filterDataLaporanBerdasarkanRole(data) {
         function previewRealtimeTheme() {
             const isDark = document.getElementById("toggleDarkMode").checked;
             const currentConfig = {
-                judul: document.getElementById("inputJudulToko").value.trim() || "LocDailyMar",
+                judul: document.getElementById("inputJudulToko").value.trim() || "LocDaily",
                 subJudul: document.getElementById("inputSubJudulToko").value.trim() || "",
                 warnaJudul: document.getElementById("inputWarnaJudul").value,
                 warnaOutline: document.getElementById("inputWarnaOutline").value,
@@ -2997,7 +2998,7 @@ function filterDataLaporanBerdasarkanRole(data) {
 
         /* LOGIKA PENGATURAN STRUK KUSTOM (KHUSUS OWNER) */
         function updateLivePreviewStruk() {
-            const namaToko = document.getElementById("inputStrukNamaToko").value.trim() || "LocDailyMar POS";
+            const namaToko = document.getElementById("inputStrukNamaToko").value.trim() || "LocDaily POS";
             const subHeader = document.getElementById("inputStrukSubHeader").value.trim();
             const footer = document.getElementById("inputStrukFooter").value.trim();
 
@@ -3838,7 +3839,7 @@ function simpanLaporanKeStorage(dataArray) {
 
             namaToko:
                 configHeader.judul ||
-                "LocDailyMar",
+                "LocDaily",
 
             subHeader:
                 configHeader.subJudul ||
@@ -3851,7 +3852,7 @@ function simpanLaporanKeStorage(dataArray) {
 
     const namaToko =
         configStruk.namaToko ||
-        "LocDailyMar";
+        "LocDaily";
 
 
     const safeNamaToko = receiptEsc(namaToko);
@@ -4660,7 +4661,7 @@ function simpanLaporanKeStorage(dataArray) {
                     : now.toISOString().slice(0,10);
                 downloadBlobFile(
                     parts,
-                    `LocDailyMar-semua-laporan-${dateKey}.csv`,
+                    `LocDaily-semua-laporan-${dateKey}.csv`,
                     "text/csv;charset=utf-8"
                 );
 
@@ -6036,7 +6037,7 @@ function batasiTampilanOmzetLaporan() {
                 <div class="ldm-mega-panel" id="ldmMegaPanel">
                     <div class="ldm-mega-panel-top">
                         <div>
-                            <strong>Navigasi LocDailyMar</strong>
+                            <strong>Navigasi LocDaily</strong>
                             <p>Semua menu dikelompokkan agar akses desktop lebih cepat dan tidak memenuhi sisi layar.</p>
                         </div>
                         <button type="button" class="ldm-mega-panel-close" id="ldmMegaClose">
@@ -6458,7 +6459,7 @@ function batasiTampilanOmzetLaporan() {
 })();
 </script>
 
-<script src="js/global-system-navigation.js?v=27.9.0-v28.17.0"></script>
+<script src="js/global-system-navigation.js?v=27.9.0-v28.18.0"></script>
 <script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
 <script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
 </body>

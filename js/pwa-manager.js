@@ -235,7 +235,7 @@
             const banner = document.createElement("div");
             banner.id = "ldmPwaUpdateBanner";
             banner.className = "ldm-pwa-update";
-            banner.innerHTML = '<span>Versi baru LocDailyMar tersedia.</span><button type="button" class="later">Nanti</button><button type="button" class="apply">Perbarui</button>';
+            banner.innerHTML = '<span>Versi baru LocDaily tersedia.</span><button type="button" class="later">Nanti</button><button type="button" class="apply">Perbarui</button>';
             banner.querySelector(".later").onclick = () => banner.remove();
             banner.querySelector(".apply").onclick = async event => {
                 event.currentTarget.disabled = true;

@@ -108,7 +108,7 @@
     const fields={name:el("checkoutName"),email:el("checkoutEmail"),phone:el("checkoutPhone"),storeName:el("checkoutStoreName"),storeCode:el("checkoutStoreCode")};
     Object.values(fields).forEach(node=>{if(node){node.readOnly=false;node.required=true;}});
     if(isManagement){
-      if(fields.name){fields.name.value=management.customer_name||"Pelanggan LocDailyMar";fields.name.readOnly=true;}
+      if(fields.name){fields.name.value=management.customer_name||"Pelanggan LocDaily";fields.name.readOnly=true;}
       if(fields.email){fields.email.value=management.customer_email||ctx.owner_email||"";fields.email.readOnly=true;}
       if(fields.phone){fields.phone.value=management.customer_phone||"";fields.phone.readOnly=true;fields.phone.required=false;}
       if(fields.storeName){fields.storeName.value=management.store_name||ctx.store_name||"";fields.storeName.readOnly=true;}
@@ -118,7 +118,7 @@
       const desc=el("checkoutDescription");if(desc)desc.textContent=currentPlan.mode==="upgrade"?"Paket baru aktif setelah pembayaran terverifikasi. Sisa masa aktif yang masih ada tetap dipertahankan dan periode baru ditambahkan.":"Perpanjangan menambah masa aktif dari tanggal berakhir saat ini. Jika lisensi sudah berakhir, periode baru dihitung dari waktu pembayaran berhasil.";
     }else{
       const tag=el("checkoutTag");if(tag)tag.textContent="PEMBAYARAN LYNK.ID";
-      const title=el("checkoutTitle");if(title)title.textContent="Pesan Lisensi LocDailyMar";
+      const title=el("checkoutTitle");if(title)title.textContent="Pesan Lisensi LocDaily";
       const desc=el("checkoutDescription");if(desc)desc.textContent="Isi data pelanggan, lalu lanjutkan ke pembayaran Lynk.id. Setelah pembayaran berhasil diverifikasi, hasil ditampilkan di halaman Lisensi.";
       if(trial&&ctx.is_trial){
         if(fields.email&&ctx.owner_email){fields.email.value=ctx.owner_email;fields.email.readOnly=true;}
@@ -198,7 +198,7 @@
   }
 
   function receiptText(r){return [
-    r.simulation===true?"LOCDailyMar — DATA LISENSI SIMULASI":"LOCDailyMar — DATA LISENSI",
+    r.simulation===true?"LocDaily — DATA LISENSI SIMULASI":"LocDaily — DATA LISENSI",
     `Order ID: ${r.order_id||"-"}`,
     `Paket: ${r.plan_name||r.plan_code||"-"}`,
     `Periode: ${r.period_label||cycleLabel(r.billing_cycle)}`,
@@ -302,7 +302,7 @@
     if(!quiet){
       if(data.payment_status==="paid"&&rendered)setStatus("✅ Pembayaran Lynk.id sudah terverifikasi. Data lisensi dan status serah-terima tersedia di bawah. Form Refund Penuh tersedia selama masih dalam batas waktu kebijakan.","success");
       else if(data.payment_status==="paid")setStatus(`⚠️ Pembayaran sudah terverifikasi, tetapi data lisensi belum dapat ditampilkan${data.receipt_error?`: ${data.receipt_error}`:""}. Sistem akan mencoba memulihkannya lagi; jangan membuat pembayaran kedua.`,"error");
-      else if(data.payment_status==="cancelled")setStatus("Order LocDailyMar sudah dibatalkan. Tutup halaman pembayaran Lynk.id dan jangan lanjutkan pembayaran pada order ini.","info");
+      else if(data.payment_status==="cancelled")setStatus("Order LocDaily sudah dibatalkan. Tutup halaman pembayaran Lynk.id dan jangan lanjutkan pembayaran pada order ini.","info");
       else if(["failed","expired"].includes(String(data.payment_status||"").toLowerCase()))setStatus(`Pembayaran berstatus ${data.payment_status}. Hubungi Support bila dana sudah terpotong.`,"error");
       else setStatus(`Status pembayaran Lynk.id: ${data.payment_status||"pending"}.`,"info");
     }
@@ -367,7 +367,7 @@
 
   function helpWhatsApp(){
     const cycle=el("checkoutPeriod")?.value||"monthly";
-    openWhatsApp(["Halo Tim LocDailyMar, saya membutuhkan bantuan pembayaran melalui Lynk.id.","",`Paket: ${currentPlan?.planName||"-"}`,`Periode: ${cycleLabel(cycle)}`,`Total: ${rupiah(currentPlan?amountFor(currentPlan.planCode,cycle):0)}`,`Store Code: ${String(el("checkoutStoreCode")?.value||"").trim().toUpperCase()||"-"}`].join("\n"));
+    openWhatsApp(["Halo Tim LocDaily, saya membutuhkan bantuan pembayaran melalui Lynk.id.","",`Paket: ${currentPlan?.planName||"-"}`,`Periode: ${cycleLabel(cycle)}`,`Total: ${rupiah(currentPlan?amountFor(currentPlan.planCode,cycle):0)}`,`Store Code: ${String(el("checkoutStoreCode")?.value||"").trim().toUpperCase()||"-"}`].join("\n"));
   }
 
   async function submitLynk(){
@@ -410,7 +410,7 @@
   async function cancelOrder(){
     const last=readLast();
     if(!last?.order_id||!last?.status_token)throw new Error("Belum ada order Lynk.id yang dapat dibatalkan pada perangkat ini.");
-    const confirmed=window.confirm("Batalkan order LocDailyMar ini?\n\nPembatalan hanya berlaku untuk order LocDailyMar yang masih PENDING. Tutup tab Lynk.id dan jangan melakukan pembayaran setelah order dibatalkan. Jika pembayaran sudah terverifikasi, gunakan proses refund, bukan cancel order.");
+    const confirmed=window.confirm("Batalkan order LocDaily ini?\n\nPembatalan hanya berlaku untuk order LocDaily yang masih PENDING. Tutup tab Lynk.id dan jangan melakukan pembayaran setelah order dibatalkan. Jika pembayaran sudah terverifikasi, gunakan proses refund, bukan cancel order.");
     if(!confirmed)return;
     const btn=el("checkoutCancelBtn");if(btn){btn.disabled=true;btn.textContent="Membatalkan…";}
     try{
@@ -441,8 +441,8 @@
       const d=await callStatus({action:"refund_policy"});
       const p=d.policy||{},hours=Math.max(1,Number(p.refund_window_hours||24));
       if(days)days.textContent=`${hours} jam`;
-      if(state)state.textContent=p.enabled===false?"Refund sedang dinonaktifkan sementara.":`Kebijakan internal LocDailyMar · Refund Penuh · maksimal ${hours} jam · proses 2-3 hari kerja.`;
-    }catch(_e){if(days)days.textContent="24 jam";if(state)state.textContent="Kebijakan refund LocDailyMar belum dapat dimuat.";}
+      if(state)state.textContent=p.enabled===false?"Refund sedang dinonaktifkan sementara.":`Kebijakan internal LocDaily · Refund Penuh · maksimal ${hours} jam · proses 2-3 hari kerja.`;
+    }catch(_e){if(days)days.textContent="24 jam";if(state)state.textContent="Kebijakan refund LocDaily belum dapat dimuat.";}
   }
 
   function init(){

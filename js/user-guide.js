@@ -12,21 +12,21 @@
     const roleLabel={owner:"Owner",admin:"Admin",kasir:"Kasir",pengguna:"Pengguna"};
     const tours={
         owner:[
-            ["Selamat datang di LocDailyMar","Sebagai Owner, Anda memiliki akses paling luas. Mulailah dari Dashboard untuk melihat kondisi toko, lalu pastikan lisensi, Store Code, akun, dan perangkat sudah benar."],
+            ["Selamat datang di LocDaily","Sebagai Owner, Anda memiliki akses paling luas. Mulailah dari Dashboard untuk melihat kondisi toko, lalu pastikan lisensi, Store Code, akun, dan perangkat sudah benar."],
             ["Siapkan data toko","Masukkan Barang dan Supplier lebih dahulu. Data master yang rapi membuat Kasir, stok, Purchase Order, dan laporan bekerja lebih akurat."],
             ["Jalankan operasional","Gunakan Kasir untuk penjualan, Stock Opname untuk pemeriksaan stok fisik, Retur untuk pengembalian, dan Pengeluaran untuk biaya operasional."],
             ["Tutup dan baca hasil hari","Selesaikan Closing Shift, lalu End of Day ketika syarat closing sudah lengkap. Jika akun Anda ditetapkan sebagai Owner Utama, gunakan Kontrol Pusat untuk laporan gabungan/per cabang dan manajemen karyawan."],
             ["Kelola pertumbuhan toko","Multi-Toko dipakai untuk cabang, transfer stok, dan pemindahan karyawan. Backup, Recovery, Aplikasi & Update, serta QA membantu menjaga sistem tetap sehat."]
         ],
         admin:[
-            ["Selamat datang di LocDailyMar","Sebagai Admin, fokus utama Anda adalah membantu operasional, inventori, pembelian, dan laporan sesuai hak akses yang diberikan."],
+            ["Selamat datang di LocDaily","Sebagai Admin, fokus utama Anda adalah membantu operasional, inventori, pembelian, dan laporan sesuai hak akses yang diberikan."],
             ["Kenali master data","Pelajari Barang, Supplier, Kartu Stok, dan Stock Opname. Pastikan stok dan informasi produk tidak dibiarkan hidup dalam dunia alternatifnya sendiri."],
             ["Operasional harian","Kasir mencatat transaksi, Retur menangani pengembalian, dan Pengeluaran mencatat biaya toko. Gunakan menu sesuai SOP toko."],
             ["Pembelian & stok","Purchase Order dan Goods Receipt digunakan untuk pemesanan serta penerimaan barang dari supplier. Cocokkan jumlah sebelum menyimpan."],
             ["Laporan & closing","Periksa Laporan dan Closing Shift setiap hari. Jika Anda diberi akses Multi-Toko, gunakan untuk melihat cabang dan transfer yang diizinkan."]
         ],
         kasir:[
-            ["Selamat datang di LocDailyMar","Sebagai Kasir, menu Anda dibuat lebih sederhana. Fokus pada Absensi, Kasir, Kartu Stok/Stock Opname yang diizinkan, Retur, dan Laporan yang tersedia."],
+            ["Selamat datang di LocDaily","Sebagai Kasir, menu Anda dibuat lebih sederhana. Fokus pada Absensi, Kasir, Kartu Stok/Stock Opname yang diizinkan, Retur, dan Laporan yang tersedia."],
             ["Mulai dari Absensi","Lakukan absensi sesuai prosedur sebelum mulai bekerja agar aktivitas akun tercatat pada hari dan shift yang benar."],
             ["Gunakan Kasir","Cari atau scan barang, periksa jumlah dan harga, masukkan pembayaran, lalu selesaikan transaksi. Pastikan transaksi benar sebelum menekan Bayar."],
             ["Jika ada masalah barang","Gunakan Retur sesuai izin dan laporkan selisih stok. Jangan mengubah stok sekadar agar angka terlihat rapi, karena angka memiliki kebiasaan membalas dendam di laporan."],

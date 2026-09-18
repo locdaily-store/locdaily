@@ -78,7 +78,7 @@
         try{
             await window.LDMStorageDB.putTransactions(rows, { cleanup: false });
         }catch(error){
-            console.warn("[LocDailyMar] Dashboard tidak dapat memperbarui arsip lokal:", error);
+            console.warn("[LocDaily] Dashboard tidak dapat memperbarui arsip lokal:", error);
         }
     }
 
@@ -95,7 +95,7 @@
                 return { rows, source: "cloud", fromDate, toDate };
             }catch(error){
                 cloudError = error;
-                console.warn("[LocDailyMar] Laporan Cloud gagal, memakai arsip lokal sementara:", error);
+                console.warn("[LocDaily] Laporan Cloud gagal, memakai arsip lokal sementara:", error);
             }
         }
 
@@ -105,7 +105,7 @@
                 return { rows, source: "indexeddb", fromDate, toDate, cloudError };
             }
         }catch(error){
-            console.warn("[LocDailyMar] Arsip lokal utama gagal, memakai cache browser sementara:", error);
+            console.warn("[LocDaily] Arsip lokal utama gagal, memakai cache browser sementara:", error);
         }
 
         return {

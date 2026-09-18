@@ -3,7 +3,8 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.17.1"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.18.0"></script>
+  <script src="js/brand-migration-v28180.js?v=27.9.0-v28.18.0"></script>
 <script src="js/navigation-performance.js?v=27.9.0-v28.16.3" defer></script>
 
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
@@ -13,7 +14,7 @@
 <script defer src="js/qa-runtime.js?v=19.0"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Barang - LocDailyMar POS</title>
+    <title>Data Barang - LocDaily POS</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0F9D58">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1550,7 +1551,7 @@
 
 
 <!-- =========================================================
-     LOCDailyMar RESPONSIVE MEGA MENU
+     LocDaily RESPONSIVE MEGA MENU
      Desktop  : Mega Menu
      HP/Tablet: Hamburger Drawer
      ========================================================= -->
@@ -2499,10 +2500,11 @@
     
     <script src="js/promo-pricing.js?v=21.0"></script>
     
-    <script src="js/primary-owner-service.js?v=28.11.0"></script>
+    <script src="js/primary-owner-service.js?v=27.9.0-v28.18.0"></script>
     
-    <script src="js/products-service.js?v=27.9.0-v28.16.2-final"></script>
+    <script src="js/products-service.js?v=27.9.0-v28.18.0"></script>
     <script src="js/products-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
+    <script src="js/catalog-request-service.js?v=27.9.0-v28.18.0"></script>
 
 <script src="js/license-v2-config.js?v=27.9.0-v28.13.1"></script>
 <script src="js/license-v2-client.js?v=25.2.0"></script>
@@ -2575,7 +2577,7 @@
 
                     <img id="imgLogoToko" class="header-logo-img" alt="Logo Toko" style="display: none;">
                     <div class="header-title-box">
-                        <h2 id="txtJudulToko">LocDailyMar</h2>
+                        <h2 id="txtJudulToko">LocDaily</h2>
                         <p id="txtSubJudulToko"></p>
                     </div>
                 </div>
@@ -2584,7 +2586,7 @@
                 </div>
             </div>
 
-            <div id="catalogAuthorityNotice"><strong>Master barang dikendalikan dari cabang pusat.</strong><br>Nama barang, satuan, harga beli, harga jual, dan promo hanya dapat diubah Owner Utama. Stok yang terlihat tetap merupakan stok toko/cabang ini.</div>
+            <div id="catalogAuthorityNotice"><strong>Master barang dikendalikan Owner Pusat.</strong><br>Nama item, satuan, harga beli/HPP, harga jual, dan promo hanya dapat diubah Owner Pusat. Owner Cabang dapat mengajukan item baru tanpa menerima data biaya. Stok yang terlihat tetap merupakan stok toko/cabang ini.</div>
 
             <div class="barang-grid" id="barangGrid">
                 <!-- Form Tambah (Owner) -->
@@ -2727,7 +2729,7 @@
 
                 <div class="form-row">
                     <label>Judul Perusahaan / Toko</label>
-                    <input type="text" id="inputJudulToko" placeholder="Contoh: LocDailyMar" oninput="previewRealtimeTheme()">
+                    <input type="text" id="inputJudulToko" placeholder="Contoh: LocDaily" oninput="previewRealtimeTheme()">
                 </div>
 
                 <div class="form-row">
@@ -3241,7 +3243,7 @@ const loggedUser =
     ];
 
     const defaultHeaderConfig = {
-        judul: "LocDailyMar",
+        judul: "LocDaily",
         subJudul: "Data Barang",
         warnaJudul: "#ffffff",
         warnaOutline: "#d99b00",
@@ -3316,7 +3318,7 @@ const loggedUser =
     function previewRealtimeTheme() {
         const isDark = document.getElementById("toggleDarkMode").checked;
         const currentConfig = {
-            judul: document.getElementById("inputJudulToko").value.trim() || "LocDailyMar",
+            judul: document.getElementById("inputJudulToko").value.trim() || "LocDaily",
             subJudul: document.getElementById("inputSubJudulToko").value.trim() || "Data Barang",
             warnaJudul: document.getElementById("inputWarnaJudul").value,
             warnaOutline: document.getElementById("inputWarnaOutline").value,
@@ -4224,7 +4226,7 @@ function catatKartuStokMutasi(payload = {}) {
 
         tampilkanNotifikasi(
             "Akses Katalog Dibatasi",
-            "Master barang hanya dapat diubah oleh Owner yang berwenang pada katalog toko aktif. Cabang yang mengikuti katalog pusat dikelola dari Toko Pusat.",
+            "Master barang hanya dapat diubah oleh Owner Pusat. Owner Cabang dapat menggunakan fitur Ajukan Item Baru tanpa akses harga beli/HPP.",
             "🔒"
         );
         return false;
@@ -5176,7 +5178,7 @@ function catatKartuStokMutasi(payload = {}) {
         }
 
         let headerConfig = JSON.parse(localStorage.getItem("headerConfig")) || defaultHeaderConfig;
-        let namaToko = headerConfig.judul || "LOCDAILYMAR";
+        let namaToko = headerConfig.judul || "LocDaily";
 
         let today = new Date();
         let dayStr = String(today.getDate()).padStart(2, '0');
@@ -5405,7 +5407,7 @@ const totalHargaPromo =
             if (notice && allowed) notice.style.display = "none";
         } catch (error) {
             if (notice) {
-                notice.innerHTML = "<strong>Master barang belum dapat dikelola dari toko ini.</strong><br>Jika katalog toko mengikuti cabang pusat, perubahan master dilakukan dari pusat. Stok cabang tetap dapat berubah melalui transaksi, penerimaan barang, transfer stok, retur, dan Stock Opname.";
+                notice.innerHTML = "<strong>Master barang belum dapat dikelola dari toko ini.</strong><br>Perubahan master barang dilakukan Owner Pusat. Owner Cabang dapat mengajukan item baru; stok cabang tetap berubah melalui transaksi, penerimaan barang, transfer stok, retur, dan Stock Opname.";
             }
             console.warn("Otoritas katalog pusat belum tersedia:", error);
         }
@@ -6274,7 +6276,7 @@ document.addEventListener(
                 <div class="ldm-mega-panel" id="ldmMegaPanel">
                     <div class="ldm-mega-panel-top">
                         <div>
-                            <strong>Navigasi LocDailyMar</strong>
+                            <strong>Navigasi LocDaily</strong>
                             <p>Semua menu dikelompokkan agar akses desktop lebih cepat dan tidak memenuhi sisi layar.</p>
                         </div>
                         <button type="button" class="ldm-mega-panel-close" id="ldmMegaClose">
@@ -6641,7 +6643,7 @@ window.addEventListener(
 );
 </script>
 
-<script src="js/global-system-navigation.js?v=27.9.0-v28.17.0"></script>
+<script src="js/global-system-navigation.js?v=27.9.0-v28.18.0"></script>
 <script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
 <script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
 </body>

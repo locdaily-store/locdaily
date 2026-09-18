@@ -401,7 +401,7 @@
 
     const button=$(cfg.submit);
     if(button){button.disabled=true;button.textContent="Mengirim Permintaan…";}
-    setMessage(cfg,"Mengirim permintaan refund penuh ke Developer LocDailyMar…","");
+    setMessage(cfg,"Mengirim permintaan refund penuh ke Developer LocDaily…","");
 
     try{
       const response=await call({

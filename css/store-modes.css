@@ -1,4 +1,4 @@
-/* LocDailyMar - Mode Operasional Kafe / Warung / Retail */
+/* LocDaily - Mode Operasional Kafe / Warung / Retail */
 html[data-ldm-store-mode="cafe"] body:not(.dark-mode){background:#fbf7f1;}
 html[data-ldm-store-mode="warung"] body:not(.dark-mode){background:#f4f8f2;}
 html[data-ldm-store-mode="cafe"] body:not(.dark-mode) .header-app{background:linear-gradient(135deg,#3f3026,#0f6f4d);}

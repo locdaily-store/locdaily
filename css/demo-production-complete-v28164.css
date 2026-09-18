@@ -1,4 +1,4 @@
-/* LocDailyMar V28.16.4 - Demo Mode Reliability & Parity Hardening */
+/* LocDaily V28.16.4 - Demo Mode Reliability & Parity Hardening */
 :root{
   --ldm-nav:#0d2240;
   --ldm-accent:#ffc107;
@@ -108,7 +108,7 @@ body.demo-app .demo-toast{position:fixed;right:18px;bottom:62px;z-index:1600;max
 
 
 /* ==========================================================================
-   LocDailyMar V28.2.4
+   LocDaily V28.2.4
    SYSTEM UI · DYNAMIC TEXT CONTRAST
    ========================================================================== */
 
@@ -579,7 +579,7 @@ button,input,select,textarea{font:inherit}
 @media(max-width:620px){.demo-login-page{padding:12px}.demo-login-head{grid-template-columns:1fr}.demo-login-side{display:none}.demo-login-copy,.demo-login-body{padding:22px}.demo-account-grid{grid-template-columns:1fr}.demo-grid.stats{grid-template-columns:1fr}.demo-products{grid-template-columns:1fr}.demo-page-head{flex-direction:column}.demo-form.two{grid-template-columns:1fr}.demo-header-actions{gap:5px}.demo-mode-pill{display:none}.demo-login-foot{align-items:flex-start;flex-direction:column}.demo-mode-note{align-items:flex-start;flex-direction:column;gap:3px}}
 
 
-/* LocDailyMar V28.5.1 - Master Shift + Ketidakhadiran dashboard-linked pages */
+/* LocDaily V28.5.1 - Master Shift + Ketidakhadiran dashboard-linked pages */
 :root{
   --wf-green:#0f9d58;
   --wf-red:#dc2626;
@@ -618,7 +618,7 @@ body.dark-mode .wf-notice.success{background:#052e1b;color:#bbf7d0;border-color:
 @media(max-width:620px){.wf-shell{width:min(100% - 16px,1220px);margin-top:8px}.wf-card,.wf-hero{padding:13px}.wf-hero-main{align-items:flex-start}.wf-brand-logo{width:38px;height:38px}.wf-hero h1{font-size:1.02rem}.wf-col-3,.wf-col-4,.wf-col-6,.wf-col-8{grid-column:1/-1}.wf-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.wf-actions>*{flex:1 1 auto}.wf-table{min-width:760px}}
 
 
-/* LocDailyMar V28.9.2 - Full Demo Page Parity
+/* LocDaily V28.9.2 - Full Demo Page Parity
    Menyamakan struktur visual modul Demo dengan halaman production tanpa mengaktifkan koneksi data production. */
 :root{
   --dp-navy:#0d2240;--dp-yellow:#ffc107;--dp-green:#0f9d58;--dp-blue:#0787c1;--dp-red:#ef4444;

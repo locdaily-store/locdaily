@@ -238,7 +238,7 @@
             if (!isQuotaError(error)) throw error;
 
             console.warn(
-                '[LocDailyMar] localStorage penuh. Cache aman sedang diperkecil.',
+                '[LocDaily] localStorage penuh. Cache aman sedang diperkecil.',
                 storageKey
             );
 

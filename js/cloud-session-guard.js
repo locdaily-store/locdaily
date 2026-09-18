@@ -535,7 +535,7 @@
             );
 
             console.warn(
-                "LocDailyMar berjalan dalam mode offline terbatas. Data transaksi akan masuk antrean perangkat."
+                "LocDaily berjalan dalam mode offline terbatas. Data transaksi akan masuk antrean perangkat."
             );
 
             return offlineContext;

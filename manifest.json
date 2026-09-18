@@ -1,8 +1,8 @@
 {
-  "name": "LocDailyMar POS",
-  "short_name": "LocDailyMar",
+  "name": "LocDaily POS",
+  "short_name": "LocDaily",
   "id": "./dashboard.html",
-  "description": "Aplikasi kasir, stok, laporan, absensi, dan operasional LocDailyMar.",
+  "description": "Aplikasi kasir, stok, laporan, absensi, dan operasional LocDaily.",
   "lang": "id-ID",
   "dir": "ltr",
   "start_url": "./dashboard.html?source=pwa",

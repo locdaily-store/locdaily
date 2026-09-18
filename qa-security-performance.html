@@ -3,7 +3,8 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.17.1"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.18.0"></script>
+  <script src="js/brand-migration-v28180.js?v=27.9.0-v28.18.0"></script>
 <script src="js/navigation-performance.js?v=27.9.0-v28.16.3" defer></script>
 
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
@@ -14,7 +15,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="theme-color" content="#0d2240">
-    <title>Pemeriksaan Sistem, Keamanan & Performa - LocDailyMar</title>
+    <title>Pemeriksaan Sistem, Keamanan & Performa - LocDaily</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="icon.png">
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -98,7 +99,7 @@
 
         result("cloud","Koneksi layanan Cloud",window.LDMSupabase&&window.LDMSupabase.isConfigured()?"PASS":"FAIL",window.LDMSupabase&&window.LDMSupabase.isConfigured()?"Koneksi aplikasi tersedia.":"Konfigurasi layanan belum lengkap. Hubungi Developer.");
         if(context&&String(context.profile&&context.profile.role||"").toLowerCase()==="owner"){
-            try{const {error}=await LDMSupabase.createClient().from("products").select("id").limit(1);if(error)throw error;result("cloud","Akses data produk","PASS","Akses data produk berhasil diverifikasi.");}catch(error){result("cloud","Akses data produk","FAIL",safeError(error));}
+            try{const {error}=await LDMSupabase.createClient().rpc("ldm_visible_products");if(error)throw error;result("cloud","Akses data produk","PASS","Endpoint produk aman berhasil diverifikasi.");}catch(error){result("cloud","Akses data produk","FAIL",safeError(error));}
             try{const {error}=await LDMSupabase.createClient().from("sync_conflicts").select("id",{count:"exact",head:true});if(error)throw error;result("cloud","Kesiapan pemulihan data","PASS","Komponen pemulihan data siap digunakan.");}catch(error){result("cloud","Kesiapan pemulihan data","FAIL",safeError(error));}
             try{const access=await LDMCloudAuth.getCurrentDeviceAccess();const status=String(access&&access.status||"").toLowerCase();result("cloud","Status perangkat",status==="active"?"PASS":"WARN",`Status device: ${status||"belum tersedia"}.`);}catch(error){result("cloud","Status perangkat","WARN",safeError(error));}
         }else{result("cloud","Akses data produk","WARN","Dilewati sampai login Owner.");result("cloud","Kesiapan pemulihan data","WARN","Dilewati sampai login Owner.");result("cloud","Status perangkat","WARN","Dilewati sampai login Owner.");}
@@ -130,7 +131,7 @@
 
 <script src="js/store-mode.js?v=27.9.0-systemui24"></script>
 <script src="js/system-theme-sync-v2824.js?v=27.9.0-systemui24"></script>
-<script src="js/global-system-navigation.js?v=27.9.0-v28.17.0"></script>
+<script src="js/global-system-navigation.js?v=27.9.0-v28.18.0"></script>
 <script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
 <script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
 </body>

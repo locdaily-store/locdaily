@@ -56,10 +56,10 @@
     }
 
     function safeName(value){
-        return String(value || "LocDailyMar")
+        return String(value || "LocDaily")
             .replace(/[^a-zA-Z0-9._-]+/g,"-")
             .replace(/-+/g,"-")
-            .replace(/^-|-$/g,"") || "LocDailyMar";
+            .replace(/^-|-$/g,"") || "LocDaily";
     }
 
     function downloadJSON(payload, filename){
@@ -80,7 +80,7 @@
         const payload = await getSnapshot();
         const date = new Date().toISOString().replace(/[:.]/g,"-");
         const storeCode = safeName(payload && payload.store && payload.store.code);
-        const filename = `LocDailyMar-Cloud-Snapshot-${storeCode}-${date}.json`;
+        const filename = `LocDaily-Cloud-Snapshot-${storeCode}-${date}.json`;
         const info = downloadJSON(payload, filename);
         return {payload, filename, ...info};
     }

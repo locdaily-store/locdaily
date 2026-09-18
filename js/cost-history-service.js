@@ -22,6 +22,22 @@
         return await window.LDMCloudSession.ensureAuthenticated({registerDevice:false});
     }
 
+    async function primaryOwnerContext(){
+        if(window.LDMPrimaryOwner && typeof window.LDMPrimaryOwner.context === "function"){
+            try{return await window.LDMPrimaryOwner.context()}catch(_error){}
+        }
+        const {data,error}=await client().rpc("ldm_primary_owner_context");
+        if(error)throw error;
+        const row=Array.isArray(data)?data[0]:data;
+        return row||{is_primary_owner:false};
+    }
+
+    function clearSensitiveCache(){
+        localStorage.removeItem(CACHE_KEY);
+        localStorage.removeItem(ENABLED_KEY);
+        localStorage.removeItem(LAST_SYNC_KEY);
+    }
+
     function number(value,fallback=0){
         const n=Number(value);
         return Number.isFinite(n)?n:fallback;
@@ -63,6 +79,11 @@
 
     async function fetchAll(){
         await context();
+        const ownerCtx=await primaryOwnerContext();
+        if(ownerCtx?.is_primary_owner!==true){
+            clearSensitiveCache();
+            return [];
+        }
         const {data,error}=await client().rpc("ldm_visible_cost_history");
         if(error)throw error;
         return Array.isArray(data)?data:[];
@@ -180,7 +201,8 @@
     async function startRealtime(){
         if(channel) return channel;
         const ctx=await context();
-        if(String(ctx?.profile?.role||"").toLowerCase()!=="owner") return null;
+        const ownerCtx=await primaryOwnerContext();
+        if(ownerCtx?.is_primary_owner!==true){clearSensitiveCache();return null;}
         const storeId=ctx.profile.store_id;
         const supabase=client();
         channel=supabase.channel(CHANNEL_NAME)
@@ -204,14 +226,14 @@
 
     async function bootstrap(){
         const ctx=await context();
-        if(String(ctx?.profile?.role||"").toLowerCase()!=="owner"){
-            localStorage.removeItem(CACHE_KEY);
-            localStorage.removeItem(ENABLED_KEY);
-            return {enabled:false,count:0,role:ctx?.profile?.role||""};
+        const ownerCtx=await primaryOwnerContext();
+        if(ownerCtx?.is_primary_owner!==true){
+            clearSensitiveCache();
+            return {enabled:false,count:0,role:ctx?.profile?.role||"",primaryOwner:false};
         }
         const cache=await refreshCache();
         await startRealtime();
-        return {enabled:true,count:cache.length,role:"owner"};
+        return {enabled:true,count:cache.length,role:"owner",primaryOwner:true};
     }
 
     window.LDMCostHistory=Object.freeze({

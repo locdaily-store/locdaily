@@ -96,7 +96,7 @@
         return rpc("ldm_prepare_store_device",{
             p_store_id:storeId,
             p_client_device_id:deviceId(),
-            p_device_name:`LocDailyMar - ${navigator.platform||"Browser"}`,
+            p_device_name:`LocDaily - ${navigator.platform||"Browser"}`,
             p_platform:platform()
         });
     }

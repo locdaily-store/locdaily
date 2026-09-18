@@ -3,7 +3,8 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.17.1"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.18.0"></script>
+  <script src="js/brand-migration-v28180.js?v=27.9.0-v28.18.0"></script>
 <script src="js/navigation-performance.js?v=27.9.0-v28.16.3" defer></script>
 
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
@@ -13,7 +14,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="theme-color" content="#0f9d58">
-    <title>Multi-Toko, Transfer Stok & Karyawan - LocDailyMar</title>
+    <title>Multi-Toko, Transfer Stok & Karyawan - LocDaily</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -62,7 +63,7 @@
             <div class="ms-brand">
                 <button class="ms-menu-toggle" type="button" data-ldm-menu-toggle aria-label="Buka menu navigasi" aria-expanded="false">☰</button>
                 <img class="ms-brand-logo" data-ldm-brand-logo alt="Logo toko">
-                <div class="ms-title"><h1 data-ldm-brand-title>LocDailyMar</h1><p data-ldm-brand-subtitle>Multi-Toko, Transfer Stok & Karyawan</p></div>
+                <div class="ms-title"><h1 data-ldm-brand-title>LocDaily</h1><p data-ldm-brand-subtitle>Multi-Toko, Transfer Stok & Karyawan</p></div>
             </div>
             <div class="ms-header-actions">
                 <span class="ms-role-chip" id="roleChip">👤 Memuat</span>
@@ -100,7 +101,7 @@
                     <form class="ms-form" id="branchForm">
                         <div class="ms-form-grid">
                             <div class="ms-field"><label>Kode Cabang</label><input id="branchCode" maxlength="30" placeholder="LDM-CABANG-02" required></div>
-                            <div class="ms-field"><label>Nama Cabang</label><input id="branchName" maxlength="120" placeholder="LocDailyMar Cabang 2" required></div>
+                            <div class="ms-field"><label>Nama Cabang</label><input id="branchName" maxlength="120" placeholder="LocDaily Cabang 2" required></div>
                             <div class="ms-field"><label>Mode Operasional Cabang</label><select id="branchMode" required><option value="retail">🛒 Toko Ritel</option><option value="cafe">☕ Kafe</option><option value="warung">🍜 Warung</option></select></div>
                         </div>
                         <label class="ms-check"><input type="checkbox" id="copyProducts" checked> Salin katalog dari toko aktif bila mode operasionalnya sama.</label>
@@ -363,7 +364,7 @@
         window.addEventListener("online",onlineState);window.addEventListener("offline",onlineState);onlineState();boot();
     })();
     </script>
-    <script src="js/global-system-navigation.js?v=27.9.0-v28.17.0"></script>
+    <script src="js/global-system-navigation.js?v=27.9.0-v28.18.0"></script>
 <script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
 <script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
 </body>
