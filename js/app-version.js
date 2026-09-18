@@ -1,9 +1,9 @@
 (function(root){
     "use strict";
     const INFO=Object.freeze({
-        appVersion:"27.9.0-v28.18.1",
-        buildVersion:"V28.18.1",
-        buildName:"Product Permission Compatibility Hotfix"
+        appVersion:"27.9.0-v28.18.2",
+        buildVersion:"V28.18.2",
+        buildName:"Attendance Isolation & Permission Repair"
     });
     root.LDM_VERSION_INFO=INFO;
     root.LDM_APP_VERSION=INFO.appVersion;
