@@ -1,4 +1,4 @@
-// Build: 27.9.0-v28.18.2 Attendance Isolation & Permission Repair
+// Build: 27.9.0-v28.18.3 Return-Aware Reporting & Net Revenue Repair
 "use strict";
 
 importScripts("./js/app-version.js");
@@ -18,7 +18,7 @@ const APP_SHELL=[
     "./js/offline-queue.js","./js/supabase-config.js","./js/supabase-client.js","./js/edge-function-client.js","./js/storage-retention.js","./js/account-service.js","./js/account-management-page-v2829.js","./js/device-service.js",
     "./js/cloud-auth.js","./js/cloud-session.js","./js/role-access-guard-v28120.js","./js/cloud-session-guard.js",
     "./js/unit-conversion.js","./js/promo-pricing.js","./js/multi-store-service.js","./js/store-mode.js","./js/product-visuals.js","./css/store-modes.css","./js/products-service.js","./js/products-bootstrap.js",
-    "./js/procurement-service.js","./js/procurement-bootstrap.js","./js/transactions-service.js","./js/reporting-service.js","./js/reporting-service-v28182.js","./js/dashboard-report-source.js","./js/attendance-workforce-service.js","./js/attendance-workforce-service-v28182.js","./js/attendance-workforce-ui.js","./js/master-shift-ui.js","./js/ketidakhadiran-ui.js","./js/attendance-service.js","./js/attendance-service-v28182.js","./js/attendance-bootstrap.js","./js/attendance-bootstrap-v28182.js","./css/attendance-workforce.css","./css/workforce-dashboard-pages.css",
+    "./js/procurement-service.js","./js/procurement-bootstrap.js","./js/transactions-service.js","./js/reporting-service.js","./js/reporting-service-v28182.js","./js/reporting-service-v28183.js","./js/dashboard-report-source.js","./js/dashboard-report-source-v28183.js","./js/attendance-workforce-service.js","./js/attendance-workforce-service-v28182.js","./js/attendance-workforce-ui.js","./js/master-shift-ui.js","./js/ketidakhadiran-ui.js","./js/attendance-service.js","./js/attendance-service-v28182.js","./js/attendance-bootstrap.js","./js/attendance-bootstrap-v28182.js","./css/attendance-workforce.css","./css/workforce-dashboard-pages.css",
     SUPABASE_CDN
 ];
 

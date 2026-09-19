@@ -3,8 +3,8 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.18.2"></script>
-  <script src="js/brand-migration-v28180.js?v=27.9.0-v28.18.2"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.18.3"></script>
+  <script src="js/brand-migration-v28180.js?v=27.9.0-v28.18.3"></script>
 <script src="js/navigation-performance.js?v=27.9.0-v28.16.3" defer></script>
 
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
@@ -3262,8 +3262,8 @@ body.dark-mode
     <script src="js/attendance-service.js?v=27.9.0-v28.16.2-final"></script>
     <script src="js/attendance-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
     
-    <script src="js/products-service.js?v=27.9.0-v28.18.2"></script>
-    <script src="js/products-bootstrap.js?v=27.9.0-v28.18.2"></script>
+    <script src="js/products-service.js?v=27.9.0-v28.18.3"></script>
+    <script src="js/products-bootstrap.js?v=27.9.0-v28.18.3"></script>
     
     <script src="js/returns-service.js?v=10.0"></script>
     <script src="js/returns-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
@@ -3273,9 +3273,9 @@ body.dark-mode
     <script src="js/stock-opname-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
 
     
-    <script src="js/reporting-service-v28182.js"></script>
-    <script src="js/dashboard-report-source.js?v=27.7.2"></script>
-    <script src="js/reporting-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
+    <script src="js/reporting-service-v28183.js"></script>
+    <script src="js/dashboard-report-source-v28183.js?v=27.9.0-v28.18.3"></script>
+    <script src="js/reporting-bootstrap.js?v=27.9.0-v28.18.3"></script>
 <style id="ldmCompactRangeAndSalesAssistantStyle">
     /* Rentang tanggal selalu satu baris; form dipindahkan ke modal ringkas. */
     #dashboardRangeFilter{
@@ -4423,23 +4423,37 @@ body.dark-mode
                 <!-- KARTU RINGKASAN UTAMA -->
                 <div class="grid-cards">
                     <div class="card omzet">
+                        <div class="card-icon">🧾</div>
+                        <div class="card-info">
+                            <h4>Penjualan Kotor</h4>
+                            <h2>Rp <span id="ownerGrossSales">0</span></h2>
+                        </div>
+                    </div>
+                    <div class="card warning">
+                        <div class="card-icon">↩️</div>
+                        <div class="card-info">
+                            <h4>Retur Disetujui</h4>
+                            <h2>-Rp <span id="ownerReturApproved">0</span></h2>
+                        </div>
+                    </div>
+                    <div class="card omzet">
                         <div class="card-icon">💰</div>
                         <div class="card-info">
-                            <h4 id="lblOwnerOmzet">Total Omzet Hari Ini</h4>
+                            <h4 id="lblOwnerOmzet">Penjualan Bersih Hari Ini</h4>
                             <h2>Rp <span id="totalOmzet">0</span></h2>
                         </div>
                     </div>
                     <div class="card tunai">
                         <div class="card-icon">💵</div>
                         <div class="card-info">
-                            <h4>Tunai (Cash)</h4>
+                            <h4>Tunai Bersih</h4>
                             <h2>Rp <span id="ownerTunai">0</span></h2>
                         </div>
                     </div>
                     <div class="card nontunai">
                         <div class="card-icon">📱</div>
                         <div class="card-info">
-                            <h4>Non Tunai (QRIS)</h4>
+                            <h4>Non Tunai Bersih</h4>
                             <h2>Rp <span id="ownerNonTunai">0</span></h2>
                         </div>
                     </div>
@@ -5057,6 +5071,8 @@ body.dark-mode
         const dashboardReportState = {
             rangeKey: "",
             rows: null,
+            summary: null,
+            daily: [],
             source: "local",
             loadedAt: 0,
             loading: null,
@@ -5102,6 +5118,8 @@ body.dark-mode
         function invalidateDashboardReportData() {
             dashboardReportState.rangeKey = "";
             dashboardReportState.rows = null;
+            dashboardReportState.summary = null;
+            dashboardReportState.daily = [];
             dashboardReportState.loadedAt = 0;
             dashboardReportState.requestId += 1;
             dashboardMonthlyReportState.clear();
@@ -5131,6 +5149,8 @@ body.dark-mode
                 if (requestId !== dashboardReportState.requestId) return;
                 dashboardReportState.rangeKey = key;
                 dashboardReportState.rows = Array.isArray(result?.rows) ? result.rows : [];
+                dashboardReportState.summary = result?.summary && typeof result.summary === "object" ? result.summary : null;
+                dashboardReportState.daily = Array.isArray(result?.daily) ? result.daily : [];
                 dashboardReportState.source = result?.source || "local";
                 dashboardReportState.loadedAt = Date.now();
                 renderOwner({ skipDataRefresh: true });
@@ -5728,20 +5748,31 @@ function logout() {
             }
             const dates = daftarTanggalInklusif(selectedDateRange.start, selectedDateRange.end);
             const totals = Object.fromEntries(dates.map(date => [date, 0]));
-            (Array.isArray(laporanAll) ? laporanAll : []).forEach(transaction => {
-                const date = parseTanggalData(transaction);
-                if (Object.prototype.hasOwnProperty.call(totals, date)) {
-                    let nominal = getNominalTransaksi(transaction);
-                    if (nominal === 0) {
-                        nominal = getDaftarItem(transaction).reduce((sum, item) => {
-                            const qty = Number(item.qty || item.jumlah || 1);
-                            const price = Number(item.harga || item.hargaJual || item.price || 0);
-                            return sum + (Number(item.subtotal) || (price * qty));
-                        }, 0);
+            const activeKey = dashboardRangeKey(selectedDateRange);
+            const dailyRows = dashboardReportState.rangeKey === activeKey && Array.isArray(dashboardReportState.daily)
+                ? dashboardReportState.daily
+                : [];
+            if (dashboardReportState.source === "cloud" && dailyRows.length) {
+                dailyRows.forEach(row => {
+                    const date=String(row.businessDate || "").slice(0,10);
+                    if(Object.prototype.hasOwnProperty.call(totals,date)) totals[date]=Number(row.netSales || 0);
+                });
+            } else {
+                (Array.isArray(laporanAll) ? laporanAll : []).forEach(transaction => {
+                    const date = parseTanggalData(transaction);
+                    if (Object.prototype.hasOwnProperty.call(totals, date)) {
+                        let nominal = getNominalTransaksi(transaction);
+                        if (nominal === 0) {
+                            nominal = getDaftarItem(transaction).reduce((sum, item) => {
+                                const qty = Number(item.netQty ?? item.qty ?? item.jumlah ?? 1);
+                                const price = Number(item.harga || item.hargaJual || item.price || 0);
+                                return sum + (Number(item.netSubtotal ?? item.netLineSales ?? item.subtotal) || (price * qty));
+                            }, 0);
+                        }
+                        totals[date] += nominal;
                     }
-                    totals[date] += nominal;
-                }
-            });
+                });
+            }
             if (dateRangeChartInstance) dateRangeChartInstance.destroy();
             box.style.display = "block";
             const styles = getComputedStyle(document.body);
@@ -5752,7 +5783,7 @@ function logout() {
                 data: {
                     labels: dates.map(date => date.slice(8, 10) + "/" + date.slice(5, 7)),
                     datasets: [{
-                        label: "Omzet Harian",
+                        label: "Penjualan Bersih Harian",
                         data: dates.map(date => totals[date]),
                         borderColor: "#0f9d58",
                         backgroundColor: "rgba(15,157,88,.14)",
@@ -5769,7 +5800,7 @@ function logout() {
                     interaction: { mode: "index", intersect: false },
                     plugins: {
                         legend: { labels: { color: textColor, boxWidth: 12 } },
-                        tooltip: { callbacks: { label: context => `Omzet: Rp ${Number(context.raw || 0).toLocaleString("id-ID")}` } }
+                        tooltip: { callbacks: { label: context => `Penjualan Bersih: Rp ${Number(context.raw || 0).toLocaleString("id-ID")}` } }
                     },
                     scales: {
                         x: { ticks: { color: textColor, autoSkip: true, maxTicksLimit: 15 }, grid: { color: borderColor } },
@@ -7345,7 +7376,9 @@ function batasiTampilanOmzetDashboard() {
 }
 
         function getNominalTransaksi(t) {
-            return Number(t.total || t.totalHarga || t.grandTotal || t.totalBayar || 0);
+            if (t && t.netTotal !== undefined) return Number(t.netTotal || 0);
+            if (t && t.netSales !== undefined) return Number(t.netSales || 0);
+            return Number(t?.total || t?.totalHarga || t?.grandTotal || t?.totalBayar || 0);
         }
 
         function getDaftarItem(t) {
@@ -7388,6 +7421,7 @@ function batasiTampilanOmzetDashboard() {
 
         function getTopSellingQty(item) {
             const rawQty =
+                item?.netQty ??
                 item?.qty ??
                 item?.jumlah ??
                 item?.quantity ??
@@ -7433,6 +7467,8 @@ function batasiTampilanOmzetDashboard() {
         ) {
             const subtotalLangsung =
                 Number(
+                    item?.netSubtotal ??
+                    item?.netLineSales ??
                     item?.subtotal ??
                     item?.subTotal ??
                     item?.totalHarga ??
@@ -9117,6 +9153,13 @@ function batasiTampilanOmzetDashboard() {
             let tunai = 0;
             let nonTunai = 0;
 
+            if (transaksi && (transaksi.netCash !== undefined || transaksi.netNoncash !== undefined)) {
+                return {
+                    tunai: Number(transaksi.netCash || 0),
+                    nonTunai: Number(transaksi.netNoncash || 0)
+                };
+            }
+
             const memPunyaPecahan = (
                 transaksi.tunai !== undefined || 
                 transaksi.bayarTunai !== undefined || 
@@ -9544,8 +9587,8 @@ function batasiTampilanOmzetDashboard() {
 
             const txtJudulLabel = getLabelPeriodeAktif();
 
-            document.getElementById("lblOwnerOmzet").innerText = `Total Omzet ${txtJudulLabel}`;
-            document.getElementById("lblOmzetBox").innerText = `🛒 Ringkasan Omzet ${txtJudulLabel}`;
+            document.getElementById("lblOwnerOmzet").innerText = `Penjualan Bersih ${txtJudulLabel}`;
+            document.getElementById("lblOmzetBox").innerText = `🛒 Ringkasan Penjualan Bersih ${txtJudulLabel}`;
             
             const formOpContainer = document.getElementById("formOperasionalContainer");
             if (formOpContainer) {
@@ -9577,11 +9620,21 @@ function batasiTampilanOmzetDashboard() {
                 }
             });
 
+            let totalGrossSales = 0;
+            let totalRetur = 0;
             let totalOmzet = 0;
             let totalTunai = 0;
             let totalNonTunai = 0;
             let totalModalBarang = 0;
             let totalQtyTerjual = 0;
+
+            const activeRange = getActiveDateRange();
+            const activeRangeKey = dashboardRangeKey(activeRange);
+            const authoritativeSummary = dashboardReportState.rangeKey === activeRangeKey
+                && dashboardReportState.summary
+                && dashboardReportState.source === "cloud"
+                ? dashboardReportState.summary
+                : null;
 
             laporan.forEach(transaksi => {
                 let nominal = getNominalTransaksi(transaksi);
@@ -9590,11 +9643,13 @@ function batasiTampilanOmzetDashboard() {
                 if (nominal === 0 && items.length > 0) {
                     items.forEach(it => {
                         const price = Number(it.harga || it.hargaJual || it.price || 0);
-                        const q = Number(it.qty || it.jumlah || 1);
-                        nominal += Number(it.subtotal) || (price * q);
+                        const q = Number(it.netQty ?? it.qty ?? it.jumlah ?? 1);
+                        nominal += Number(it.netSubtotal ?? it.netLineSales ?? it.subtotal) || (price * q);
                     });
                 }
 
+                totalGrossSales += Number(transaksi.grossTotal ?? transaksi.total ?? transaksi.grandTotal ?? nominal) || 0;
+                totalRetur += Number(transaksi.returTotal ?? transaksi.approvedReturns ?? 0) || 0;
                 totalOmzet += nominal;
 
                 const pecahan = hitungPecahanPembayaran(transaksi, nominal);
@@ -9603,22 +9658,40 @@ function batasiTampilanOmzetDashboard() {
 
                 items.forEach(item => {
                     const nama = item.nama || item.namaBarang || item.title || "";
-                    const qty = Number(item.qty || item.jumlah || 1);
+                    const qty = Number(item.netQty ?? item.qty ?? item.jumlah ?? 1);
 
-                    let modalSatuan = Number(item.hargaBeli || item.modal || item.hpp || 0);
-                    if (modalSatuan === 0 && mapModalBarang[nama.toLowerCase().trim()]) {
-                        modalSatuan = mapModalBarang[nama.toLowerCase().trim()];
+                    if (item.netHpp !== undefined) {
+                        totalModalBarang += Number(item.netHpp || 0);
+                    } else {
+                        let modalSatuan = Number(item.hargaBeli || item.modal || item.hpp || 0);
+                        if (modalSatuan === 0 && mapModalBarang[nama.toLowerCase().trim()]) {
+                            modalSatuan = mapModalBarang[nama.toLowerCase().trim()];
+                        }
+                        totalModalBarang += (modalSatuan * qty);
                     }
-
-                    totalModalBarang += (modalSatuan * qty);
                     totalQtyTerjual += qty;
                 });
             });
+
+            if (authoritativeSummary) {
+                totalGrossSales = Number(authoritativeSummary.grossSales || 0);
+                totalRetur = Number(authoritativeSummary.approvedReturns || 0);
+                totalOmzet = Number(authoritativeSummary.netSales || 0);
+                totalTunai = Number(authoritativeSummary.netCash || 0);
+                totalNonTunai = Number(authoritativeSummary.netNoncash || 0);
+                if (authoritativeSummary.costVisible === true) {
+                    totalModalBarang = Number(authoritativeSummary.netHpp || 0);
+                }
+            }
 
             const totalBiayaOperasional = operasional.reduce((sum, item) => sum + Number(item.nominal || 0), 0);
             const grandTotalModal = totalModalBarang + totalBiayaOperasional;
             const totalProfit = totalOmzet - grandTotalModal;
 
+            const grossEl=document.getElementById("ownerGrossSales");
+            const returnEl=document.getElementById("ownerReturApproved");
+            if(grossEl) grossEl.innerText = totalGrossSales.toLocaleString("id-ID");
+            if(returnEl) returnEl.innerText = totalRetur.toLocaleString("id-ID");
             document.getElementById("totalOmzet").innerText = totalOmzet.toLocaleString("id-ID");
             document.getElementById("ownerTunai").innerText = totalTunai.toLocaleString("id-ID");
             document.getElementById("ownerNonTunai").innerText = totalNonTunai.toLocaleString("id-ID");
@@ -11771,7 +11844,7 @@ window.addEventListener(
 <script src="js/onboarding-service.js?v=27.9.0-commercial02-onboarding1"></script>
 <script src="js/onboarding-dashboard.js?v=27.9.0-commercial02-onboarding1"></script>
 <script src="js/user-guide.js?v=24.2"></script>
-<script src="js/global-system-navigation.js?v=27.9.0-v28.18.2"></script>
+<script src="js/global-system-navigation.js?v=27.9.0-v28.18.3"></script>
 
 <script>
 (function(){

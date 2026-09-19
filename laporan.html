@@ -3,8 +3,8 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.18.2"></script>
-  <script src="js/brand-migration-v28180.js?v=27.9.0-v28.18.2"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.18.3"></script>
+  <script src="js/brand-migration-v28180.js?v=27.9.0-v28.18.3"></script>
 <script src="js/navigation-performance.js?v=27.9.0-v28.16.3" defer></script>
 
     <script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
@@ -2056,16 +2056,16 @@
     <script src="js/attendance-service.js?v=27.9.0-v28.16.2-final"></script>
     <script src="js/attendance-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
     
-    <script src="js/products-service.js?v=27.9.0-v28.18.2"></script>
-    <script src="js/products-bootstrap.js?v=27.9.0-v28.18.2"></script>
+    <script src="js/products-service.js?v=27.9.0-v28.18.3"></script>
+    <script src="js/products-bootstrap.js?v=27.9.0-v28.18.3"></script>
     
     <script src="js/returns-service.js?v=10.0"></script>
     <script src="js/returns-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
 
 
     
-    <script src="js/reporting-service-v28182.js"></script>
-    <script src="js/reporting-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
+    <script src="js/reporting-service-v28183.js"></script>
+    <script src="js/reporting-bootstrap.js?v=27.9.0-v28.18.3"></script>
 <script src="js/license-v2-config.js?v=27.9.0-v28.13.1"></script>
 <script src="js/license-v2-client.js?v=25.2.0"></script>
 <script defer src="js/license-v2-guard.js?v=25.2.0"></script>
@@ -2125,6 +2125,14 @@
 ></div>
 
             <div class="summary-grid">
+                <div class="stat-card">
+                    <span class="stat-title">Penjualan Kotor</span>
+                    <span class="stat-value" id="statGross">Rp 0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title">Retur Disetujui</span>
+                    <span class="stat-value" id="statReturns">-Rp 0</span>
+                </div>
                 <div class="stat-card">
                     <span class="stat-title">Penjualan Bersih</span>
                     <span class="stat-value" id="statOmset">Rp 0</span>
@@ -2419,7 +2427,7 @@
                 <span class="bold" id="advTotalDiskon">-Rp 0</span>
             </div>
             <div class="detail-row">
-                <span style="color:#64748b;">Total Belanja</span>
+                <span style="color:#64748b;">Penjualan Kotor Transaksi</span>
                 <span class="bold" id="advTotal">Rp 0</span>
             </div>
             <div id="advReturBox" style="display:none;border:1px solid rgba(217,119,6,.2);background:rgba(217,119,6,.06);border-radius:9px;padding:9px;margin:7px 0;font-size:.68rem;line-height:1.6"></div>
@@ -2556,7 +2564,7 @@ document.addEventListener(
         cekPeringatanStok();
 
         setDefaultReportDateRange();
-        loadLaporan();
+        loadLaporan().finally(()=>onDateRangeChanged());
 
         batasiTampilanOmzetLaporan();
 
@@ -3411,6 +3419,8 @@ function simpanLaporanKeStorage(dataArray) {
 
         let reportDateRangeInitialized = false;
         let reportRangeRequestId = 0;
+        let reportFinancialSummary = null;
+        let reportFinancialSummaryRange = "";
 
         function localDateInputValue(date = new Date()) {
             const d = new Date(date);
@@ -3477,12 +3487,19 @@ function simpanLaporanKeStorage(dataArray) {
             );
 
             try {
-                const rows = await window.LDMReporting.fetchAllReportTransactions({
-                    fromDate: fromDate || null,
-                    toDate: toDate || null,
-                    pageSize: 500
-                });
+                const [rows,summary] = await Promise.all([
+                    window.LDMReporting.fetchAllReportTransactions({
+                        fromDate: fromDate || null,
+                        toDate: toDate || null,
+                        pageSize: 500
+                    }),
+                    typeof window.LDMReporting.fetchFinancialSummary === "function"
+                        ? window.LDMReporting.fetchFinancialSummary({fromDate:fromDate || null,toDate:toDate || null})
+                        : Promise.resolve(null)
+                ]);
                 if (requestId !== reportRangeRequestId) return;
+                reportFinancialSummary = summary && typeof summary === "object" ? summary : null;
+                reportFinancialSummaryRange = `${fromDate}|${toDate}`;
                 applyLaporanRows(rows, { migrateLegacy: false });
                 updateTransactionArchiveStatus(
                     `Periode ${fromDate || "awal"} s.d. ${toDate || "terbaru"}: ${rows.length.toLocaleString("id-ID")} transaksi. ` +
@@ -3555,12 +3572,20 @@ function simpanLaporanKeStorage(dataArray) {
         }
 
         function getReturnTotalForTransaction(item) {
+            if (item && item.returTotal !== undefined) return Number(item.returTotal || 0);
+            if (item && item.approvedReturns !== undefined) return Number(item.approvedReturns || 0);
             return getApprovedReturnsForTransaction(item)
                 .reduce((sum, r) => sum + Number(r.totalRetur || 0), 0);
         }
 
+        function getGrossTransactionTotal(item) {
+            return Number(item?.grossTotal ?? item?.grossSales ?? item?.total ?? item?.grandTotal ?? 0) || 0;
+        }
+
         function getNetTransactionTotal(item) {
-            return Math.max(0, Number(item.total || 0) - getReturnTotalForTransaction(item));
+            if (item && item.netTotal !== undefined) return Number(item.netTotal || 0);
+            if (item && item.netSales !== undefined) return Number(item.netSales || 0);
+            return Math.max(0, getGrossTransactionTotal(item) - getReturnTotalForTransaction(item));
         }
 
         function bukaReturDariLaporan() {
@@ -3575,10 +3600,29 @@ function simpanLaporanKeStorage(dataArray) {
         }
 
         function updateSummaryCards() {
-            let totalOmset = filteredData.reduce((acc, curr) => acc + getNetTransactionTotal(curr), 0);
-            document.getElementById("statOmset").innerText = `Rp ${totalOmset.toLocaleString("id-ID")}`;
-            document.getElementById("statCount").innerText = `${filteredData.length} TRX`;
+            const searchValue=String(document.getElementById("inputSearch")?.value || "").trim();
+            const fromDate=String(document.getElementById("filterStartDate")?.value || "");
+            const toDate=String(document.getElementById("filterEndDate")?.value || "");
+            const useAuthoritative = !searchValue
+                && reportFinancialSummary
+                && reportFinancialSummaryRange === `${fromDate}|${toDate}`;
 
+            let grossSales = filteredData.reduce((acc,curr)=>acc+getGrossTransactionTotal(curr),0);
+            let returnsTotal = filteredData.reduce((acc,curr)=>acc+getReturnTotalForTransaction(curr),0);
+            let netSales = filteredData.reduce((acc,curr)=>acc+getNetTransactionTotal(curr),0);
+            let transactionCount = filteredData.length;
+
+            if(useAuthoritative){
+                grossSales=Number(reportFinancialSummary.grossSales || 0);
+                returnsTotal=Number(reportFinancialSummary.approvedReturns || 0);
+                netSales=Number(reportFinancialSummary.netSales || 0);
+                transactionCount=Number(reportFinancialSummary.transactionCount || 0);
+            }
+
+            document.getElementById("statGross").innerText = `Rp ${grossSales.toLocaleString("id-ID")}`;
+            document.getElementById("statReturns").innerText = `-Rp ${returnsTotal.toLocaleString("id-ID")}`;
+            document.getElementById("statOmset").innerText = `Rp ${netSales.toLocaleString("id-ID")}`;
+            document.getElementById("statCount").innerText = `${transactionCount} TRX`;
         }
 
         function renderTable() {
@@ -3745,14 +3789,17 @@ function simpanLaporanKeStorage(dataArray) {
                 rowDiskonEl.style.display = "none";
             }
 
-            document.getElementById("advTotal").innerText = `Rp ${Number(item.total || 0).toLocaleString("id-ID")}`;
+            document.getElementById("advTotal").innerText = `Rp ${getGrossTransactionTotal(item).toLocaleString("id-ID")}`;
 
             const approvedRetur = getApprovedReturnsForTransaction(item);
-            const totalRetur = approvedRetur.reduce((sum, r) => sum + Number(r.totalRetur || 0), 0);
+            const totalRetur = getReturnTotalForTransaction(item);
             const returBox = document.getElementById("advReturBox");
-            if (approvedRetur.length) {
+            if (totalRetur > 0) {
                 returBox.style.display = "block";
-                returBox.innerHTML = `<strong>↩️ Riwayat Retur</strong><br>${approvedRetur.map(r => `${esc(r.returId)} • -Rp ${Number(r.totalRetur||0).toLocaleString("id-ID")}`).join("<br>")}<hr style="border:0;border-top:1px dashed var(--border-color);margin:6px 0"><strong>Penjualan Bersih: Rp ${Math.max(0,Number(item.total||0)-totalRetur).toLocaleString("id-ID")}</strong>`;
+                const detailRetur = approvedRetur.length
+                    ? approvedRetur.map(r => `${esc(r.returId)} • -Rp ${Number(r.totalRetur||0).toLocaleString("id-ID")}`).join("<br>")
+                    : `Retur APPROVED Cloud • -Rp ${totalRetur.toLocaleString("id-ID")}`;
+                returBox.innerHTML = `<strong>↩️ Riwayat Retur</strong><br>${detailRetur}<hr style="border:0;border-top:1px dashed var(--border-color);margin:6px 0"><strong>Penjualan Bersih: Rp ${getNetTransactionTotal(item).toLocaleString("id-ID")}</strong>`;
             } else {
                 returBox.style.display = "none";
                 returBox.innerHTML = "";
@@ -5714,7 +5761,7 @@ function tampilkanStatusAksesLaporan() {
     else if (role === "Owner") {
 
         el.textContent =
-            "👑 Mode Owner: akses laporan penuh.";
+            "👑 Mode Owner: akses laporan penuh. Retur APPROVED mengurangi Penjualan Bersih berdasarkan tanggal approval WITA.";
 
     }
 
@@ -6459,7 +6506,7 @@ function batasiTampilanOmzetLaporan() {
 })();
 </script>
 
-<script src="js/global-system-navigation.js?v=27.9.0-v28.18.2"></script>
+<script src="js/global-system-navigation.js?v=27.9.0-v28.18.3"></script>
 <script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
 <script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
 </body>
