@@ -1,11 +1,12 @@
-// Build: 27.9.0-v28.18.3 Return-Aware Reporting & Net Revenue Repair
+// Build: 27.9.0-v28.18.3 Dashboard UI Fix1
 "use strict";
 
 importScripts("./js/app-version.js");
 const APP_VERSION=String(self.LDM_APP_VERSION||"runtime-version-missing");
 const CACHE_PREFIX="ldm-";
-const SHELL_CACHE=`${CACHE_PREFIX}${APP_VERSION}-shell`;
-const RUNTIME_CACHE=`${CACHE_PREFIX}${APP_VERSION}-runtime`;
+const CACHE_REVISION="dashboard-ui-fix1";
+const SHELL_CACHE=`${CACHE_PREFIX}${APP_VERSION}-${CACHE_REVISION}-shell`;
+const RUNTIME_CACHE=`${CACHE_PREFIX}${APP_VERSION}-${CACHE_REVISION}-runtime`;
 const SUPABASE_CDN="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0";
 
 const APP_SHELL=[

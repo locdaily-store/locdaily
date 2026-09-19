@@ -4423,37 +4423,23 @@ body.dark-mode
                 <!-- KARTU RINGKASAN UTAMA -->
                 <div class="grid-cards">
                     <div class="card omzet">
-                        <div class="card-icon">🧾</div>
-                        <div class="card-info">
-                            <h4>Penjualan Kotor</h4>
-                            <h2>Rp <span id="ownerGrossSales">0</span></h2>
-                        </div>
-                    </div>
-                    <div class="card warning">
-                        <div class="card-icon">↩️</div>
-                        <div class="card-info">
-                            <h4>Retur Disetujui</h4>
-                            <h2>-Rp <span id="ownerReturApproved">0</span></h2>
-                        </div>
-                    </div>
-                    <div class="card omzet">
                         <div class="card-icon">💰</div>
                         <div class="card-info">
-                            <h4 id="lblOwnerOmzet">Penjualan Bersih Hari Ini</h4>
+                            <h4 id="lblOwnerOmzet">Total Omzet Hari Ini</h4>
                             <h2>Rp <span id="totalOmzet">0</span></h2>
                         </div>
                     </div>
                     <div class="card tunai">
                         <div class="card-icon">💵</div>
                         <div class="card-info">
-                            <h4>Tunai Bersih</h4>
+                            <h4>Tunai (Cash)</h4>
                             <h2>Rp <span id="ownerTunai">0</span></h2>
                         </div>
                     </div>
                     <div class="card nontunai">
                         <div class="card-icon">📱</div>
                         <div class="card-info">
-                            <h4>Non Tunai Bersih</h4>
+                            <h4>Non Tunai (QRIS)</h4>
                             <h2>Rp <span id="ownerNonTunai">0</span></h2>
                         </div>
                     </div>
@@ -9587,8 +9573,8 @@ function batasiTampilanOmzetDashboard() {
 
             const txtJudulLabel = getLabelPeriodeAktif();
 
-            document.getElementById("lblOwnerOmzet").innerText = `Penjualan Bersih ${txtJudulLabel}`;
-            document.getElementById("lblOmzetBox").innerText = `🛒 Ringkasan Penjualan Bersih ${txtJudulLabel}`;
+            document.getElementById("lblOwnerOmzet").innerText = `Total Omzet ${txtJudulLabel}`;
+            document.getElementById("lblOmzetBox").innerText = `🛒 Ringkasan Omzet ${txtJudulLabel}`;
             
             const formOpContainer = document.getElementById("formOperasionalContainer");
             if (formOpContainer) {
