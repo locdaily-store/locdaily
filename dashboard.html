@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.18.3"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.19.0-rc2"></script>
   <script src="js/brand-migration-v28180.js?v=27.9.0-v28.18.3"></script>
 <script src="js/navigation-performance.js?v=27.9.0-v28.16.3" defer></script>
 
@@ -3256,7 +3256,7 @@ body.dark-mode
     <script src="js/cloud-session.js?v=27.9.0-v28.16.3-navfast"></script>
     <script src="js/store-mode.js?v=27.9.0-mode1"></script>
     <link rel="stylesheet" href="css/store-modes.css?v=27.9.0-mode2">
-    <script src="js/role-access-guard-v28120.js?v=27.9.0-v28.12.0"></script>
+    <script src="js/employee-permission-service-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/role-access-guard-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
     
     <script src="js/attendance-service.js?v=27.9.0-v28.16.2-final"></script>
@@ -4422,21 +4422,21 @@ body.dark-mode
             <div id="viewOwner" style="display: none;">
                 <!-- KARTU RINGKASAN UTAMA -->
                 <div class="grid-cards">
-                    <div class="card omzet">
+                    <div class="card omzet" data-ldm-financial="revenue">
                         <div class="card-icon">💰</div>
                         <div class="card-info">
                             <h4 id="lblOwnerOmzet">Total Omzet Hari Ini</h4>
                             <h2>Rp <span id="totalOmzet">0</span></h2>
                         </div>
                     </div>
-                    <div class="card tunai">
+                    <div class="card tunai" data-ldm-financial="revenue">
                         <div class="card-icon">💵</div>
                         <div class="card-info">
                             <h4>Tunai (Cash)</h4>
                             <h2>Rp <span id="ownerTunai">0</span></h2>
                         </div>
                     </div>
-                    <div class="card nontunai">
+                    <div class="card nontunai" data-ldm-financial="revenue">
                         <div class="card-icon">📱</div>
                         <div class="card-info">
                             <h4>Non Tunai (QRIS)</h4>
@@ -4444,7 +4444,7 @@ body.dark-mode
                         </div>
                     </div>
 
-                    <div class="card modal">
+                    <div class="card modal" data-ldm-financial="hpp">
                         <div class="card-icon">📉</div>
                         <div class="card-info">
                             <h4>Modal + Ops</h4>
@@ -4452,7 +4452,7 @@ body.dark-mode
                         </div>
                     </div>
 
-                    <div class="card profit">
+                    <div class="card profit" data-ldm-financial="profit">
                         <div class="card-icon">📈</div>
                         <div class="card-info">
                             <h4>Profit Bersih</h4>
@@ -4728,14 +4728,14 @@ body.dark-mode
                                 <h2>Rp <span id="monthlyOmzet">0</span></h2>
                             </div>
                         </div>
-                        <div class="card modal">
+                        <div class="card modal" data-ldm-financial="hpp">
                             <div class="card-icon">📉</div>
                             <div class="card-info">
                                 <h4>Modal + Ops</h4>
                                 <h2>Rp <span id="monthlyModal">0</span></h2>
                             </div>
                         </div>
-                        <div class="card profit">
+                        <div class="card profit" data-ldm-financial="profit">
                             <div class="card-icon">📈</div>
                             <div class="card-info">
                                 <h4>Profit Bersih</h4>
@@ -9566,6 +9566,11 @@ function batasiTampilanOmzetDashboard() {
             }
         }
 
+
+        function ldmCanViewRevenue(){return window.LDMEmployeePermissions?.can?.("finance.revenue.view")!==false;}
+        function ldmCanViewHpp(){return window.LDMEmployeePermissions?.can?.("hpp.view")!==false;}
+        function ldmCanViewProfit(){return window.LDMEmployeePermissions?.can?.("finance.profit.view")!==false && ldmCanViewRevenue() && ldmCanViewHpp();}
+
         function renderOwner(options = {}) {
             const laporanAll = getDashboardPeriodRows();
             const operasionalAll = JSON.parse(localStorage.getItem("operasional")) || [];
@@ -9670,9 +9675,14 @@ function batasiTampilanOmzetDashboard() {
                 }
             }
 
-            const totalBiayaOperasional = operasional.reduce((sum, item) => sum + Number(item.nominal || 0), 0);
-            const grandTotalModal = totalModalBarang + totalBiayaOperasional;
-            const totalProfit = totalOmzet - grandTotalModal;
+            const canRevenue = ldmCanViewRevenue();
+            const canHpp = ldmCanViewHpp();
+            const canProfit = ldmCanViewProfit();
+            if (!canRevenue) { totalGrossSales=0; totalRetur=0; totalOmzet=0; totalTunai=0; totalNonTunai=0; }
+            if (!canHpp) { totalModalBarang=0; }
+            const totalBiayaOperasional = canHpp ? operasional.reduce((sum, item) => sum + Number(item.nominal || 0), 0) : 0;
+            const grandTotalModal = canHpp ? (totalModalBarang + totalBiayaOperasional) : 0;
+            const totalProfit = canProfit ? (totalOmzet - grandTotalModal) : 0;
 
             const grossEl=document.getElementById("ownerGrossSales");
             const returnEl=document.getElementById("ownerReturApproved");
@@ -11830,7 +11840,7 @@ window.addEventListener(
 <script src="js/onboarding-service.js?v=27.9.0-commercial02-onboarding1"></script>
 <script src="js/onboarding-dashboard.js?v=27.9.0-commercial02-onboarding1"></script>
 <script src="js/user-guide.js?v=24.2"></script>
-<script src="js/global-system-navigation.js?v=27.9.0-v28.18.3"></script>
+<script src="js/global-system-navigation-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 
 <script>
 (function(){

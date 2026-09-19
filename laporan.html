@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.18.3"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.19.0-rc2"></script>
   <script src="js/brand-migration-v28180.js?v=27.9.0-v28.18.3"></script>
 <script src="js/navigation-performance.js?v=27.9.0-v28.16.3" defer></script>
 
@@ -2050,7 +2050,7 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/cloud-auth.js?v=27.9.0-v28.16.3-navfast"></script>
     <script src="js/cloud-session.js?v=27.9.0-v28.16.3-navfast"></script>
-    <script src="js/role-access-guard-v28120.js?v=27.9.0-v28.12.0"></script>
+    <script src="js/employee-permission-service-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/role-access-guard-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
     
     <script src="js/attendance-service.js?v=27.9.0-v28.16.2-final"></script>
@@ -2125,15 +2125,15 @@
 ></div>
 
             <div class="summary-grid">
-                <div class="stat-card">
+                <div class="stat-card" data-ldm-financial="revenue">
                     <span class="stat-title">Penjualan Kotor</span>
                     <span class="stat-value" id="statGross">Rp 0</span>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" data-ldm-financial="revenue">
                     <span class="stat-title">Retur Disetujui</span>
                     <span class="stat-value" id="statReturns">-Rp 0</span>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" data-ldm-financial="revenue">
                     <span class="stat-title">Penjualan Bersih</span>
                     <span class="stat-value" id="statOmset">Rp 0</span>
                 </div>
@@ -2426,14 +2426,14 @@
                 <span>Total Potongan Harga</span>
                 <span class="bold" id="advTotalDiskon">-Rp 0</span>
             </div>
-            <div class="detail-row">
+            <div class="detail-row" data-ldm-financial="revenue">
                 <span style="color:#64748b;">Penjualan Kotor Transaksi</span>
                 <span class="bold" id="advTotal">Rp 0</span>
             </div>
             <div id="advReturBox" style="display:none;border:1px solid rgba(217,119,6,.2);background:rgba(217,119,6,.06);border-radius:9px;padding:9px;margin:7px 0;font-size:.68rem;line-height:1.6"></div>
             
             <!-- Rincian Pembayaran (Mendukung Pembayaran Biasa & Split Payment) -->
-            <div id="boxMetodePembayaran">
+            <div id="boxMetodePembayaran" data-ldm-financial="revenue">
                 <div class="detail-row" id="rowSingleBayar">
                     <span style="color:#64748b;" id="labelBayar">Dibayar</span>
                     <span id="advBayar">Rp 0</span>
@@ -2448,7 +2448,7 @@
                 </div>
             </div>
 
-            <div class="detail-row">
+            <div class="detail-row" data-ldm-financial="revenue">
                 <span style="color:#64748b;">Kembalian</span>
                 <span style="color:#10b981; font-weight:700;" id="advKembali">Rp 0</span>
             </div>
@@ -3619,6 +3619,7 @@ function simpanLaporanKeStorage(dataArray) {
                 transactionCount=Number(reportFinancialSummary.transactionCount || 0);
             }
 
+            if(!ldmCanViewRevenue()){grossSales=0;returnsTotal=0;netSales=0;}
             document.getElementById("statGross").innerText = `Rp ${grossSales.toLocaleString("id-ID")}`;
             document.getElementById("statReturns").innerText = `-Rp ${returnsTotal.toLocaleString("id-ID")}`;
             document.getElementById("statOmset").innerText = `Rp ${netSales.toLocaleString("id-ID")}`;
@@ -3664,7 +3665,7 @@ function simpanLaporanKeStorage(dataArray) {
                         </td>
                         <td data-label="Waktu">${esc(item.waktu_teks || item.tanggal || '-')}</td>
                         <td data-label="Kasir"><span style="font-weight:600; color:#0284c7;">${esc(namaKasir)}</span></td>
-                        <td data-label="Total"><strong>Rp ${getNetTransactionTotal(item).toLocaleString("id-ID")}</strong></td>
+                        <td data-label="Total" data-ldm-financial="revenue"><strong>${ldmCanViewRevenue()?`Rp ${getNetTransactionTotal(item).toLocaleString("id-ID")}`:"🔒 Disembunyikan"}</strong></td>
                         <td data-label="Pembayaran">${badgePembayaran}</td>
                         <td data-label="Aksi"><span class="badge-view">Lihat Detail ➔</span></td>
                     </tr>
@@ -5774,47 +5775,16 @@ function tampilkanStatusAksesLaporan() {
 
 }
 
+
+function ldmCanViewRevenue(){return window.LDMEmployeePermissions?.can?.("finance.revenue.view")!==false;}
+function ldmCanViewHpp(){return window.LDMEmployeePermissions?.can?.("hpp.view")!==false;}
+function ldmCanViewProfit(){return window.LDMEmployeePermissions?.can?.("finance.profit.view")!==false && ldmCanViewRevenue() && ldmCanViewHpp();}
+
 function batasiTampilanOmzetLaporan() {
-
-    const isOwner = getRolePengguna() === "Owner";
-
-
-    const omzetElement =
-        document.getElementById(
-            "statOmset"
-        );
-
-
-    if (!omzetElement) {
-        return;
-    }
-
-
-    const omzetCard =
-        omzetElement.closest(
-            ".stat-card"
-        );
-
-
-    if (!omzetCard) {
-        return;
-    }
-
-
-    /*
-     * Hanya Owner melihat
-     * Total Penjualan.
-     */
-    if (isOwner) {
-
-        omzetCard.style.display = "";
-
-    } else {
-
-        omzetCard.style.display = "none";
-
-    }
-
+    const canRevenue = ldmCanViewRevenue();
+    ["statGross","statReturns","statOmset"].forEach(id=>{const card=document.getElementById(id)?.closest(".stat-card");if(card)card.style.display=canRevenue?"":"none";});
+    const notice=document.getElementById("roleReportNotice");
+    if(notice&&!canRevenue) notice.textContent="🔒 Nominal pendapatan disembunyikan sesuai Jabatan & Hak Akses yang ditetapkan Owner Pusat.";
 }
     </script>
 
@@ -6506,7 +6476,7 @@ function batasiTampilanOmzetLaporan() {
 })();
 </script>
 
-<script src="js/global-system-navigation.js?v=27.9.0-v28.18.3"></script>
+<script src="js/global-system-navigation-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
 <script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
 </body>

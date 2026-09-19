@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.18.3"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.19.0-rc2"></script>
   <script src="js/brand-migration-v28180.js?v=27.9.0-v28.18.3"></script>
 <script src="js/navigation-performance.js?v=27.9.0-v28.16.3" defer></script>
 
@@ -175,6 +175,8 @@
   <h3>↩️ Retur & Penjualan Bersih</h3>
   <p><strong>V28.18.3 Return-Aware Reporting:</strong> retur berstatus APPROVED mengurangi Penjualan Bersih. Laporan mempertahankan Penjualan Kotor, menampilkan nilai Retur, lalu menghitung Penjualan Bersih. Retur PENDING, REJECTED, dan CANCELLED tidak mengurangi pendapatan. HPP hanya dibalik untuk barang retur yang benar-benar kembali ke stok.</p>
 </section>
+
+<section class="guide-card" id="panduanJabatanHakAkses"><h2>👥 Jabatan & Hak Akses Terpusat</h2><p><strong>Khusus Owner Pusat pada paket Toko.</strong> Fitur ini menambahkan jabatan custom di atas Role Sistem Owner/Admin/Kasir. Role Sistem tetap menjadi batas keamanan utama.</p><ol><li>Buka <strong>Kontrol Pusat → Jabatan & Hak Akses</strong>.</li><li>Buat jabatan baru atau gunakan template Supervisor, Kepala Toko, Kasir Senior, Barista, atau Staf Gudang.</li><li>Pilih Role Sistem dasar, mode operasional, dan cakupan cabang.</li><li>Atur tiga data sensitif: <strong>Pendapatan/Omzet</strong>, <strong>Profit/Laba</strong>, dan <strong>HPP/Harga Beli</strong>. Jika dimatikan, data dimask dari server dan bagian terkait disembunyikan.</li><li>Pilih fitur operasional yang boleh digunakan lalu simpan.</li><li>Buka tab <strong>Penugasan Karyawan</strong> dan pasangkan jabatan ke akun. Perubahan berikutnya pada jabatan otomatis berlaku ke semua akun yang memakainya.</li></ol><p><strong>Catatan tema:</strong> halaman Jabatan & Hak Akses otomatis mengikuti Tema Dashboard melalui sinkronisasi tema bersama. Tidak ada tombol tema tambahan di halaman ini.</p><p><strong>Batas aman:</strong> Kontrol Pusat, pengelolaan jabatan, master katalog jaringan, kelola cabang, dan kebijakan keamanan tetap khusus Owner Pusat. HPP hanya dapat diberikan pada jabatan berbasis Owner Cabang/Admin, sedangkan Profit hanya dapat diberikan jika Pendapatan dan HPP juga aktif.</p></section>
 </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
@@ -183,7 +185,7 @@
 <script src="js/supabase-client.js"></script>
 <script src="js/cloud-auth.js?v=27.9.0-v28.16.3-navfast"></script>
 <script src="js/cloud-session.js?v=27.9.0-v28.16.3-navfast"></script>
-<script src="js/role-access-guard-v28120.js?v=27.9.0-v28.12.0"></script>
+<script src="js/employee-permission-service-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/role-access-guard-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
 <script src="js/user-guide.js?v=27.4"></script>
 <script>(function(){if(!window.LDM_PUBLIC_GUIDE_MODE)return;document.documentElement.classList.add("ldm-public-guide");document.addEventListener("click",function(e){const a=e.target.closest("a[href]");if(!a)return;let u;try{u=new URL(a.getAttribute("href"),location.href)}catch(_){return}const file=decodeURIComponent(u.pathname.split("/").pop()||"").toLowerCase();if(file.endsWith(".html")&&!['homepage.html','panduan.html'].includes(file)){e.preventDefault();alert("Mode Panduan Publik hanya untuk membaca panduan. Kembali ke Homepage lalu pilih Masuk Aplikasi untuk membuka halaman operasional.")}},true)})();</script>
@@ -192,7 +194,7 @@
 
 <script src="js/store-mode.js?v=27.9.0-systemui24"></script>
 <script src="js/system-theme-sync-v2824.js?v=27.9.0-systemui24"></script>
-<script src="js/global-system-navigation.js?v=27.9.0-v28.18.3"></script>
+<script src="js/global-system-navigation-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
 <script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
 </body>

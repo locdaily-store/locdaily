@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.18.3"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.19.0-rc2"></script>
   <script src="js/brand-migration-v28180.js?v=27.9.0-v28.18.3"></script>
 <script src="js/navigation-performance.js?v=27.9.0-v28.16.3" defer></script>
 
@@ -459,17 +459,18 @@
       cloud_control:['Cloud Control','Memantau sinkronisasi dan kontrol cloud tingkat lanjut.'],
       central_control:['Kontrol Pusat','Laporan jaringan, profit, karyawan, sinkronisasi katalog mode sama, serta pengelolaan katalog khusus cabang beda mode oleh Owner Pusat.'],
       eod:['End of Day','Menutup operasional harian setelah seluruh shift selesai.'],
-      qa_security:['QA & Security','Menjalankan pemeriksaan kesehatan, keamanan, dan konfigurasi sistem.']
+      qa_security:['QA & Security','Menjalankan pemeriksaan kesehatan, keamanan, dan konfigurasi sistem.'],
+      job_roles:['Jabatan & Hak Akses Terpusat','Khusus paket Toko: Owner Pusat membuat jabatan custom, mengatur fitur, scope cabang/mode, serta visibilitas Pendapatan, Profit, dan HPP.']
     };
     const PLAN_META={
       WARUNG_KECIL:{tag:'MULAI USAHA',summary:'Operasional inti untuk warung/toko satu cabang yang membutuhkan kasir, stok, absensi, dan laporan.',functions:[['Kasir & stok','Transaksi langsung mengurangi stok dan masuk laporan.'],['Kontrol fisik','Stock Opname dan Kartu Stok membantu mengecek selisih.'],['Operasional dasar','Absensi termasuk Master Shift, cuti tahunan, Ketidakhadiran, retur, closing, backup, dan promo dasar.'],['Akun Dummy Aman','Demo tersedia dengan data contoh tanpa memakai kuota perangkat atau toko. Halaman inti mengikuti susunan visual modul aplikasi utama masing-masing, tetapi tampilan dan fitur Demo tetap dapat berbeda dari penggunaan sebenarnya.'],['Akun & perangkat','Kelola akun karyawan dan hingga 2 perangkat pada satu toko.']]},
       WARUNG_SEDERHANA:{tag:'TRIAL 14 HARI',summary:'Untuk usaha yang mulai membutuhkan supplier, pembelian, biaya operasional, akun cloud, recovery, dan pengelolaan kehadiran terjadwal.',functions:[['Trial 14 hari','Coba gratis dengan kuota 1 perangkat dan 1 toko. Akun Owner dan toko langsung disiapkan setelah pendaftaran berhasil.'],['Pembelian lengkap','Supplier, Purchase Order, dan Penerimaan Barang.'],['Kehadiran terjadwal','Master Shift, cuti tahunan, dan Ketidakhadiran.'],['Akun Dummy Aman','Demo tersedia dengan data contoh tanpa memakai kuota perangkat atau toko. Halaman inti mengikuti susunan visual modul aplikasi utama masing-masing, tetapi tampilan dan fitur Demo tetap dapat berbeda dari penggunaan sebenarnya.'],['Cloud operasional','Paket berbayar mendukung hingga 3 perangkat pada satu toko.'],['Lanjut tanpa kehilangan data','Setelah Trial berakhir, data toko tetap tersimpan dan dapat dilanjutkan dengan paket berbayar.']]},
-      TOKO:{tag:'MULTI CABANG',summary:'Untuk bisnis dengan beberapa cabang yang membutuhkan kontrol pusat, pengawasan kehadiran lintas cabang, transfer stok/karyawan, EOD, dan security QA.',functions:[['Multi-Toko','Kelola hingga 5 toko dengan total 15 perangkat dalam satu jaringan. Mode sama dapat mengikuti katalog pusat; mode berbeda memakai katalog khusus cabang yang master-nya tetap dikendalikan Owner Pusat.'],['Kehadiran lintas cabang','Owner Cabang melihat cabangnya; Owner Pusat dapat melihat Ketidakhadiran seluruh cabang.'],['Akun Dummy Aman','Demo Owner Pusat, Owner Cabang, Admin, dan Kasir tersedia tanpa memakai kuota perangkat atau toko. Halaman inti mengikuti susunan visual modul aplikasi utama masing-masing, tetapi tampilan dan fitur Demo tetap dapat berbeda dari penggunaan sebenarnya.'],['Transfer cabang','Transfer stok melalui Draft → Dalam Pengiriman → Diterima dan pindahkan Admin/Kasir dengan riwayat perpindahan.'],['Kontrol lanjutan','Kontrol Pusat mengelola katalog seluruh cabang. Owner Cabang dapat mengajukan item baru tanpa akses harga beli/HPP, ditambah Cloud Control, EOD, QA dan Security sesuai role akun.']]}
+      TOKO:{tag:'MULTI CABANG',summary:'Untuk bisnis dengan beberapa cabang yang membutuhkan kontrol pusat, pengawasan kehadiran lintas cabang, transfer stok/karyawan, EOD, dan security QA.',functions:[['Multi-Toko','Kelola hingga 5 toko dengan total 15 perangkat dalam satu jaringan. Mode sama dapat mengikuti katalog pusat; mode berbeda memakai katalog khusus cabang yang master-nya tetap dikendalikan Owner Pusat.'],['Kehadiran lintas cabang','Owner Cabang melihat cabangnya; Owner Pusat dapat melihat Ketidakhadiran seluruh cabang.'],['Akun Dummy Aman','Demo Owner Pusat, Owner Cabang, Admin, dan Kasir tersedia tanpa memakai kuota perangkat atau toko. Halaman inti mengikuti susunan visual modul aplikasi utama masing-masing, tetapi tampilan dan fitur Demo tetap dapat berbeda dari penggunaan sebenarnya.'],['Transfer cabang','Transfer stok melalui Draft → Dalam Pengiriman → Diterima dan pindahkan Admin/Kasir dengan riwayat perpindahan.'],['Kontrol lanjutan','Kontrol Pusat mengelola katalog seluruh cabang, Jabatan & Hak Akses, serta visibilitas Pendapatan, Profit, dan HPP per jabatan. Ditambah Cloud Control, EOD, QA dan Security sesuai hak akses.']]}
     };
     const PLAN_FEATURES={
       WARUNG_KECIL:['demo_account','dashboard','pos','inventory','stock_card','stock_opname','reports','attendance','returns','shift_closing','backup_restore','basic_promo','cloud_accounts','cloud_devices'],
       WARUNG_SEDERHANA:['demo_account','dashboard','pos','inventory','stock_card','stock_opname','reports','attendance','returns','shift_closing','backup_restore','basic_promo','advanced_promo','expenses','suppliers','purchase_order','goods_receipt','cloud_accounts','cloud_devices','recovery_center','app_update'],
-      TOKO:['demo_account','dashboard','pos','inventory','stock_card','stock_opname','reports','attendance','returns','shift_closing','backup_restore','basic_promo','advanced_promo','expenses','suppliers','purchase_order','goods_receipt','cloud_accounts','cloud_devices','recovery_center','app_update','multi_store','cloud_control','central_control','eod','qa_security']
+      TOKO:['demo_account','dashboard','pos','inventory','stock_card','stock_opname','reports','attendance','returns','shift_closing','backup_restore','basic_promo','advanced_promo','expenses','suppliers','purchase_order','goods_receipt','cloud_accounts','cloud_devices','recovery_center','app_update','multi_store','cloud_control','central_control','eod','qa_security','job_roles']
     };
     function configPlan(code){return LDM_LICENSE_V2_CONFIG.plans[code]||{}}
     function planName(code){return configPlan(code).name||code}
@@ -575,7 +576,7 @@
 
 <script src="js/store-mode.js?v=27.9.0-systemui24"></script>
 <script src="js/system-theme-sync-v2824.js?v=27.9.0-systemui24"></script>
-<script src="js/global-system-navigation.js?v=27.9.0-v28.18.3"></script>
+<script src="js/global-system-navigation-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
 <script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
 </body>

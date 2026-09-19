@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.18.3"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.19.0-rc2"></script>
   <script src="js/brand-migration-v28180.js?v=27.9.0-v28.18.3"></script>
 <script src="js/navigation-performance.js?v=27.9.0-v28.16.3" defer></script>
 
@@ -2490,7 +2490,7 @@
     <script src="js/store-mode.js?v=27.9.0-mode1"></script>
     <script src="js/product-visuals.js?v=27.9.0-mode1"></script>
     <link rel="stylesheet" href="css/store-modes.css?v=27.9.0-mode2">
-    <script src="js/role-access-guard-v28120.js?v=27.9.0-v28.12.0"></script>
+    <script src="js/employee-permission-service-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/role-access-guard-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
     
     <script src="js/attendance-service.js?v=27.9.0-v28.16.2-final"></script>
@@ -2649,7 +2649,7 @@
                     <input type="number" id="konversiBeli" min="0.001" step="0.001" value="1" oninput="updatePreviewKonversiBarang()" placeholder="Contoh: 24">
                     <small id="previewKonversiBeli" style="display:block;margin:-6px 0 10px;color:var(--label-color);">1 Pcs = 1 Pcs</small>
 
-                    <label>Harga Beli per Satuan Dasar</label>
+                    <label data-ldm-financial="hpp">Harga Beli per Satuan Dasar</label>
                     <input type="number" id="hargaBeli" placeholder="Contoh: 2800">
 
                     <label>Harga Jual (Ke Konsumen)</label>
@@ -2939,7 +2939,7 @@
             <label>Jumlah Stok Tambahan (Satuan Dasar)</label>
             <input type="number" id="stokTambah" step="0.001" placeholder="Masukkan jumlah dalam satuan dasar">
 
-            <label>Harga Beli Baru per Satuan Dasar (Rp)</label>
+            <label data-ldm-financial="hpp">Harga Beli Baru per Satuan Dasar (Rp)</label>
             <input type="number" id="stokHargaBeli" placeholder="Modal per satuan dasar">
 
             <label>Harga Jual Konsumen Baru (Rp)</label>
@@ -3008,7 +3008,7 @@
             <input type="number" id="editKonversiBeli" min="0.001" step="0.001" value="1" oninput="updatePreviewKonversiEdit()">
             <small id="previewEditKonversi" style="display:block;margin:-6px 0 10px;color:var(--label-color);">1 Pcs = 1 Pcs</small>
 
-            <label>Harga Beli per Satuan Dasar (Rp)</label>
+            <label data-ldm-financial="hpp">Harga Beli per Satuan Dasar (Rp)</label>
             <input type="number" id="editHargaBeli">
 
             <label>Harga Jual Konsumen (Rp)</label>
@@ -3881,7 +3881,9 @@ let isPromoValid = CekPromoAktif(item, 1);
                 : ((isPromoValid && item.promo.hargaPromo) ? Number(item.promo.hargaPromo) : hgJual);
             let margin = hgEfektif - hgBeli;
 
-            // =====================================================
+            function ldmCanViewHpp(){return window.LDMEmployeePermissions?.can?.("hpp.view")!==false;}
+
+// =====================================================
 // TAMPILAN HARGA BERDASARKAN ROLE
 // =====================================================
 
@@ -3894,12 +3896,9 @@ const hargaPromoTersedia =
 let detailHargaHTML = "";
 
 
-if (isOwner) {
+if (ldmCanViewHpp()) {
 
-    /*
-     * OWNER:
-     * Bisa melihat seluruh informasi keuangan barang.
-     */
+    /* HPP terlihat hanya jika diizinkan oleh Jabatan & Hak Akses. */
 
     detailHargaHTML = `
         <div class="item-details">
@@ -6643,7 +6642,7 @@ window.addEventListener(
 );
 </script>
 
-<script src="js/global-system-navigation.js?v=27.9.0-v28.18.3"></script>
+<script src="js/global-system-navigation-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
 <script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
 </body>
