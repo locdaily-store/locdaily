@@ -2,35 +2,239 @@
 <html lang="id">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="strict-origin-when-cross-origin"><meta name="theme-color" content="#0d2240">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#0d2240">
 <title>Jabatan & Hak Akses - LocDaily</title>
-<link rel="manifest" href="manifest.json"><link rel="icon" href="assets/icons/icon-192.png"><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="css/global-responsive-navigation.css?v=27.9.0-v28.19.1-final"><link rel="stylesheet" href="css/job-role-management-v28190rc2.css?v=27.9.0-v28.19.1-final">
-<script src="js/app-version.js?v=27.9.0-v28.19.1-final"></script><script src="js/brand-migration-v28180.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/navigation-performance.js?v=27.9.0-v28.16.3" defer></script>
-<script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script><script src="js/storage-quota-guard.js?v=27.7.1"></script><script defer src="js/storage-health-monitor.js?v=27.9.0-v28.16.1-runtimefix"></script><script src="js/local-time.js?v=26.4.0"></script>
-<script src="js/security-hardening.js?v=27.9.0-v28.16.2-final"></script><script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script><script src="js/supabase-config.js"></script><script src="js/supabase-client.js"></script><script src="js/cloud-auth.js?v=27.9.0-v28.16.3-navfast"></script><script src="js/cloud-session.js?v=27.9.0-v28.16.3-navfast"></script>
-<script src="js/employee-permission-service-v28190rc2.js?v=27.9.0-v28.19.1-final"></script><script src="js/role-access-guard-v28190rc2.js?v=27.9.0-v28.19.1-final"></script><script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
-<script src="js/license-v2-config.js?v=27.9.0-v28.13.1"></script><script src="js/license-v2-client.js?v=25.2.0"></script><script defer src="js/license-v2-guard.js?v=25.2.0"></script><script src="js/primary-owner-service.js?v=27.9.0-v28.19.1-final"></script>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="assets/icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/global-responsive-navigation.css?v=27.9.0-v28.19.1-ui-fix1">
+<link rel="stylesheet" href="css/job-role-management-v28191-ui-fix1.css?v=27.9.0-v28.19.1-ui-fix1">
+<script src="js/app-version.js?v=27.9.0-v28.19.1-ui-fix1"></script>
+<script src="js/brand-migration-v28180.js?v=27.9.0-v28.19.0-rc2"></script>
+<script src="js/navigation-performance.js?v=27.9.0-v28.16.3" defer></script>
+<script src="js/storage-engine.js?v=27.9.0-storage-archive-v2826"></script>
+<script src="js/storage-quota-guard.js?v=27.7.1"></script>
+<script defer src="js/storage-health-monitor.js?v=27.9.0-v28.16.1-runtimefix"></script>
+<script src="js/local-time.js?v=26.4.0"></script>
+<script src="js/security-hardening.js?v=27.9.0-v28.16.2-final"></script>
+<script src="js/error-monitor.js?v=27.9.0-monitor4"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/cloud-auth.js?v=27.9.0-v28.16.3-navfast"></script>
+<script src="js/cloud-session.js?v=27.9.0-v28.16.3-navfast"></script>
+<script src="js/employee-permission-service-v28190rc2.js?v=27.9.0-v28.19.1-final"></script>
+<script src="js/role-access-guard-v28190rc2.js?v=27.9.0-v28.19.1-final"></script>
+<script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
+<script src="js/license-v2-config.js?v=27.9.0-v28.13.1"></script>
+<script src="js/license-v2-client.js?v=25.2.0"></script>
+<script defer src="js/license-v2-guard.js?v=25.2.0"></script>
+<script src="js/primary-owner-service.js?v=27.9.0-v28.19.1-final"></script>
 </head>
 <body class="jr-page">
-<main class="jr-shell">
-<section class="jr-hero"><div><span class="jr-kicker">👥 PAKET TOKO · KHUSUS OWNER PUSAT</span><h1>Jabatan & Hak Akses</h1><p>Buat jabatan seperti Supervisor, Kasir Senior, Barista, atau Staf Gudang. Satu perubahan di pusat langsung diikuti semua akun yang menggunakan jabatan tersebut, tanpa mengubah role sistem Owner/Admin/Kasir.</p></div><div class="jr-hero-actions"><button class="jr-btn soft jr-mobile-menu" id="jrMobileMenuToggle" type="button" data-ldm-menu-toggle aria-label="Buka menu navigasi" aria-expanded="false">☰ Menu</button><a class="jr-btn soft" href="owner-control-center.html" style="display:inline-flex;align-items:center;text-decoration:none">← Kontrol Pusat</a><button class="jr-btn green" id="jrNewRole" data-jr-action>+ Buat Jabatan</button></div></section>
-<section class="jr-info-grid"><article class="jr-info"><strong>1. Role Sistem tetap aman</strong><span>Owner, Admin, dan Kasir tetap menjadi batas keamanan utama. Jabatan custom tidak bisa menaikkan akun melewati batas role sistemnya.</span></article><article class="jr-info"><strong>2. Satu jabatan, semua cabang</strong><span>Ubah nama atau hak akses sekali dari pusat. Semua akun yang memakai jabatan itu otomatis mengikuti versi terbaru.</span></article><article class="jr-info"><strong>3. Hak sensitif tetap dikunci</strong><span>Kontrol Pusat, master katalog, dan kebijakan keamanan tetap khusus Owner Pusat. HPP, pendapatan, dan profit dapat diberikan secara terkontrol sesuai batas Role Sistem.</span></article></section>
-<div class="jr-tabs" role="tablist"><button class="jr-tab active" data-tab="roles">Master Jabatan</button><button class="jr-tab" data-tab="assignments">Penugasan Karyawan</button><button class="jr-tab" data-tab="audit">Riwayat Perubahan</button></div>
-<section class="jr-panel active" data-panel="roles">
-<div class="jr-card"><div class="jr-card-head"><div><h2>Master Jabatan Jaringan</h2><p>Pilih jabatan di kiri lalu atur hak aksesnya. Gunakan template agar tidak perlu mulai dari kosong.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><select id="jrTemplate" class="jr-btn soft" style="border:0"><option value="">Gunakan template…</option><option value="supervisor">Supervisor Cabang</option><option value="kepala">Kepala Toko</option><option value="kasirSenior">Kasir Senior</option><option value="barista">Barista</option><option value="gudang">Staf Gudang</option></select><button class="jr-btn soft" id="jrReload" data-jr-action>Muat Ulang</button></div></div><div class="jr-status" id="jrStatus">Menyiapkan data jabatan…</div>
-<div class="jr-layout"><aside><div class="jr-role-list" id="jrRoleList"></div></aside><section class="jr-editor"><div class="jr-card-head"><div><h2 id="jrEditorTitle">Buat Jabatan Baru</h2><p id="jrEditorHint">Atur nama, cakupan, dan hak akses secara sederhana.</p></div></div>
-<div class="jr-form-grid" style="margin-top:12px"><div class="jr-field"><label>Nama jabatan</label><input id="jrName" maxlength="60" placeholder="Contoh: Supervisor Cabang"><span class="jr-help">Nama dapat diganti kapan saja tanpa mengubah akun yang sudah memakai jabatan ini.</span></div><div class="jr-field"><label>Role sistem dasar</label><select id="jrBaseRole"><option value="owner">Owner Cabang</option><option value="admin">Admin</option><option value="kasir">Kasir</option></select><span class="jr-help">Menentukan batas maksimum hak akses. Jabatan tidak dapat melewati batas ini.</span></div><div class="jr-field full"><label>Deskripsi singkat</label><textarea id="jrDescription" maxlength="250" placeholder="Jelaskan tanggung jawab jabatan agar mudah dipahami."></textarea></div></div>
-<h3 class="jr-section-title">Berlaku pada mode operasional</h3><div class="jr-mode-row"><label class="jr-check-chip"><input type="checkbox" data-mode="retail" checked><span>🏪 Toko Ritel</span></label><label class="jr-check-chip"><input type="checkbox" data-mode="cafe" checked><span>☕ Kafe</span></label><label class="jr-check-chip"><input type="checkbox" data-mode="warung" checked><span>🧺 Warung</span></label></div>
-<h3 class="jr-section-title">Cakupan cabang</h3><label class="jr-store-option" style="max-width:340px"><input type="checkbox" id="jrAllStores" checked><span><strong>Semua cabang</strong><br><small>Jabatan otomatis tersedia di seluruh jaringan.</small></span></label><div class="jr-store-list" id="jrStoreList"></div>
-<h3 class="jr-section-title">Visibilitas data keuangan</h3><div class="jr-sensitive-intro"><strong>Atur angka sensitif dengan tiga sakelar sederhana.</strong><span>Jika dimatikan, data dimask dari server dan bagian terkait disembunyikan dari tampilan akun tersebut.</span></div><div class="jr-sensitive-grid" id="jrSensitivePermissions"></div>
-<h3 class="jr-section-title">Hak akses fitur <span class="jr-pill" id="jrPermissionCountText">0 hak</span></h3><div class="jr-note">Hak berlabel <strong>Wajib</strong> menjaga akun tetap bisa membuka fungsi dasar. Kontrol Pusat, pengelolaan jabatan, master katalog, cabang, dan kebijakan keamanan tetap khusus Owner Pusat. Tema halaman ini mengikuti Tema Dashboard otomatis tanpa tombol pengaturan tema tambahan.</div><div class="jr-permission-groups" id="jrPermissionGroups"></div>
-<div class="jr-impact"><div><span>Akun memakai jabatan</span><strong id="jrImpactUsers">0</strong></div><div><span>Cabang terdampak</span><strong id="jrImpactStores">0</strong></div><div><span>Hak akses efektif</span><strong id="jrImpactPermissions">0</strong></div></div>
-<div class="jr-actions"><button class="jr-btn soft" id="jrDuplicateRole" data-jr-action hidden>Duplikat</button><button class="jr-btn red" id="jrToggleActive" data-jr-action hidden>Nonaktifkan</button><button class="jr-btn red" id="jrDeleteRole" data-jr-action hidden>🗑 Hapus Jabatan</button><button class="jr-btn green" id="jrSaveRole" data-jr-action>Simpan</button></div>
-</section></div></div></section>
-<section class="jr-panel" data-panel="assignments"><div class="jr-card"><div class="jr-card-head"><div><h2>Penugasan Karyawan</h2><p>Pilih jabatan untuk setiap akun. Hanya jabatan yang sesuai role sistem, cabang, dan mode toko yang akan tersedia.</p></div></div><div class="jr-note" style="margin-top:12px">Jika memilih <strong>Default role sistem</strong>, akun kembali memakai hak akses standar Owner/Admin/Kasir seperti sebelum fitur jabatan custom digunakan.</div><div class="jr-table-wrap"><table class="jr-table"><thead><tr><th>Karyawan</th><th>Cabang</th><th>Role Sistem</th><th>Jabatan Saat Ini</th><th>Status</th><th>Pilih Jabatan</th><th>Aksi</th></tr></thead><tbody id="jrAssignmentRows"><tr><td colspan="7" class="jr-empty">Memuat akun…</td></tr></tbody></table></div></div></section>
-<section class="jr-panel" data-panel="audit"><div class="jr-card"><div class="jr-card-head"><div><h2>Riwayat Perubahan</h2><p>Catatan pembuatan, perubahan, aktivasi, dan penugasan jabatan untuk membantu audit.</p></div></div><div class="jr-audit" id="jrAuditList"><div class="jr-empty">Memuat riwayat…</div></div></div></section>
-</main>
-<div class="jr-blocked" id="jrBlocked"><div class="jr-blocked-card"><div style="font-size:40px">🔒</div><h2>Akses khusus Owner Pusat</h2><p id="jrBlockedText">Jabatan jaringan hanya dapat dibuat dan diubah oleh Owner Pusat.</p><a class="jr-btn" href="dashboard.html" style="display:inline-flex;align-items:center;text-decoration:none">Kembali ke Dashboard</a></div></div>
-<script src="js/store-mode.js?v=27.9.0-systemui24"></script><script src="js/system-theme-sync-v2824.js?v=27.9.0-systemui24"></script><script src="js/job-role-management-v28190rc2.js?v=27.9.0-v28.19.1-final"></script><script src="js/global-system-navigation-v28190rc2.js?v=27.9.0-v28.19.1-final"></script><script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script><script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
-</body></html>
+<div class="app-layout jr-app-layout">
+  <main class="main-content jr-main-content">
+    <header class="header-app jr-header" id="jrHeader">
+      <div class="header-brand-container jr-header-brand">
+        <button class="btn-toggle-menu jr-mobile-menu" id="jrMobileMenuToggle" type="button" data-ldm-menu-toggle aria-label="Buka menu navigasi" aria-expanded="false">☰</button>
+        <div class="jr-header-icon" aria-hidden="true">🪪</div>
+        <div class="jr-header-title">
+          <h1>Jabatan & Hak Akses</h1>
+          <p>ATUR TANGGUNG JAWAB DAN AKSES KERJA KARYAWAN</p>
+        </div>
+      </div>
+      <div class="jr-header-actions">
+        <a class="btn-header-action jr-header-link" href="owner-control-center.html">← Kontrol Pusat</a>
+        <button class="btn-header-action jr-header-primary" id="jrNewRole" data-jr-action type="button">+ Buat Jabatan</button>
+      </div>
+    </header>
+
+    <section class="jr-summary-grid" aria-label="Ringkasan jabatan">
+      <article class="jr-summary-card">
+        <div class="jr-summary-icon green">🪪</div>
+        <div><span>Jabatan Aktif</span><strong id="jrSummaryRoles">0</strong></div>
+      </article>
+      <article class="jr-summary-card">
+        <div class="jr-summary-icon blue">👥</div>
+        <div><span>Karyawan Terhubung</span><strong id="jrSummaryUsers">0</strong></div>
+      </article>
+      <article class="jr-summary-card">
+        <div class="jr-summary-icon amber">🏪</div>
+        <div><span>Cabang</span><strong id="jrSummaryStores">0</strong></div>
+      </article>
+      <article class="jr-summary-card">
+        <div class="jr-summary-icon purple">✅</div>
+        <div><span>Pilihan Fitur</span><strong id="jrSummaryFeatures">0</strong></div>
+      </article>
+    </section>
+
+    <section class="jr-guide-card">
+      <div class="jr-guide-icon" aria-hidden="true">💡</div>
+      <div>
+        <strong>Atur akses sesuai tanggung jawab karyawan</strong>
+        <p>Buat jabatan seperti Supervisor, Kepala Toko, Kasir Senior, Barista, atau Staf Gudang. Setelah jabatan diberikan kepada karyawan, perubahan berikutnya akan diterapkan secara otomatis.</p>
+      </div>
+    </section>
+
+    <div class="jr-tabs" role="tablist" aria-label="Bagian pengaturan jabatan">
+      <button class="jr-tab active" type="button" data-tab="roles">Daftar Jabatan</button>
+      <button class="jr-tab" type="button" data-tab="assignments">Jabatan Karyawan</button>
+      <button class="jr-tab" type="button" data-tab="audit">Riwayat Perubahan</button>
+    </div>
+
+    <section class="jr-panel active" data-panel="roles">
+      <div class="jr-card">
+        <div class="jr-card-head">
+          <div>
+            <h2>Pengaturan Jabatan</h2>
+            <p>Pilih jabatan yang sudah ada atau buat yang baru. Kamu juga dapat memakai contoh pengaturan sebagai titik awal.</p>
+          </div>
+          <div class="jr-toolbar">
+            <select id="jrTemplate" class="jr-toolbar-select" aria-label="Pilih contoh jabatan">
+              <option value="">Pilih contoh jabatan…</option>
+              <option value="supervisor">Supervisor Cabang</option>
+              <option value="kepala">Kepala Toko</option>
+              <option value="kasirSenior">Kasir Senior</option>
+              <option value="barista">Barista</option>
+              <option value="gudang">Staf Gudang</option>
+            </select>
+            <button class="jr-btn soft" id="jrReload" data-jr-action type="button">↻ Perbarui</button>
+          </div>
+        </div>
+        <div class="jr-status" id="jrStatus" role="status" aria-live="polite">Menyiapkan data…</div>
+
+        <div class="jr-layout">
+          <aside class="jr-role-sidebar" aria-label="Daftar jabatan">
+            <div class="jr-subhead">
+              <div><strong>Daftar Jabatan</strong><span>Pilih salah satu untuk melihat pengaturannya.</span></div>
+            </div>
+            <div class="jr-role-list" id="jrRoleList"></div>
+          </aside>
+
+          <section class="jr-editor">
+            <div class="jr-card-head jr-editor-head">
+              <div>
+                <h2 id="jrEditorTitle">Buat Jabatan Baru</h2>
+                <p id="jrEditorHint">Isi informasi jabatan, lalu pilih akses yang sesuai dengan tugasnya.</p>
+              </div>
+            </div>
+
+            <div class="jr-form-grid jr-block-space">
+              <div class="jr-field">
+                <label for="jrName">Nama jabatan</label>
+                <input id="jrName" maxlength="60" placeholder="Contoh: Supervisor Cabang" autocomplete="off">
+                <span class="jr-help">Gunakan nama yang mudah dikenali oleh tim.</span>
+              </div>
+              <div class="jr-field">
+                <label for="jrBaseRole">Tingkat akses akun</label>
+                <select id="jrBaseRole">
+                  <option value="owner">Owner Cabang</option>
+                  <option value="admin">Admin</option>
+                  <option value="kasir">Kasir</option>
+                </select>
+                <span class="jr-help">Pilihan fitur akan menyesuaikan dengan tingkat akun ini.</span>
+              </div>
+              <div class="jr-field full">
+                <label for="jrDescription">Keterangan</label>
+                <textarea id="jrDescription" maxlength="250" placeholder="Contoh: Mengawasi operasional cabang dan membantu pengecekan laporan harian."></textarea>
+              </div>
+            </div>
+
+            <div class="jr-setting-section">
+              <div class="jr-setting-title"><strong>Jenis usaha yang menggunakan jabatan ini</strong><span>Pilih satu atau beberapa jenis usaha.</span></div>
+              <div class="jr-mode-row">
+                <label class="jr-check-chip"><input type="checkbox" data-mode="retail" checked><span>🏪 Toko Ritel</span></label>
+                <label class="jr-check-chip"><input type="checkbox" data-mode="cafe" checked><span>☕ Kafe</span></label>
+                <label class="jr-check-chip"><input type="checkbox" data-mode="warung" checked><span>🧺 Warung</span></label>
+              </div>
+            </div>
+
+            <div class="jr-setting-section">
+              <div class="jr-setting-title"><strong>Cabang yang menggunakan jabatan ini</strong><span>Pilih seluruh cabang atau tentukan cabang tertentu.</span></div>
+              <label class="jr-store-option jr-all-stores"><input type="checkbox" id="jrAllStores" checked><span><strong>Semua cabang</strong><small>Jabatan tersedia untuk seluruh cabang.</small></span></label>
+              <div class="jr-store-list" id="jrStoreList"></div>
+            </div>
+
+            <div class="jr-setting-section">
+              <div class="jr-setting-title"><strong>Data keuangan yang boleh dilihat</strong><span>Aktifkan hanya data yang memang diperlukan untuk pekerjaan jabatan ini.</span></div>
+              <div class="jr-sensitive-grid" id="jrSensitivePermissions"></div>
+            </div>
+
+            <div class="jr-setting-section">
+              <div class="jr-setting-title jr-setting-title-row">
+                <div><strong>Fitur yang boleh digunakan</strong><span>Pilih fitur yang diperlukan untuk pekerjaan sehari-hari.</span></div>
+                <span class="jr-pill" id="jrPermissionCountText">0 pilihan</span>
+              </div>
+              <div class="jr-note">Beberapa akses penting selalu tersedia agar akun tetap dapat digunakan dengan baik. Pengaturan khusus pemilik utama tidak dapat diberikan kepada jabatan lain.</div>
+              <div class="jr-permission-groups" id="jrPermissionGroups"></div>
+            </div>
+
+            <div class="jr-impact" aria-label="Ringkasan jabatan yang dipilih">
+              <div><span>Karyawan memakai jabatan</span><strong id="jrImpactUsers">0</strong></div>
+              <div><span>Cabang digunakan</span><strong id="jrImpactStores">0</strong></div>
+              <div><span>Fitur tersedia</span><strong id="jrImpactPermissions">0</strong></div>
+            </div>
+
+            <div class="jr-actions">
+              <button class="jr-btn soft" id="jrDuplicateRole" data-jr-action type="button" hidden>Duplikat</button>
+              <button class="jr-btn red-outline" id="jrToggleActive" data-jr-action type="button" hidden>Nonaktifkan</button>
+              <button class="jr-btn red" id="jrDeleteRole" data-jr-action type="button" hidden>🗑 Hapus Jabatan</button>
+              <button class="jr-btn green" id="jrSaveRole" data-jr-action type="button">Simpan</button>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="jr-panel" data-panel="assignments">
+      <div class="jr-card">
+        <div class="jr-card-head">
+          <div>
+            <h2>Jabatan Karyawan</h2>
+            <p>Tentukan jabatan untuk setiap karyawan. Pilihan yang tersedia akan menyesuaikan cabang, jenis usaha, dan tingkat akun.</p>
+          </div>
+        </div>
+        <div class="jr-note jr-block-space">Pilih <strong>Akses standar</strong> jika karyawan tidak perlu memakai jabatan tambahan.</div>
+        <div class="jr-table-wrap">
+          <table class="jr-table">
+            <thead><tr><th>Karyawan</th><th>Cabang</th><th>Tingkat Akun</th><th>Jabatan Saat Ini</th><th>Status</th><th>Pilih Jabatan</th><th>Aksi</th></tr></thead>
+            <tbody id="jrAssignmentRows"><tr><td colspan="7" class="jr-empty">Menyiapkan daftar karyawan…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="jr-panel" data-panel="audit">
+      <div class="jr-card">
+        <div class="jr-card-head">
+          <div>
+            <h2>Riwayat Perubahan</h2>
+            <p>Lihat perubahan jabatan dan penempatan karyawan yang dilakukan sebelumnya.</p>
+          </div>
+        </div>
+        <div class="jr-audit" id="jrAuditList"><div class="jr-empty">Menyiapkan riwayat…</div></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="jr-blocked" id="jrBlocked" aria-hidden="true">
+  <div class="jr-blocked-card" role="dialog" aria-modal="true" aria-labelledby="jrBlockedTitle">
+    <div class="jr-blocked-icon">🔒</div>
+    <h2 id="jrBlockedTitle">Akses terbatas</h2>
+    <p id="jrBlockedText">Halaman Jabatan & Hak Akses hanya dapat dikelola oleh Pemilik Utama.</p>
+    <a class="jr-btn" href="dashboard.html">Kembali ke Dashboard</a>
+  </div>
+</div>
+
+<script src="js/store-mode.js?v=27.9.0-systemui24"></script>
+<script src="js/system-theme-sync-v2824.js?v=27.9.0-systemui24"></script>
+<script src="js/job-role-management-v28191-ui-fix1.js?v=27.9.0-v28.19.1-ui-fix1"></script>
+<script src="js/global-system-navigation-v28190rc2.js?v=27.9.0-v28.19.1-final"></script>
+<script src="js/customer-safe-copy-v2828.js?v=27.9.0-v28.16.0-security"></script>
+<script defer src="js/ui-copy-cleanup-v2861.js?v=27.9.0-v28.16.0-security"></script>
+</body>
+</html>
