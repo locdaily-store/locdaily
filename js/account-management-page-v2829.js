@@ -177,11 +177,12 @@
     }
 
     body.innerHTML=accounts.map((account,index)=>{
+      const protectedOwner=account.is_primary_owner===true;
       const actions=currentRole==="owner"
         ? `<div class="row-actions">
              <button onclick="openEdit(${index})">Edit</button>
              <button class="secondary" onclick="sendReset(${index})">Reset</button>
-             <button class="danger" onclick="deleteAt(${index})">Hapus</button>
+             ${protectedOwner?'<span class="badge role">OWNER PUSAT DILINDUNGI</span>':`<button class="danger" onclick="deleteAt(${index})">Hapus</button>`}
            </div>`
         : '<span class="muted">Hanya lihat</span>';
 
@@ -386,29 +387,62 @@
     $("editDisplay").value=selected.display_name||"";
     $("editRole").value=selected.role||"kasir";
     $("editActive").value=selected.active?"true":"false";
+    const protectedOwner=selected.is_primary_owner===true;
+    $("editRole").disabled=protectedOwner;
+    $("editActive").disabled=protectedOwner;
+    const deleteButton=$("editDeleteBtn");
+    if(deleteButton)deleteButton.hidden=protectedOwner;
+    const box=$("editMessage");
+    if(box){
+      box.style.display=protectedOwner?"block":"none";
+      box.className="notice";
+      box.textContent=protectedOwner
+        ?"Owner Pusat dilindungi: username dan nama tampilan boleh diubah, tetapi role, status aktif, dan penghapusan hanya dapat diubah melalui prosedur developer."
+        :"";
+    }
     $("editModal").classList.add("open");
   }
 
   function closeEdit(){
     $("editModal").classList.remove("open");
+    $("editRole").disabled=false;
+    $("editActive").disabled=false;
+    const deleteButton=$("editDeleteBtn");if(deleteButton)deleteButton.hidden=false;
+    const box=$("editMessage");if(box){box.style.display="none";box.textContent="";}
     selected=null;
   }
 
   async function saveEdit(){
     if(!selected)return;
+    const username=$("editUsername").value.trim();
+    const displayName=$("editDisplay").value.trim();
+    const box=$("editMessage");
+    const button=$("editSaveBtn");
+    if(!/^[A-Za-z0-9._-]{3,50}$/.test(username)){
+      if(box){box.style.display="block";box.className="notice";box.textContent="Username harus 3-50 karakter dan hanya boleh huruf, angka, titik, garis bawah, atau strip.";}
+      return;
+    }
+    if(button){button.disabled=true;button.textContent="Menyimpan…";}
+    if(box){box.style.display="block";box.className="notice";box.textContent="Menyimpan perubahan akun…";}
     try{
-      await window.LDMAccounts.updateProfile({
+      const result=await window.LDMAccounts.updateProfile({
         userId:selected.user_id,
-        username:$("editUsername").value,
-        displayName:$("editDisplay").value,
+        username,
+        displayName,
         role:$("editRole").value,
         active:$("editActive").value==="true"
       });
       closeEdit();
-      showMessage("✅ Akun berhasil diperbarui.");
+      showMessage(result?.job_role_unassigned
+        ?"✅ Akun berhasil diperbarui. Jabatan custom lama dilepas karena tidak lagi cocok dengan role sistem baru."
+        :"✅ Akun berhasil diperbarui.");
       await refreshAll();
     }catch(error){
-      showMessage("❌ "+String(error?.message||error),"error");
+      const text=String(error?.message||error);
+      if(box){box.style.display="block";box.className="notice";box.textContent="Gagal menyimpan: "+text;}
+      showMessage("❌ "+text,"error");
+    }finally{
+      if(button){button.disabled=false;button.textContent="💾 Simpan";}
     }
   }
 
@@ -436,6 +470,12 @@
 
   async function deleteSelected(){
     if(!selected)return;
+    if(selected.is_primary_owner===true){
+      const box=$("editMessage");
+      if(box){box.style.display="block";box.className="notice";box.textContent="Owner Pusat dilindungi dan tidak dapat dihapus dari Management Account.";}
+      showMessage("❌ Owner Pusat dilindungi dan tidak dapat dihapus dari Management Account.","error");
+      return;
+    }
     if(!window.confirm(
       `Hapus akun ${selected.username}?\n\nJika akun mempunyai histori, akses akun akan dinonaktifkan agar histori tetap aman.`
     ))return;

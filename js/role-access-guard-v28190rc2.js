@@ -2,7 +2,7 @@
     "use strict";
     if(window.LDM_PUBLIC_GUIDE_MODE===true)return;
 
-    const VERSION="28.19.0-rc2";
+    const VERSION="28.19.1-final";
     const ALL=Object.freeze(["owner","admin","kasir"]);
     const POLICY=Object.freeze({
         "dashboard.html":Object.freeze({roles:ALL,permission:"dashboard.view"}),

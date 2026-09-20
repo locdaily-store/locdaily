@@ -1,6 +1,6 @@
 (function(){
     "use strict";
-    const VERSION="28.19.0-rc2";
+    const VERSION="28.19.1-final";
     const HIDDEN_CLASS="ldm-financial-hidden";
 
     function can(code){

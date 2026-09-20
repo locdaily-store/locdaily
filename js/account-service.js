@@ -1,7 +1,7 @@
 (function(){
     "use strict";
 
-    const CHANNEL_NAME = "ldm-cloud-accounts-v2829";
+    const CHANNEL_NAME = "ldm-cloud-accounts-v28191";
     const DEFAULT_TIMEOUT_MS = 15000;
     const CONTEXT_TIMEOUT_MS = 12000;
     let channel = null;
@@ -105,7 +105,7 @@
 
     async function listAccounts(context){
         if(!context) await accountContext();
-        const data = await rpc("ldm_account_list", undefined, "Daftar akun");
+        const data = await rpc("ldm_account_list_v28191", undefined, "Daftar akun");
         return Array.isArray(data) ? data : [];
     }
 
@@ -179,7 +179,7 @@
 
     async function updateProfile({userId,username,displayName,role,active}){
         const context = await ownerContext();
-        const data = await rpc("ldm_account_update_profile",{
+        const data = await rpc("ldm_account_update_profile_v28191",{
             p_user_id:userId,
             p_username:String(username||"").trim(),
             p_display_name:String(displayName||"").trim() || null,

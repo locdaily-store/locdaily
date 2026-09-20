@@ -1,7 +1,7 @@
 (function(){
     "use strict";
 
-    const VERSION="28.19.0-rc2";
+    const VERSION="28.19.1-final";
     const CACHE_KEY="ldmEmployeePermissionContextV28190";
     const CACHE_TTL=5*60*1000;
     let contextCache=null;
@@ -119,6 +119,13 @@
         return data;
     }
 
+    async function deleteRole(roleId){
+        const data=await rpc("ldm_job_role_delete_v28191",{p_role_id:String(roleId||"")});
+        clearCache();
+        window.dispatchEvent(new CustomEvent("ldm-job-roles-updated",{detail:data||{}}));
+        return data;
+    }
+
     async function assign(userId,roleId){
         const data=await rpc("ldm_job_role_assign_v28190",{p_user_id:userId,p_role_id:roleId});
         clearCache();
@@ -139,6 +146,6 @@
     window.LDMEmployeePermissions=Object.freeze({
         version:VERSION,
         context,current,can,requirePermission,clearCache,
-        catalog,roles,stores,assignments,audit,saveRole,setActive,assign,unassign
+        catalog,roles,stores,assignments,audit,saveRole,setActive,deleteRole,assign,unassign
     });
 })();

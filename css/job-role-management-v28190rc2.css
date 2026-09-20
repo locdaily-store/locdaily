@@ -12,3 +12,17 @@
 .jr-sensitive-intro{display:flex;flex-direction:column;gap:3px;margin:8px 0 10px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--accent-color,#ffc107) 12%,var(--bg-secondary,#fff));border:1px solid color-mix(in srgb,var(--accent-color,#ffc107) 35%,transparent);font-size:.68rem;line-height:1.5}.jr-sensitive-intro span{color:var(--system-card-muted,var(--jr-muted))}
 .jr-sensitive-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:14px}.jr-sensitive-card{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:12px;border:1px solid var(--border-color,var(--jr-line));border-radius:14px;background:var(--bg-secondary,#fff);cursor:pointer;transition:.18s ease}.jr-sensitive-card.active{border-color:#55b77f;box-shadow:0 0 0 2px rgba(15,157,88,.10);background:color-mix(in srgb,#0f9d58 6%,var(--bg-secondary,#fff))}.jr-sensitive-card.disabled{opacity:.55;cursor:not-allowed}.jr-sensitive-icon{font-size:1.25rem}.jr-sensitive-copy{min-width:0}.jr-sensitive-copy strong{display:block;font-size:.75rem}.jr-sensitive-copy small{display:block;margin-top:3px;font-size:.62rem;line-height:1.45}.jr-switch{position:relative;width:38px;height:22px}.jr-switch input{position:absolute;opacity:0;pointer-events:none}.jr-switch i{position:absolute;inset:0;border-radius:999px;background:#cbd5e1;transition:.18s}.jr-switch i:after{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25);transition:.18s}.jr-switch input:checked+i{background:#0f9d58}.jr-switch input:checked+i:after{transform:translateX(16px)}
 @media(max-width:900px){.jr-sensitive-grid{grid-template-columns:1fr}}
+
+
+/* V28.19.1 FINAL - responsive navigation + destructive action clarity */
+.jr-mobile-menu{display:none}
+#jrDeleteRole{border:1px solid color-mix(in srgb,#b42318 55%,transparent)}
+@media(max-width:899px){
+  .jr-mobile-menu{display:inline-flex!important;align-items:center;justify-content:center}
+  .jr-hero-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .jr-hero-actions .jr-mobile-menu{grid-column:1/-1}
+}
+@media(max-width:620px){
+  .jr-hero-actions{grid-template-columns:1fr}
+  .jr-hero-actions .jr-mobile-menu{grid-column:auto}
+}

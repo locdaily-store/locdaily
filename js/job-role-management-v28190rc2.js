@@ -150,6 +150,7 @@
         $("jrSaveRole").textContent=draft.id?"Simpan Perubahan":"Buat Jabatan";
         $("jrDuplicateRole").hidden=!draft.id;
         $("jrToggleActive").hidden=!draft.id;
+        $("jrDeleteRole").hidden=!draft.id;
         $("jrToggleActive").textContent=draft.active?"Nonaktifkan":"Aktifkan";
         $("jrToggleActive").className=`jr-btn ${draft.active?'red':'green'}`;
         renderStores();renderSensitivePermissions();renderPermissions();renderImpact();
@@ -217,6 +218,26 @@
         state.selectedId=null;state.editing=copy;renderRoles();renderEditor();setStatus("Salinan jabatan dibuat sebagai draft. Simpan setelah nama dan hak akses sesuai.");
     }
 
+    async function deleteRole(){
+        const draft=readEditor();if(!draft.id)return;
+        const role=roleById(draft.id)||draft;
+        const assigned=Number(role.assigned_count||0);
+        if(assigned>0){
+            setStatus(`Jabatan ${role.name} masih dipakai ${assigned} akun. Lepaskan atau ganti jabatan akun tersebut terlebih dahulu sebelum menghapus.`,"error");
+            showTab("assignments");
+            return;
+        }
+        if(!window.confirm(`Hapus jabatan ${role.name}?\n\nJabatan akan dihapus dari daftar aktif dan dicatat ke riwayat audit. Tindakan ini tidak menghapus akun karyawan.`))return;
+        setBusy(true);setStatus("Menghapus jabatan…");
+        try{
+            await api().deleteRole(role.id);
+            state.selectedId=null;state.editing=blankRole();
+            await reloadAll(true);
+            setStatus("Jabatan berhasil dihapus. Akun karyawan dan histori audit tetap aman.","ok");
+        }catch(error){setStatus(`Gagal menghapus jabatan: ${error.message||error}`,"error");}
+        finally{setBusy(false);}
+    }
+
     function roleAppliesToEmployee(role,employee){
         if(!role||!role.active||role.base_system_role!==employee.system_role)return false;
         if(!role.allowed_modes?.includes(employee.store_mode))return false;
@@ -248,7 +269,7 @@
     }
 
     function auditText(item){
-        const names={CREATE_ROLE:"Membuat jabatan",UPDATE_ROLE:"Mengubah jabatan",ACTIVATE_ROLE:"Mengaktifkan jabatan",DEACTIVATE_ROLE:"Menonaktifkan jabatan",ASSIGN_ROLE:"Menetapkan jabatan",UNASSIGN_ROLE:"Melepas jabatan"};
+        const names={CREATE_ROLE:"Membuat jabatan",UPDATE_ROLE:"Mengubah jabatan",ACTIVATE_ROLE:"Mengaktifkan jabatan",DEACTIVATE_ROLE:"Menonaktifkan jabatan",DELETE_ROLE:"Menghapus jabatan",ASSIGN_ROLE:"Menetapkan jabatan",UNASSIGN_ROLE:"Melepas jabatan"};
         return names[item.action]||item.action;
     }
     function renderAudit(){
@@ -283,6 +304,7 @@
     $("jrSaveRole").addEventListener("click",saveRole);
     $("jrDuplicateRole").addEventListener("click",duplicateRole);
     $("jrToggleActive").addEventListener("click",toggleActive);
+    $("jrDeleteRole").addEventListener("click",deleteRole);
     $("jrReload").addEventListener("click",async()=>{setBusy(true);try{await reloadAll(true);setStatus("Data berhasil diperbarui.","ok");}catch(error){setStatus(error.message||String(error),"error");}finally{setBusy(false);}});
     $("jrTemplate").addEventListener("change",event=>{if(event.target.value){applyTemplate(event.target.value);event.target.value="";}});
     $("jrBaseRole").addEventListener("change",event=>{state.editing.base_system_role=event.target.value;state.editing.permissions=defaultPermissions(event.target.value);renderSensitivePermissions();renderPermissions();renderImpact();});
