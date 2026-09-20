@@ -1418,7 +1418,7 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/cloud-auth.js?v=27.9.0-v28.16.3-navfast"></script>
     <script src="js/cloud-session.js?v=27.9.0-v28.16.3-navfast"></script>
-    <script src="js/employee-permission-service-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/role-access-guard-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
+    <script src="js/employee-permission-service-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/role-access-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/action-permission-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
     
     <script src="js/attendance-service.js?v=27.9.0-v28.16.2-final"></script>
@@ -1440,7 +1440,7 @@
 <div class="page-grid" style="grid-template-columns:minmax(330px,.9fr) minmax(560px,1.55fr)">
 <section class="box"><div class="box-title"><span>🔎 Cari Transaksi</span><small>ID / Kasir / Barang</small></div><div class="hint">Cari transaksi asli menggunakan ID <strong>LDM-...</strong>. Qty yang sudah diretur atau sedang Pending otomatis mengurangi batas retur agar tidak melebihi qty pembelian.</div><div class="form-group"><label>Transaksi</label><div class="retur-search"><input id="returTxSearch" class="form-control" autocomplete="off" placeholder="Contoh: LDM-260823-101500-A7P2" oninput="searchTransaction(this.value)" onfocus="searchTransaction(this.value)"><div id="returTxDropdown" class="search-dropdown"></div></div></div><div id="returSelectedTx" class="tx-selected"><div style="display:flex;justify-content:space-between;gap:10px"><div><span class="code-pill" id="returTxCode">-</span><div style="margin-top:5px;font-size:.7rem;font-weight:800" id="returTxCashier">-</div></div><div style="text-align:right"><strong id="returTxTotal">Rp 0</strong><br><small id="returTxDate">-</small></div></div></div>
 <div class="box-title" style="margin-top:14px"><span>📦 Item Retur</span><small id="returItemCount">0 Item</small></div><div id="returItems"><div class="empty-state">Pilih transaksi terlebih dahulu.</div></div>
-<div class="form-group"><label>Metode Refund</label><select id="returRefundMethod" class="form-control" onchange="updateReturnTotal()"><option value="Tunai">Tunai</option><option value="Non Tunai">Non Tunai / QRIS / Transfer</option></select></div><div class="form-group"><label>Kasir / Shift dari Absensi yang Memproses Refund</label><select id="returRefundShift" class="form-control" required></select><small class="mini-note">Approval hanya dapat dilakukan oleh <strong>Owner</strong>. Pilihan diambil dari akun yang sudah <strong>Absen Masuk</strong> dan belum Absen Keluar. Refund tunai otomatis dicatat sebagai Kas Keluar pada shift tersebut.</small></div><div class="form-group"><label>Catatan Retur</label><textarea id="returNote" class="form-control" maxlength="200" placeholder="Keterangan tambahan"></textarea></div><div class="return-total-box"><span>Total Refund</span><strong id="returTotalPreview">Rp 0</strong></div><div class="btn-row" style="margin-top:10px"><button class="btn primary" type="button" onclick="createReturn(false)">📨 Ajukan Retur</button><button id="btnCreateApprove" class="btn success" type="button" onclick="createReturn(true)" style="display:none">✅ Simpan & Approve</button><button class="btn secondary" type="button" onclick="resetReturnForm()">Reset</button></div></section>
+<div class="form-group"><label>Metode Refund</label><select id="returRefundMethod" class="form-control" onchange="updateReturnTotal()"><option value="Tunai">Tunai</option><option value="Non Tunai">Non Tunai / QRIS / Transfer</option></select></div><div class="form-group"><label>Kasir / Shift dari Absensi yang Memproses Refund</label><select id="returRefundShift" class="form-control" required></select><small class="mini-note">Approval hanya dapat dilakukan oleh <strong>Owner</strong>. Pilihan diambil dari akun yang sudah <strong>Absen Masuk</strong> dan belum Absen Keluar. Refund tunai otomatis dicatat sebagai Kas Keluar pada shift tersebut.</small></div><div class="form-group"><label>Catatan Retur</label><textarea id="returNote" class="form-control" maxlength="200" placeholder="Keterangan tambahan"></textarea></div><div class="return-total-box"><span>Total Refund</span><strong id="returTotalPreview">Rp 0</strong></div><div class="btn-row" style="margin-top:10px"><button class="btn primary" type="button" data-ldm-permission="returns.create" onclick="createReturn(false)">📨 Ajukan Retur</button><button id="btnCreateApprove" class="btn success" type="button" data-ldm-permission="returns.approve" onclick="createReturn(true)" style="display:none">✅ Simpan & Approve</button><button class="btn secondary" type="button" onclick="resetReturnForm()">Reset</button></div></section>
 <section class="box"><div class="box-title"><span>📋 Riwayat Retur</span><small id="returCount">0 Retur</small></div><div class="toolbar"><div class="form-group"><label>Pencarian</label><input id="returSearchHistory" class="form-control" placeholder="Retur ID / Transaksi / Kasir" oninput="renderReturns()"></div><div class="form-group"><label>Status</label><select id="returStatusFilter" class="form-control" onchange="renderReturns()"><option value="">Semua</option><option value="PENDING">Pending</option><option value="APPROVED">Approved</option><option value="REJECTED">Rejected</option><option value="CANCELLED">Cancelled</option></select></div><div class="form-group"><label>Tanggal</label><input type="date" id="returDateFilter" class="form-control" onchange="renderReturns()"></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Retur ID</th><th>Transaksi</th><th>Nilai</th><th>Refund / Shift</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="returBody"></tbody></table></div></section></div>
 </main></div>
 <div class="modal" id="returInfoModal" onclick="if(event.target===this)closeReturInfo()"><div class="modal-card"><div class="modal-head"><strong id="returInfoTitle">Informasi</strong><button class="btn secondary" onclick="closeReturInfo()">✕</button></div><div id="returInfoBody" style="font-size:.7rem;line-height:1.65"></div><div class="btn-row" style="margin-top:12px"><button class="btn primary" onclick="closeReturInfo()">OK</button></div></div></div>
@@ -1712,7 +1712,7 @@ async function createReturn(directApprove){
     ){
         showInfo(
             'Transaksi Belum Cloud',
-            'Item transaksi tidak memiliki transaction_item_id cloud. Tahap 10 hanya memproses transaksi yang tersimpan di Supabase Tahap 8+.'
+            'Item transaksi ini belum dapat diproses untuk retur. Pilih transaksi lain atau perbarui data terlebih dahulu.'
         );
         return;
     }
@@ -1742,7 +1742,7 @@ async function createReturn(directApprove){
     ){
         showInfo(
             'Cloud Retur Belum Siap',
-            'returns-service.js belum termuat.'
+            'Data retur belum siap digunakan. Muat ulang halaman lalu coba lagi.'
         );
         return;
     }
@@ -1786,8 +1786,8 @@ async function createReturn(directApprove){
                 ? 'Retur Disetujui'
                 : 'Retur Diajukan',
             directApprove && currentRole==='owner'
-                ? `Retur <span class="code-pill">${esc(result.return_code||'')}</span> sudah disimpan dan <strong>APPROVED di Supabase</strong>. Stok cloud diperbarui secara atomik.`
-                : `Retur <span class="code-pill">${esc(result.return_code||'')}</span> disimpan sebagai <strong>PENDING di Supabase</strong>. Qty Pending langsung mereservasi jatah retur agar device lain tidak over-return.`
+                ? `Retur <span class="code-pill">${esc(result.return_code||'')}</span> berhasil disetujui. Stok telah diperbarui.`
+                : `Retur <span class="code-pill">${esc(result.return_code||'')}</span> berhasil diajukan dan menunggu pemeriksaan.`
         );
 
     }catch(error){
@@ -1798,7 +1798,7 @@ async function createReturn(directApprove){
 
         showInfo(
             'Retur Gagal',
-            esc(error.message||String(error))
+            'Retur belum dapat diproses. Periksa koneksi lalu coba lagi.'
         );
     }
 }
@@ -1844,7 +1844,7 @@ async function applyApproval(id,shiftId){
     ){
         showInfo(
             'Cloud Retur Belum Siap',
-            'returns-service.js belum termuat.'
+            'Data retur belum siap digunakan. Muat ulang halaman lalu coba lagi.'
         );
         return false;
     }
@@ -1864,7 +1864,7 @@ async function applyApproval(id,shiftId){
 
         showInfo(
             'Retur Disetujui',
-            `Retur <span class="code-pill">${esc(r.returId)}</span> sudah <strong>APPROVED oleh Owner</strong>. Perubahan stok dan refund cloud dilakukan atomik.`
+            `Retur <span class="code-pill">${esc(r.returId)}</span> sudah <strong>disetujui Owner</strong>. Stok dan nilai pengembalian telah diperbarui.`
         );
 
         return true;
@@ -1872,7 +1872,7 @@ async function applyApproval(id,shiftId){
     }catch(error){
         showInfo(
             'Approval Gagal',
-            esc(error.message||String(error))
+            'Retur belum dapat diproses. Periksa koneksi lalu coba lagi.'
         );
 
         return false;
@@ -2002,7 +2002,7 @@ async function rejectReturn(id){
     }catch(error){
         showInfo(
             'Reject Gagal',
-            esc(error.message||String(error))
+            'Retur belum dapat diproses. Periksa koneksi lalu coba lagi.'
         );
     }
 }
@@ -2306,7 +2306,7 @@ async function cancelReturn(id){
 
     const ok=await ldmDialog.confirm(
         'Konfirmasi Cancel Retur',
-        `Cancel ${r.returId}? Jika APPROVED, stok cloud akan dibalik secara atomik.`,
+        `Batalkan ${r.returId}? Jika retur sudah disetujui, perubahan stok akan dikembalikan sesuai catatan sebelumnya.`,
         status==='APPROVED'
             ? 'danger'
             : 'warning',
@@ -2339,7 +2339,7 @@ async function cancelReturn(id){
     }catch(error){
         showInfo(
             'Cancel Gagal',
-            esc(error.message||String(error))
+            'Retur belum dapat diproses. Periksa koneksi lalu coba lagi.'
         );
     }
 }
@@ -2373,7 +2373,7 @@ async function deleteReturnPermanent(id){
 
     const ok=await ldmDialog.confirm(
         'Arsipkan Retur',
-        `Arsipkan ${r.returId}? Record cloud memakai soft delete dan tidak dihapus keras.`,
+        `Arsipkan ${r.returId}? Data tetap disimpan dalam riwayat dan tidak tampil pada daftar aktif.`,
         'danger',
         {
             okText:'Arsipkan'
@@ -2397,12 +2397,12 @@ async function deleteReturnPermanent(id){
 
         showInfo(
             'Retur Diarsipkan',
-            'Record retur sudah di-soft-delete dari tampilan aktif cloud.'
+            'Retur berhasil diarsipkan dari daftar aktif.'
         );
     }catch(error){
         showInfo(
             'Arsip Gagal',
-            esc(error.message||String(error))
+            'Retur belum dapat diproses. Periksa koneksi lalu coba lagi.'
         );
     }
 }
@@ -2571,19 +2571,17 @@ function renderReturns(){
                         `<button class="btn warning" onclick="rejectReturn('${r.returId}')">✕ Reject</button>`;
                 }
 
-                if(canCancelReturn(r)){
+                if(canCancelReturn(r) && window.LDMActionPermissions?.can("returns.cancel")){
                     act+=
-                        `<button class="btn danger" onclick="cancelReturn('${r.returId}')">🚫 Cancel</button>`;
+                        `<button class="btn danger" data-ldm-permission="returns.cancel" onclick="cancelReturn('${r.returId}')">🚫 Batalkan</button>`;
                 }
 
                 if(
-                    currentRole==='owner'
-                    &&
-                    ['PENDING','REJECTED','CANCELLED']
-                        .includes(status)
+                    window.LDMActionPermissions?.can("returns.delete")
+                    && ['PENDING','REJECTED','CANCELLED'].includes(status)
                 ){
                     act+=
-                        `<button class="btn danger" onclick="deleteReturnPermanent('${r.returId}')">🗄 Arsipkan</button>`;
+                        `<button class="btn danger" data-ldm-permission="returns.delete" onclick="deleteReturnPermanent('${r.returId}')">🗄 Arsipkan</button>`;
                 }
 
                 return `

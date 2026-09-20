@@ -1929,7 +1929,7 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/cloud-auth.js?v=27.9.0-v28.16.3-navfast"></script>
     <script src="js/cloud-session.js?v=27.9.0-v28.16.3-navfast"></script>
-    <script src="js/employee-permission-service-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/role-access-guard-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
+    <script src="js/employee-permission-service-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/role-access-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/action-permission-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
 
     
@@ -2453,7 +2453,7 @@
 
                         <button
                             class="btn primary"
-                            id="saveBtn"
+                            id="saveBtn" data-ldm-permission="eod.run"
                             onclick="askSave()"
                         >
                             🌙 Simpan End of Day
@@ -3562,7 +3562,7 @@ function saveEOD(){
         "success"
     );
 }
-function renderHistory(){const a=eodLogs();if(!a.length){historyBody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--label-color)">Belum ada riwayat End of Day.</td></tr>';return}historyBody.innerHTML=a.map(x=>`<tr><td><strong>${esc(x.tanggal)}</strong><br><small>${esc(x.waktu||'')} WITA</small></td><td>${esc(x.finalizedBy||'-')}<br><small>${esc(String(x.role||'').toUpperCase())}</small></td><td>${rp(x.omzetClosing)}</td><td>${rp(x.tunaiSistem)}</td><td>${rp(x.tunaiFisik)}</td><td>${signed(x.selisihTunai)}</td><td><button class="btn secondary" onclick="printEOD(${Number(x.id)})">Cetak</button>${currentRole==='owner'?` <button class="btn danger" onclick="deleteEOD(${Number(x.id)})">Hapus</button>`:''}</td></tr>`).join('')}
+function renderHistory(){const a=eodLogs();if(!a.length){historyBody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--label-color)">Belum ada riwayat End of Day.</td></tr>';return}historyBody.innerHTML=a.map(x=>`<tr><td><strong>${esc(x.tanggal)}</strong><br><small>${esc(x.waktu||'')} WITA</small></td><td>${esc(x.finalizedBy||'-')}<br><small>${esc(String(x.role||'').toUpperCase())}</small></td><td>${rp(x.omzetClosing)}</td><td>${rp(x.tunaiSistem)}</td><td>${rp(x.tunaiFisik)}</td><td>${signed(x.selisihTunai)}</td><td><button class="btn secondary" data-ldm-permission="eod.print" onclick="printEOD(${Number(x.id)})">Cetak</button>${currentRole==='owner'?` <button class="btn danger" data-ldm-permission="eod.reopen" onclick="deleteEOD(${Number(x.id)})">Buka Ulang</button>`:''}</td></tr>`).join('')}
 async function deleteEOD(id){
     if(currentRole!=='owner')return;
 
@@ -3586,7 +3586,7 @@ async function deleteEOD(id){
 
     loadEOD();
 }
-function printEOD(id){const x=eodLogs().find(r=>Number(r.id)===Number(id));if(!x)return;const cfg=JSON.parse(localStorage.getItem('headerConfig')||'null')||DEFAULT;printArea.innerHTML=`<div style="font:12px Arial;color:#111"><div style="text-align:center;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:10px"><h2>${esc(cfg.judul||'LocDaily')}</h2><div>END OF DAY</div><div>${esc(x.tanggal)} ${esc(x.waktu||'')} WITA</div></div><table style="width:100%;border-collapse:collapse">${[['Final Oleh',`${esc(x.finalizedBy)} (${esc(String(x.role||'').toUpperCase())})`],['Penjualan Sistem',rp(x.penjualanSistem)],['Omzet Closing',rp(x.omzetClosing)],['Selisih Omzet',signed(x.selisihOmzet)],['Tunai Sistem',rp(x.tunaiSistem)],['Mutasi Kas Masuk',rp(x.mutasiKasMasuk)],['Mutasi Kas Keluar',rp(x.mutasiKasKeluar)],['Ekspektasi Tunai Fisik',rp(x.ekspektasiTunaiFisik)],['Tunai Fisik Tanpa Modal',rp(x.tunaiFisik)],['Selisih Tunai',signed(x.selisihTunai)],['Modal Awal Terpisah',rp(x.modalAwal)],['Non-Tunai',rp(x.nonTunai)]].map(r=>`<tr><td style="border:1px solid #bbb;padding:5px">${r[0]}</td><td style="border:1px solid #bbb;padding:5px">${r[1]}</td></tr>`).join('')}</table><h3 style="margin:12px 0 4px">Catatan</h3><div style="border:1px solid #bbb;padding:6px">${esc(x.catatan||'Tidak ada catatan.')}</div></div>`;window.print()}
+function printEOD(id){if(!window.LDMActionPermissions?.require("eod.print"))return;const x=eodLogs().find(r=>Number(r.id)===Number(id));if(!x)return;const cfg=JSON.parse(localStorage.getItem('headerConfig')||'null')||DEFAULT;printArea.innerHTML=`<div style="font:12px Arial;color:#111"><div style="text-align:center;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:10px"><h2>${esc(cfg.judul||'LocDaily')}</h2><div>END OF DAY</div><div>${esc(x.tanggal)} ${esc(x.waktu||'')} WITA</div></div><table style="width:100%;border-collapse:collapse">${[['Final Oleh',`${esc(x.finalizedBy)} (${esc(String(x.role||'').toUpperCase())})`],['Penjualan Sistem',rp(x.penjualanSistem)],['Omzet Closing',rp(x.omzetClosing)],['Selisih Omzet',signed(x.selisihOmzet)],['Tunai Sistem',rp(x.tunaiSistem)],['Mutasi Kas Masuk',rp(x.mutasiKasMasuk)],['Mutasi Kas Keluar',rp(x.mutasiKasKeluar)],['Ekspektasi Tunai Fisik',rp(x.ekspektasiTunaiFisik)],['Tunai Fisik Tanpa Modal',rp(x.tunaiFisik)],['Selisih Tunai',signed(x.selisihTunai)],['Modal Awal Terpisah',rp(x.modalAwal)],['Non-Tunai',rp(x.nonTunai)]].map(r=>`<tr><td style="border:1px solid #bbb;padding:5px">${r[0]}</td><td style="border:1px solid #bbb;padding:5px">${r[1]}</td></tr>`).join('')}</table><h3 style="margin:12px 0 4px">Catatan</h3><div style="border:1px solid #bbb;padding:6px">${esc(x.catatan||'Tidak ada catatan.')}</div></div>`;window.print()}
 function alertBox(t,m,type='success'){modalIcon.textContent=type==='success'?'✅':type==='warning'?'⚠️':'❌';modalTitle.textContent=t;modalMsg.textContent=m;modalActions.innerHTML='<button class="btn primary" onclick="closeModal()">Tutup</button>';modal.style.display='flex'}function confirmBox(t,m){modalIcon.textContent='❓';modalTitle.textContent=t;modalMsg.textContent=m;modalActions.innerHTML='<button class="btn secondary" onclick="closeModal()">Batal</button><button class="btn primary" onclick="saveEOD()">Ya, Simpan</button>';modal.style.display='flex'}function closeModal(){modal.style.display='none'}
 function theme(){let c;try{c=JSON.parse(localStorage.getItem('headerConfig')||'null')||DEFAULT}catch{c=DEFAULT}logo.style.display=c.logoData?'block':'none';if(c.logoData)logo.src=c.logoData;storeTitle.textContent=c.judul||DEFAULT.judul;storeTitle.style.color=c.warnaJudul||'#fff';storeTitle.style.textShadow=`1px 1px 0 ${c.warnaOutline||DEFAULT.warnaOutline}`;storeSub.textContent=c.subJudul||DEFAULT.subJudul;storeSub.style.color=c.warnaSubJudul||DEFAULT.warnaSubJudul;headerApp.style.background=c.warnaBgHeader||DEFAULT.warnaBgHeader;document.documentElement.style.setProperty('--app-font',c.fontFamily||DEFAULT.fontFamily);document.documentElement.style.setProperty('--brand-font',c.brandFontFamily||c.fontFamily||DEFAULT.brandFontFamily);document.documentElement.style.setProperty('--bg-primary',c.bgPrimary||DEFAULT.bgPrimary);document.documentElement.style.setProperty('--bg-secondary',c.bgSecondary||DEFAULT.bgSecondary);document.documentElement.style.setProperty('--accent-color',c.warnaSubJudul||DEFAULT.warnaSubJudul);document.documentElement.style.setProperty('--nav-desktop-bg',c.warnaBgHeader||DEFAULT.warnaBgHeader);document.body.classList.toggle('dark-mode',!!c.darkMode)}
 function identity(){currentUser=localStorage.getItem('activeUsername')||localStorage.getItem('loggedInUser')||localStorage.getItem('username')||'';currentRole=String(localStorage.getItem('userRole')||'').toLowerCase();userBadge.textContent=`👤 ${currentUser||'-'} (${(currentRole||'-').toUpperCase()})`}
@@ -4248,7 +4248,7 @@ document.addEventListener('DOMContentLoaded',init);
     window.saveEOD = async function(){
         if(!window.LDMReporting){
             closeModal();
-            alertBox("Cloud Reporting Belum Siap","reporting-service.js belum termuat.","danger");
+            alertBox("Layanan Belum Siap","End of Day belum dapat diproses. Muat ulang aplikasi lalu coba lagi.","danger");
             return;
         }
 
@@ -4265,12 +4265,13 @@ document.addEventListener('DOMContentLoaded',init);
             loadEOD();
             alertBox(
                 "End of Day Berhasil",
-                `EOD ${result.business_date || selectedDate} sudah FINAL di cloud.`,
+                `End of Day ${result.business_date || selectedDate} berhasil diselesaikan.`,
                 "success"
             );
         }catch(error){
             closeModal();
-            alertBox("End of Day Gagal",error?.message || String(error),"danger");
+            console.error("[LocDaily][eod-finalize]",error);
+            alertBox("End of Day Gagal","End of Day belum dapat diselesaikan. Periksa data dan koneksi lalu coba lagi.","danger");
         }
     };
 
@@ -4281,15 +4282,15 @@ document.addEventListener('DOMContentLoaded',init);
         if(!target) return;
 
         if(!target.cloudId){
-            alertBox("EOD Legacy","EOD lama belum dimigrasikan ke Tahap 12.","warning");
+            alertBox("Data EOD Lama","Data EOD lama ini belum dapat dibuka ulang dari halaman ini.","warning");
             return;
         }
 
         const ok = await ldmDialog.confirm(
             "Batalkan End of Day",
-            "EOD akan berstatus VOIDED. Closing Shift tidak ikut dihapus.",
+            "End of Day akan dibuka ulang. Closing Shift tetap tersimpan.",
             "danger",
-            {okText:"Void EOD"}
+            {okText:"Buka Ulang"}
         );
         if(!ok) return;
 
@@ -4299,9 +4300,10 @@ document.addEventListener('DOMContentLoaded',init);
                 "Dibatalkan Owner dari End of Day"
             );
             loadEOD();
-            alertBox("EOD Dibatalkan","Snapshot EOD cloud berstatus VOIDED.","success");
+            alertBox("EOD Dibuka Ulang","End of Day berhasil dibuka ulang.","success");
         }catch(error){
-            alertBox("Void EOD Gagal",error?.message || String(error),"danger");
+            console.error("[LocDaily][eod-reopen]",error);
+            alertBox("Buka Ulang Gagal","End of Day belum dapat dibuka ulang. Coba lagi setelah koneksi stabil.","danger");
         }
     };
 

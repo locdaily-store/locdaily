@@ -46,7 +46,7 @@
     <script src="js/offline-queue.js?v=16.0"></script>
     <script src="js/cloud-auth.js?v=27.9.0-v28.16.3-navfast"></script>
     <script src="js/cloud-session.js?v=27.9.0-v28.16.3-navfast"></script>
-    <script src="js/employee-permission-service-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/role-access-guard-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
+    <script src="js/employee-permission-service-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/role-access-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/action-permission-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
     <script src="js/primary-owner-service.js?v=28.11.0"></script>
     <script src="js/license-v2-config.js?v=27.9.0-v28.13.1"></script>
@@ -119,7 +119,7 @@
                         <div class="ms-security-note" id="transferModeNote">Pilih toko tujuan untuk memeriksa aturan transfer antar mode.</div>
                         <div class="ms-table-wrap"><table class="ms-table"><thead><tr><th>Pilih</th><th>Barang</th><th>Stok Sumber</th><th>Stok Tujuan</th><th>Qty Transfer</th></tr></thead><tbody id="candidateRows"><tr><td colspan="5" class="ms-empty">Pilih toko tujuan terlebih dahulu.</td></tr></tbody></table></div>
                         <div class="ms-field"><label>Catatan Transfer</label><textarea id="transferNote" maxlength="500" placeholder="Opsional: kebutuhan restock cabang"></textarea></div>
-                        <button class="ms-btn ms-btn-primary" type="submit">Simpan sebagai Draft</button>
+                        <button class="ms-btn ms-btn-primary" type="submit" data-ldm-permission="multi_store.transfer.create">Simpan sebagai Draft</button>
                     </form>
                 </section>
 
@@ -145,11 +145,11 @@
                     <div class="ms-employee-info" id="employeeInfo">Pilih karyawan untuk melihat cabang asal dan hak akses.</div>
                     <div class="ms-field"><label>Cabang Tujuan</label><select id="employeeDestination" required><option value="">Pilih cabang tujuan</option></select></div>
                     <div class="ms-field"><label>Catatan Pemindahan</label><textarea id="employeeTransferNote" maxlength="500" placeholder="Contoh: Rotasi kasir ke cabang baru"></textarea></div>
-                    <button class="ms-btn ms-btn-primary" type="submit">Pindahkan Karyawan</button>
+                    <button class="ms-btn ms-btn-primary" type="submit" data-ldm-permission="multi_store.employee.transfer">Pindahkan Karyawan</button>
                     <div class="ms-security-note">🔐 Hanya Owner Utama yang ditetapkan pada cabang pusat dapat memindahkan karyawan. Owner cabang biasa tidak memiliki izin untuk tindakan ini. Setelah pindah, akses perangkat karyawan pada cabang lama diputus dan perlu diotorisasi pada cabang tujuan.</div>
                 </form>
                 <div>
-                    <div class="ms-panel-head" style="margin-bottom:9px"><div><span class="ms-panel-kicker">🕘 Riwayat Aktivitas</span><h2>Riwayat Pemindahan</h2><p>Jejak perpindahan disimpan pada data Cloud dan tidak bergantung pada browser.</p></div></div>
+                    <div class="ms-panel-head" style="margin-bottom:9px"><div><span class="ms-panel-kicker">🕘 Riwayat Aktivitas</span><h2>Riwayat Pemindahan</h2><p>Riwayat perpindahan tersimpan pada akun toko dan tetap tersedia saat berganti perangkat.</p></div></div>
                     <div class="ms-employee-history" id="employeeTransferList"><div class="ms-empty">Memuat riwayat…</div></div>
                 </div>
             </div>
@@ -164,7 +164,7 @@
         const esc=value=>String(value==null?"":value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
         const num=value=>Number(value||0).toLocaleString("id-ID",{maximumFractionDigits:3});
         function alertBox(message,type="good"){$("alertBox").className=`ms-alert show ${type}`;$('alertBox').textContent=message;window.scrollTo({top:0,behavior:"smooth"});setTimeout(()=>$("alertBox").classList.remove("show"),5000)}
-        function errorMessage(error){return error&&error.message?error.message:String(error||"Terjadi kesalahan.")}
+        function errorMessage(error){try{console.error("Multi-Toko:",error)}catch(_error){}const raw=error&&error.message?String(error.message):String(error||"");if(/ACCESS_DENIED/i.test(raw))return "Akun ini tidak memiliki akses untuk tindakan tersebut.";if(/network|fetch|offline|Failed to fetch/i.test(raw))return "Koneksi ke layanan belum tersedia. Periksa internet lalu coba lagi.";return "Data belum dapat diproses. Muat ulang halaman lalu coba lagi."}
         function setLoading(value){$("appRoot").classList.toggle("ms-loading",!!value)}
         function currentStore(){return stores.find(row=>row.is_current)||networkStores.find(row=>row.is_current)||null}
         function primaryStore(){return networkStores.find(row=>row.is_primary)||stores.find(row=>row.is_primary)||null}
@@ -273,8 +273,8 @@
             $("transferList").innerHTML=transfers.length?transfers.map(row=>{
                 const items=Array.isArray(row.items)?row.items:[];
                 let actions="";
-                if(row.status==="DRAFT"&&row.source_store_id===activeId){actions=`<button class="ms-btn ms-btn-primary" data-send="${esc(row.id)}">Kirim Stok</button><button class="ms-btn ms-btn-danger" data-cancel="${esc(row.id)}">Batalkan</button>`}
-                if(row.status==="IN_TRANSIT"&&row.destination_store_id===activeId){actions=`<button class="ms-btn ms-btn-primary" data-receive="${esc(row.id)}">Terima Stok</button>`}
+                if(row.status==="DRAFT"&&row.source_store_id===activeId){actions=`<button class="ms-btn ms-btn-primary" data-ldm-permission="multi_store.transfer.send" data-send="${esc(row.id)}">Kirim Stok</button><button class="ms-btn ms-btn-danger" data-ldm-permission="multi_store.transfer.cancel" data-cancel="${esc(row.id)}">Batalkan</button>`}
+                if(row.status==="IN_TRANSIT"&&row.destination_store_id===activeId){actions=`<button class="ms-btn ms-btn-primary" data-ldm-permission="multi_store.transfer.receive" data-receive="${esc(row.id)}">Terima Stok</button>`}
                 return `<article class="ms-transfer"><div class="ms-transfer-top"><div><div class="ms-transfer-code">${esc(row.transfer_code)}</div><div class="ms-transfer-route">${esc(row.source_store_name)} → ${esc(row.destination_store_name)}</div></div><span class="ms-status status-${String(row.status).toLowerCase()}">${statusLabel(row.status)}</span></div><div class="ms-transfer-items">${items.map(item=>`${esc(item.name)}: ${num(item.qty_requested)} ${esc(item.unit)}`).join(" · ")||"Tanpa item"}</div>${row.note?`<div class="ms-transfer-items">Catatan: ${esc(row.note)}</div>`:""}<div class="ms-actions">${actions}</div></article>`
             }).join(""):'<div class="ms-empty">Belum ada transfer stok.</div>';
             $("transferList").querySelectorAll("[data-send]").forEach(btn=>btn.onclick=()=>sendTransfer(btn.dataset.send));
@@ -313,6 +313,7 @@
             catch(error){employeeTransfers=[];$("employeeTransferList").innerHTML=`<div class="ms-empty">${esc(errorMessage(error))}</div>`}
         }
         async function moveEmployee(){
+            if(window.LDMActionPermissions && !window.LDMActionPermissions.require("multi_store.employee.transfer"))return;
             const employee=selectedEmployee();
             const destination=$("employeeDestination").value;
             if(!employee||!destination){alertBox("Pilih karyawan dan cabang tujuan terlebih dahulu.","bad");return}
@@ -328,9 +329,9 @@
         }
 
         async function loadTransfers(){try{transfers=await window.LDMMultiStore.listTransfers(150);renderTransfers()}catch(error){$("transferList").innerHTML=`<div class="ms-empty">${esc(errorMessage(error))}</div>`}}
-        async function sendTransfer(id){if(!confirm("Kirim stok sekarang? Stok toko sumber akan langsung berkurang."))return;setLoading(true);try{await window.LDMMultiStore.sendTransfer(id);alertBox("Stok berhasil dikirim dan status menjadi Dalam Pengiriman.");await Promise.all([loadTransfers(),loadStores()])}catch(error){alertBox(errorMessage(error),"bad")}finally{setLoading(false)}}
-        async function receiveTransfer(id){if(!confirm("Konfirmasi seluruh barang transfer sudah diterima?"))return;setLoading(true);try{await window.LDMMultiStore.receiveTransfer(id);alertBox("Transfer diterima dan stok toko tujuan sudah bertambah.");await Promise.all([loadTransfers(),loadStores()])}catch(error){alertBox(errorMessage(error),"bad")}finally{setLoading(false)}}
-        async function cancelTransfer(id){const reason=prompt("Alasan pembatalan transfer:","");if(reason===null)return;setLoading(true);try{await window.LDMMultiStore.cancelTransfer(id,reason);alertBox("Draft transfer berhasil dibatalkan.");await loadTransfers()}catch(error){alertBox(errorMessage(error),"bad")}finally{setLoading(false)}}
+        async function sendTransfer(id){if(window.LDMActionPermissions && !window.LDMActionPermissions.require("multi_store.transfer.send"))return;if(!confirm("Kirim stok sekarang? Stok toko sumber akan langsung berkurang."))return;setLoading(true);try{await window.LDMMultiStore.sendTransfer(id);alertBox("Stok berhasil dikirim dan status menjadi Dalam Pengiriman.");await Promise.all([loadTransfers(),loadStores()])}catch(error){alertBox(errorMessage(error),"bad")}finally{setLoading(false)}}
+        async function receiveTransfer(id){if(window.LDMActionPermissions && !window.LDMActionPermissions.require("multi_store.transfer.receive"))return;if(!confirm("Konfirmasi seluruh barang transfer sudah diterima?"))return;setLoading(true);try{await window.LDMMultiStore.receiveTransfer(id);alertBox("Transfer diterima dan stok toko tujuan sudah bertambah.");await Promise.all([loadTransfers(),loadStores()])}catch(error){alertBox(errorMessage(error),"bad")}finally{setLoading(false)}}
+        async function cancelTransfer(id){if(window.LDMActionPermissions && !window.LDMActionPermissions.require("multi_store.transfer.cancel"))return;const reason=prompt("Alasan pembatalan transfer:","");if(reason===null)return;setLoading(true);try{await window.LDMMultiStore.cancelTransfer(id,reason);alertBox("Draft transfer berhasil dibatalkan.");await loadTransfers()}catch(error){alertBox(errorMessage(error),"bad")}finally{setLoading(false)}}
 
         async function loadStores(){
             const out=await Promise.allSettled([window.LDMMultiStore.listStores(),window.LDMMultiStore.quota(),window.LDMMultiStore.listNetworkStoreOptions()]);
@@ -359,7 +360,7 @@
         $("refreshEmployees").onclick=()=>Promise.all([loadEmployees(),loadEmployeeTransfers()]);
         $("employeeTransferForm").onsubmit=event=>{event.preventDefault();moveEmployee()};
         $("branchForm").onsubmit=async event=>{event.preventDefault();if(!isPrimaryOwner()){alertBox("Hanya Owner Pusat yang dapat membuat cabang baru.","bad");return}if(!quota?.quota_synced||quota?.quota_stale||quota?.store_limit_reached){alertBox(quota?.store_limit_reached?`Batas toko sudah tercapai (${Number(quota.active_stores||0)}/${Number(quota.max_stores||0)} total toko termasuk toko pusat).`:"Informasi batas pemakaian sedang diperbarui. Refresh halaman beberapa saat lagi.","bad");return}setLoading(true);try{const result=await window.LDMMultiStore.createBranch({code:$("branchCode").value,name:$("branchName").value,operationalMode:$("branchMode").value,copyProducts:$("copyProducts").checked});const copyNote=result.products_copied?"Katalog mode yang sama disalin dengan stok 0.":result.copy_skipped_mode_mismatch?"Mode cabang berbeda, sehingga katalog sengaja tidak disalin.":"Cabang dibuat tanpa menyalin katalog.";alertBox(`Cabang ${result.name} berhasil dibuat. ${copyNote}`);event.target.reset();$("copyProducts").checked=true;$("branchMode").value="retail";updateBranchCopyPolicy();await loadStores()}catch(error){alertBox(quotaError(error),"bad")}finally{setLoading(false)}};
-        $("transferForm").onsubmit=async event=>{event.preventDefault();const selected=[];$("candidateRows").querySelectorAll("[data-pick]:checked").forEach(check=>{const index=Number(check.dataset.pick);const qty=Number($("candidateRows").querySelector(`[data-qty="${index}"]`).value);if(qty>0)selected.push({source_product_id:candidates[index].source_product_id,qty})});if(!selected.length){alertBox("Pilih minimal satu barang dan isi qty transfer.","bad");return}setLoading(true);try{const result=await window.LDMMultiStore.createTransfer($("destinationStore").value,selected,$("transferNote").value);alertBox(`Draft ${result.transfer_code} berhasil dibuat.`);event.target.reset();candidates=[];renderCandidates();await loadTransfers()}catch(error){alertBox(errorMessage(error),"bad")}finally{setLoading(false)}};
+        $("transferForm").onsubmit=async event=>{event.preventDefault();if(window.LDMActionPermissions && !window.LDMActionPermissions.require("multi_store.transfer.create"))return;const selected=[];$("candidateRows").querySelectorAll("[data-pick]:checked").forEach(check=>{const index=Number(check.dataset.pick);const qty=Number($("candidateRows").querySelector(`[data-qty="${index}"]`).value);if(qty>0)selected.push({source_product_id:candidates[index].source_product_id,qty})});if(!selected.length){alertBox("Pilih minimal satu barang dan isi qty transfer.","bad");return}setLoading(true);try{const result=await window.LDMMultiStore.createTransfer($("destinationStore").value,selected,$("transferNote").value);alertBox(`Draft ${result.transfer_code} berhasil dibuat.`);event.target.reset();candidates=[];renderCandidates();await loadTransfers()}catch(error){alertBox(errorMessage(error),"bad")}finally{setLoading(false)}};
         function onlineState(){const offline=navigator.onLine===false;$("offlineBanner").classList.toggle("show",offline);document.querySelectorAll("button[type=submit]").forEach(btn=>btn.disabled=offline);const branchBtn=$("branchForm")?.querySelector('button[type="submit"]');if(branchBtn&&!offline&&(!quota?.quota_synced||quota?.quota_stale||quota?.store_limit_reached||quota?.store_over_limit))branchBtn.disabled=true}
         window.addEventListener("online",onlineState);window.addEventListener("offline",onlineState);onlineState();boot();
     })();

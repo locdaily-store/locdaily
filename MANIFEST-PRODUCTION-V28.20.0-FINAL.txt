@@ -1,0 +1,21 @@
+LocDaily V28.20.0 FINAL - Production Manifest
+Runtime: 27.9.0-v28.20.0-final
+Database: Stage 40
+Baseline: V28.19.1 UI FIX1 / Stage 39
+
+Production berisi frontend GitHub Pages saja.
+Tidak boleh berisi:
+- folder supabase/
+- file .sql
+- script deploy .cmd
+- folder payload/
+- folder baseline/
+- folder tools/
+- source License Authority private
+
+Perubahan utama:
+- Jabatan & Hak Akses granular sampai tingkat tindakan.
+- Batas diskon per Jabatan.
+- Permission guard V28.20.0.
+- Enforcement frontend/service dan server-side melalui Stage 40.
+- Perbaikan copy publik dan compatibility permission lama.

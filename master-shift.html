@@ -30,7 +30,7 @@
   <script src="js/supabase-client.js"></script>
   <script src="js/cloud-auth.js?v=27.9.0-v28.16.3-navfast"></script>
   <script src="js/cloud-session.js?v=27.9.0-v28.16.3-navfast"></script>
-  <script src="js/employee-permission-service-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/role-access-guard-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
+  <script src="js/employee-permission-service-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/role-access-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/action-permission-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
   <script src="js/attendance-workforce-service-v28182.js"></script>
   <script src="js/license-v2-config.js?v=27.9.0-v28.13.1"></script>
@@ -105,7 +105,7 @@
           <div class="wf-field wf-col-6"><label>Tahun</label><input id="masterLeaveYear" type="text" readonly></div>
           <div class="wf-col-12"><div class="wf-notice" id="masterLeaveSummary">Pilih akun untuk melihat hak cuti.</div></div>
         </div>
-        <div class="wf-actions" style="margin-top:12px"><button class="wf-btn soft" type="button" id="masterSaveLeave">Simpan Hak Cuti</button></div>
+        <div class="wf-actions" style="margin-top:12px"><button class="wf-btn soft" type="button" id="masterSaveLeave" data-ldm-permission="master_shift.leave.manage">Simpan Hak Cuti</button></div>
         <div class="wf-divider"></div>
         <div class="wf-notice">Owner Pusat boleh membiarkan jadwal akunnya sendiri kosong. Akun lain tetap wajib memiliki jadwal lengkap untuk setiap tanggal dalam bulan.</div>
       </section>
@@ -115,8 +115,8 @@
       <div class="wf-card-head">
         <div><h2>Jadwal Bulanan</h2><p>Setelah template diterapkan, cukup ubah tanggal yang berbeda menjadi Libur, Cuti Tahunan, atau shift lain.</p></div>
         <div class="wf-actions">
-          <button class="wf-btn danger" type="button" id="masterClear" hidden>Kosongkan Jadwal Owner Pusat</button>
-          <button class="wf-btn primary" type="button" id="masterSave">💾 Simpan Jadwal Bulan</button>
+          <button class="wf-btn danger" type="button" id="masterClear" data-ldm-permission="master_shift.schedule.manage" hidden>Kosongkan Jadwal Owner Pusat</button>
+          <button class="wf-btn primary" type="button" id="masterSave" data-ldm-permission="master_shift.schedule.manage">💾 Simpan Jadwal Bulan</button>
         </div>
       </div>
       <div id="masterMessage" class="wf-notice">Memuat Master Shift...</div>
@@ -149,7 +149,7 @@
             </select>
           </div>
           <div class="wf-col-4 wf-actions end">
-            <button id="masterAbsenceSave" class="wf-btn primary" type="submit">Simpan Batas</button>
+            <button id="masterAbsenceSave" class="wf-btn primary" type="submit" data-ldm-permission="master_shift.absence_deadline.manage">Simpan Batas</button>
           </div>
           <div class="wf-col-12">
             <label for="masterAbsenceApplyOpen" style="display:flex;gap:8px;align-items:center">

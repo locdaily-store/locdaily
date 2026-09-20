@@ -3,6 +3,13 @@
 
     let channel = null;
 
+    async function requireAction(permissionCode){
+        const service=window.LDMEmployeePermissions;
+        if(service&&typeof service.requirePermission==="function"){
+            await service.requirePermission(permissionCode);
+        }
+    }
+
     function client(){
         if(!window.LDMSupabase) throw new Error("Layanan Cloud belum siap.");
         return window.LDMSupabase.createClient();
@@ -152,6 +159,7 @@
     }
 
     async function createTransfer(destinationStoreId,items,note=""){
+        await requireAction("multi_store.transfer.create");
         if(navigator.onLine===false) throw new Error("Transfer stok hanya dapat dibuat saat online.");
         return rpc("ldm_create_stock_transfer",{
             p_destination_store_id:destinationStoreId,
@@ -164,16 +172,19 @@
     }
 
     async function sendTransfer(id){
+        await requireAction("multi_store.transfer.send");
         if(navigator.onLine===false) throw new Error("Pengiriman transfer membutuhkan koneksi internet.");
         return rpc("ldm_send_stock_transfer",{p_transfer_id:id});
     }
 
     async function receiveTransfer(id){
+        await requireAction("multi_store.transfer.receive");
         if(navigator.onLine===false) throw new Error("Penerimaan transfer membutuhkan koneksi internet.");
         return rpc("ldm_receive_stock_transfer",{p_transfer_id:id});
     }
 
     async function cancelTransfer(id,reason){
+        await requireAction("multi_store.transfer.cancel");
         if(navigator.onLine===false) throw new Error("Pembatalan transfer membutuhkan koneksi internet.");
         return rpc("ldm_cancel_stock_transfer",{p_transfer_id:id,p_reason:String(reason||"").trim()});
     }
@@ -190,6 +201,7 @@
     }
 
     async function transferEmployee(userId,destinationStoreId,note=""){
+        await requireAction("multi_store.employee.transfer");
         if(navigator.onLine===false) throw new Error("Pemindahan karyawan membutuhkan koneksi internet.");
         return rpc("ldm_transfer_employee",{
             p_user_id:String(userId||"").trim(),

@@ -2050,7 +2050,7 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/cloud-auth.js?v=27.9.0-v28.16.3-navfast"></script>
     <script src="js/cloud-session.js?v=27.9.0-v28.16.3-navfast"></script>
-    <script src="js/employee-permission-service-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/role-access-guard-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
+    <script src="js/employee-permission-service-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/role-access-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/action-permission-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
     
     <script src="js/attendance-service.js?v=27.9.0-v28.16.2-final"></script>
@@ -2147,9 +2147,8 @@
                 <div class="action-header">
                     <h3 style="font-size: 0.88rem; color:var(--text-color);">Riwayat Transaksi</h3>
                     <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
-                        <button class="btn-export" onclick="exportDataCSV()">📥 Export Tampilan CSV</button>
-                        <button id="btnDownloadAllReports" class="btn-export" onclick="downloadSemuaLaporanCloud()">☁️ Download Semua Laporan</button>
-                        <button id="btnResetLaporan" class="btn-reset" onclick="bukaModalPasswordReset()">Reset Laporan</button>
+                        <button class="btn-export" data-ldm-permission="reports.export" onclick="exportDataCSV()">📥 Export Tampilan CSV</button>
+                        <button id="btnDownloadAllReports" class="btn-export" data-ldm-permission="reports.export" onclick="downloadSemuaLaporanCloud()">☁️ Download Semua Laporan</button>
                     </div>
                 </div>
 
@@ -2454,8 +2453,8 @@
             </div>
 
             <button class="btn-print" style="background:#d97706;margin-bottom:7px" onclick="bukaReturDariLaporan()">↩️ Buat / Lihat Retur</button>
-            <button class="btn-print" onclick="cetakStruk()">🖨️ Cetak Struk Transaksi</button>
-            <button id="btnHapusSatu" class="btn-delete-single" onclick="konfirmasiHapusSatu()">🗑️ Hapus Transaksi Ini</button>
+            <button class="btn-print" data-ldm-permission="reports.print" onclick="cetakStruk()">🖨️ Cetak Struk Transaksi</button>
+            <button id="btnHapusSatu" class="btn-delete-single" data-ldm-permission="reports.transaction.delete" onclick="konfirmasiHapusSatu()">↩️ Batalkan Transaksi Ini</button>
         </div>
     </div>
 
@@ -2464,7 +2463,7 @@
         <div class="popup-box">
             <div class="icon">🔒</div>
             <h3>Otentikasi Keamanan</h3>
-            <p>Masukkan password untuk reset seluruh laporan:</p>
+            <p>Masukkan password untuk melanjutkan:</p>
             <input type="password" id="inputPassOwner" class="popup-input" placeholder="Password Otentikasi">
             <div class="modal-buttons">
                 <button class="btn-confirm-yes" onclick="verifikasiPasswordReset()">Lanjut</button>
@@ -2477,9 +2476,9 @@
         <div class="popup-box">
             <div class="icon">⚠️</div>
             <h3>Konfirmasi Reset</h3>
-            <p>Apakah Anda yakin ingin menghapus <b>seluruh data laporan transaksi</b>?</p>
+            <p>Fitur reset seluruh laporan tidak digunakan pada data aktif.</p>
             <div class="modal-buttons">
-                <button class="btn-confirm-yes" onclick="eksekusiResetSemua()">Ya, Hapus Semua</button>
+                <button class="btn-confirm-yes" onclick="eksekusiResetSemua()">Tutup</button>
                 <button class="btn-confirm-no" onclick="tutupModal('modalConfirmReset')">Batal</button>
             </div>
         </div>
@@ -2489,7 +2488,7 @@
         <div class="popup-box">
             <div class="icon">🔒</div>
             <h3>Otentikasi Keamanan</h3>
-            <p>Masukkan password untuk menghapus transaksi ini:</p>
+            <p>Masukkan password untuk membatalkan transaksi ini:</p>
             <input type="password" id="inputPassHapusSatu" class="popup-input" placeholder="Password Otentikasi">
             <div class="modal-buttons">
                 <button class="btn-confirm-yes" onclick="verifikasiHapusSatu()">Lanjut</button>
@@ -2501,10 +2500,10 @@
     <div class="popup" id="modalConfirmHapusSatu">
         <div class="popup-box">
             <div class="icon">🗑️</div>
-            <h3>Hapus Transaksi</h3>
-            <p id="teksConfirmHapusSatu">Apakah Anda yakin ingin menghapus transaksi ini?</p>
+            <h3>Batalkan Transaksi</h3>
+            <p id="teksConfirmHapusSatu">Apakah Anda yakin ingin membatalkan transaksi ini?</p>
             <div class="modal-buttons">
-                <button class="btn-confirm-yes" onclick="eksekusiHapusSatu()">Ya, Hapus</button>
+                <button class="btn-confirm-yes" onclick="eksekusiHapusSatu()">Ya, Batalkan</button>
                 <button class="btn-confirm-no" onclick="tutupModal('modalConfirmHapusSatu')">Batal</button>
             </div>
         </div>
@@ -3503,7 +3502,7 @@ function simpanLaporanKeStorage(dataArray) {
                 applyLaporanRows(rows, { migrateLegacy: false });
                 updateTransactionArchiveStatus(
                     `Periode ${fromDate || "awal"} s.d. ${toDate || "terbaru"}: ${rows.length.toLocaleString("id-ID")} transaksi. ` +
-                    `Pergantian tanggal tidak menghapus histori; data Cloud tetap dipisahkan berdasarkan business_date.`
+                    `Pergantian tanggal tidak menghapus riwayat; transaksi tetap tersimpan sesuai tanggalnya.`
                 );
             } catch (error) {
                 console.warn("Riwayat Cloud berdasarkan tanggal gagal dimuat:", error);
@@ -3851,6 +3850,7 @@ function simpanLaporanKeStorage(dataArray) {
         /* CETAK STRUK DENGAN SINKRONISASI PENGATURAN STRUK SAMA SEPERTI KASIR */
         function cetakStruk() {
 
+    if (!requirePermission("laporan.print")) return;
     if (selectedIndex === null) return;
 
     const item =
@@ -4563,7 +4563,7 @@ function simpanLaporanKeStorage(dataArray) {
         function exportDataCSV() {
             if (
         !requirePermission(
-            "laporan.view"
+            "laporan.export"
         )
     ) {
 
@@ -4614,7 +4614,7 @@ function simpanLaporanKeStorage(dataArray) {
         }
 
         async function downloadSemuaLaporanCloud() {
-            if (!requirePermission("laporan.view")) return;
+            if (!requirePermission("laporan.export")) return;
 
             if (
                 !window.LDMReporting ||
@@ -4631,7 +4631,7 @@ function simpanLaporanKeStorage(dataArray) {
             const originalText = button ? button.textContent : "";
             if (button) {
                 button.disabled = true;
-                button.textContent = "⏳ Mengambil data cloud…";
+                button.textContent = "⏳ Memuat data…";
             }
 
             try {
@@ -4902,7 +4902,7 @@ function eksekusiResetSemua() {
                 const selectedItem = dataLaporan.find(d => d.realIndex === selectedIndex);
                 const selectedCode = selectedItem ? getKodeTransaksi(selectedItem) : "transaksi ini";
                 document.getElementById("teksConfirmHapusSatu").innerText =
-                    `Apakah Anda yakin ingin menghapus transaksi ${selectedCode}?`;
+                    `Apakah Anda yakin ingin membatalkan transaksi ${selectedCode}?`;
                 bukaModal("modalConfirmHapusSatu");
             } else {
                 document.getElementById("inputPassHapusSatu").value = "";
@@ -4919,7 +4919,7 @@ function eksekusiResetSemua() {
                 const selectedItem = dataLaporan.find(d => d.realIndex === selectedIndex);
                 const selectedCode = selectedItem ? getKodeTransaksi(selectedItem) : "transaksi ini";
                 document.getElementById("teksConfirmHapusSatu").innerText =
-                    `Apakah Anda yakin ingin menghapus transaksi ${selectedCode}?`;
+                    `Apakah Anda yakin ingin membatalkan transaksi ${selectedCode}?`;
                 bukaModal("modalConfirmHapusSatu");
             } else {
                 tampilkanNotifikasi("Password Salah", "Password otentikasi yang Anda masukkan salah!", "🔒");
@@ -4970,7 +4970,7 @@ function eksekusiResetSemua() {
 
             tampilkanNotifikasi(
                 "Transaksi Dihapus",
-                "Transaksi telah dihapus dari Laporan, daftar transaksi Retur, dan perhitungan Shift pada Absensi.",
+                "Transaksi berhasil dibatalkan dan data terkait telah diperbarui.",
                 "🗑️"
             );
         }
@@ -5560,6 +5560,10 @@ function getCurrentRole() {
 function hasPermission(
     permission
 ) {
+    if (window.LDMActionPermissions && typeof window.LDMActionPermissions.hasLegacy === "function") {
+        return window.LDMActionPermissions.hasLegacy(permission);
+    }
+
 
     const role =
         getCurrentRole();
@@ -6409,7 +6413,7 @@ function batasiTampilanOmzetLaporan() {
         tutupModal("modalConfirmReset");
         tampilkanNotifikasi(
             "Reset Massal Dinonaktifkan",
-            "Tahap 12 memakai laporan cloud. Transaksi tidak boleh dihapus massal dari localStorage. Void transaksi satu per satu agar audit stok dan retur tetap konsisten.",
+            "Pembatalan transaksi dilakukan satu per satu agar stok, retur, dan laporan tetap sesuai.",
             "🔒"
         );
     };
@@ -6426,7 +6430,7 @@ function batasiTampilanOmzetLaporan() {
         }
 
         if(!window.LDMReporting){
-            tampilkanNotifikasi("Cloud Reporting Belum Siap","reporting-service.js belum termuat.","⚠️");
+            tampilkanNotifikasi("Data Belum Siap","Data transaksi belum siap digunakan. Muat ulang halaman lalu coba lagi.","⚠️");
             return;
         }
 
@@ -6434,7 +6438,7 @@ function batasiTampilanOmzetLaporan() {
             if(selectedItem.cloudId){
                 await window.LDMReporting.voidSale(
                     selectedItem.cloudId,
-                    "Void Owner dari Laporan Tahap 12"
+                    "Pembatalan transaksi dari Laporan"
                 );
             }else if(selectedItem.cloudLegacyId){
                 await window.LDMReporting.archiveLegacyTransaction(
@@ -6442,8 +6446,8 @@ function batasiTampilanOmzetLaporan() {
                 );
             }else{
                 tampilkanNotifikasi(
-                    "Transaksi Legacy Belum Cloud",
-                    "Migrasikan Laporan lama melalui halaman Migrasi Tahap 12 terlebih dahulu.",
+                    "Transaksi Belum Dapat Diproses",
+                    "Transaksi lama ini belum dapat dibatalkan dari halaman Laporan.",
                     "⚠️"
                 );
                 return;
@@ -6457,14 +6461,15 @@ function batasiTampilanOmzetLaporan() {
             tampilkanNotifikasi(
                 "Transaksi Diproses",
                 selectedItem.cloudId
-                    ? "Transaksi cloud berhasil di-void dan stok dibalik secara atomik."
-                    : "Transaksi legacy berhasil diarsipkan.",
+                    ? "Transaksi berhasil dibatalkan dan stok telah disesuaikan."
+                    : "Transaksi lama berhasil dipindahkan dari daftar aktif.",
                 "🗑️"
             );
         }catch(error){
+            console.error("[LocDaily][report-transaction-cancel]",error);
             tampilkanNotifikasi(
                 "Tidak Dapat Diproses",
-                error?.message || String(error),
+                "Transaksi belum dapat dibatalkan. Periksa koneksi lalu coba lagi.",
                 "⚠️"
             );
         }

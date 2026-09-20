@@ -2215,7 +2215,7 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/cloud-auth.js?v=27.9.0-v28.16.3-navfast"></script>
     <script src="js/cloud-session.js?v=27.9.0-v28.16.3-navfast"></script>
-    <script src="js/employee-permission-service-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/role-access-guard-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
+    <script src="js/employee-permission-service-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/role-access-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/action-permission-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
     <!-- V28.5.1: Workforce enforcement + Master Shift + Ketidakhadiran -->
     <script src="js/attendance-workforce-service-v28182.js"></script>
@@ -2616,7 +2616,7 @@
                             <input type="text" id="txtCatatanAbsen" placeholder="Misal: Datang tepat waktu / Keterangan Dokter">
                         </div>
 
-                        <button type="submit" id="btnSubmitAbsen" class="btn-submit-absen">
+                        <button type="submit" id="btnSubmitAbsen" class="btn-submit-absen" data-ldm-permission="attendance.submit">
                             <span>📌</span> Simpan Presensi Hari Ini
                         </button>
                     </form>
@@ -2850,7 +2850,8 @@ async function cekAbsensiOwnerTanggal() {
         alertBox.classList.add("show");
     } catch (error) {
         listContainer.innerHTML = "";
-        tampilkanAlertCustom("Pemeriksaan Jadwal Gagal", error.message || String(error), "error");
+        console.error("[LocDaily][attendance-schedule-check]",error);
+        tampilkanAlertCustom("Pemeriksaan Jadwal Gagal", "Jadwal belum dapat diperiksa. Periksa koneksi lalu coba lagi.", "error");
     }
 }
 
@@ -3436,7 +3437,7 @@ const loggedUser =
             ) {
                 tampilkanAlertCustom(
                     "Cloud Absensi Belum Siap",
-                    "attendance-service.js belum termuat.",
+                    "Data absensi belum siap digunakan. Muat ulang halaman lalu coba lagi.",
                     "danger"
                 );
                 return;
@@ -3516,7 +3517,7 @@ const loggedUser =
 
                 tampilkanAlertCustom(
                     "Presensi Gagal",
-                    error.message || String(error),
+                    "Presensi belum dapat disimpan. Periksa koneksi lalu coba lagi.",
                     "danger"
                 );
 
@@ -3609,10 +3610,10 @@ const loggedUser =
                 let hapusCol = `-`;
                 if (
                     hasPermission(
-                        "absensi.history"
+                        "absensi.delete"
                     )
                 ) {
-                    hapusCol = `<button class="btn-delete-log" onclick="hapusAbsensi('${item.id}')">🗑️ Hapus</button>`;
+                    hapusCol = `<button class="btn-delete-log" data-ldm-permission="attendance.delete" onclick="hapusAbsensi('${item.id}')">🗑️ Hapus</button>`;
                 }
 
                 tr.innerHTML = `
@@ -3631,7 +3632,7 @@ const loggedUser =
 
     if (
         !requirePermission(
-            "absensi.history"
+            "absensi.delete"
         )
     ) {
         return;
@@ -3640,7 +3641,7 @@ const loggedUser =
     if (
         !await ldmDialog.confirm(
             "Hapus Data Presensi",
-            "Apakah Anda yakin ingin menghapus data presensi ini? Data cloud akan di-soft-delete.",
+            "Apakah Anda yakin ingin menghapus data presensi ini dari daftar aktif?",
             "danger",
             {
                 okText: "Hapus"
@@ -3657,7 +3658,7 @@ const loggedUser =
     ) {
         tampilkanAlertCustom(
             "Cloud Absensi Belum Siap",
-            "attendance-service.js belum termuat.",
+            "Data absensi belum siap digunakan. Muat ulang halaman lalu coba lagi.",
             "danger"
         );
         return;
@@ -3669,7 +3670,7 @@ const loggedUser =
 
         tampilkanAlertCustom(
             "Terhapus",
-            "Data presensi berhasil di-soft-delete dari cloud.",
+            "Data presensi berhasil dihapus dari daftar aktif.",
             "success"
         );
 
@@ -3687,9 +3688,10 @@ const loggedUser =
         }
 
     } catch (error) {
+        console.error("[LocDaily][attendance-delete]",error);
         tampilkanAlertCustom(
             "Gagal Menghapus",
-            error.message || String(error),
+            "Data presensi belum dapat dihapus. Coba lagi setelah koneksi stabil.",
             "danger"
         );
     }
@@ -3976,7 +3978,8 @@ async function cekRiwayatAbsensiOwner() {
         const expectedRows = await getOwnerExpectedAttendance(tanggal);
         expectedMap = new Map(expectedRows.map(row => [String(row.username || "").trim().toLowerCase(), row]));
     } catch (error) {
-        tampilkanAlertCustom("Riwayat Jadwal Gagal Dimuat", error.message || String(error), "error");
+        console.error("[LocDaily][attendance-history-schedule]",error);
+        tampilkanAlertCustom("Riwayat Jadwal Gagal Dimuat", "Riwayat jadwal belum dapat dimuat. Periksa koneksi lalu coba lagi.", "error");
         return;
     }
 
@@ -4950,6 +4953,10 @@ function getCurrentRole() {
 function hasPermission(
     permission
 ) {
+    if (window.LDMActionPermissions && typeof window.LDMActionPermissions.hasLegacy === "function") {
+        return window.LDMActionPermissions.hasLegacy(permission);
+    }
+
 
     const role =
         getCurrentRole();

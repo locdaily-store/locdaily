@@ -1,0 +1,26 @@
+LocDaily V28.20.0 FINAL
+Granular Feature Actions & Permission Enforcement
+Runtime: 27.9.0-v28.20.0-final
+Database: Stage 40
+
+RINGKASAN
+- Owner Pusat kini dapat mengatur bukan hanya halaman yang boleh dibuka, tetapi juga tindakan penting di dalam halaman.
+- Hak akses granular mencakup Kasir, Barang, Kartu Stok, Stock Opname, Supplier, Purchase Order, Penerimaan Barang, Retur, Laporan, Pengeluaran, Absensi, Ketidakhadiran, Master Shift, Closing Shift, End of Day, Multi-Toko, dan transfer karyawan.
+- Jabatan Kasir dapat diberi batas maksimum diskon manual per transaksi 0-100%.
+- Permission parent/child dibuat konsisten: tindakan tidak dapat aktif tanpa akses halaman induknya.
+- Permission placeholder yang tidak memiliki aksi nyata dinonaktifkan agar tidak muncul sebagai pilihan palsu.
+- Compatibility bridge menerjemahkan kode hak akses lama ke model V28.20.0 supaya halaman lama tetap bekerja.
+- Aksi yang mengubah uang, stok, PO, retur, closing, absensi, jadwal, dan transfer diperiksa kembali di database, bukan hanya disembunyikan di UI.
+
+PERBAIKAN SEMANTIK
+- Batalkan Penerimaan Barang tidak lagi disebut Hapus.
+- Edit, Approve, Batalkan, Hapus Draft, dan Cetak Purchase Order mempunyai izin terpisah.
+- Presensi, Riwayat Absensi, dan Hapus Presensi mempunyai izin terpisah.
+- Closing Shift dipisah menjadi Buat Closing, Mutasi Kas, Buka Ulang, Password Closing, dan Cetak.
+- Void/Batalkan transaksi dari Laporan menggunakan satu permission yang benar-benar sesuai dengan UI saat ini.
+- Teks publik yang disentuh tidak menampilkan istilah internal database atau pesan teknis mentah.
+
+DATABASE
+- Wajib menjalankan Stage 40 sebelum frontend V28.20.0.
+- Tidak ada perubahan License Authority.
+- Tidak perlu redeploy Edge Function untuk rilis ini.

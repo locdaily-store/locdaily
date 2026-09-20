@@ -1744,7 +1744,7 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/cloud-auth.js?v=27.9.0-v28.16.3-navfast"></script>
     <script src="js/cloud-session.js?v=27.9.0-v28.16.3-navfast"></script>
-    <script src="js/employee-permission-service-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/role-access-guard-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
+    <script src="js/employee-permission-service-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/role-access-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/action-permission-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
 
 
@@ -1810,7 +1810,7 @@
     </div>
 </div>
 
-<button class="btn-main" type="submit" id="btnSaveExpense">💾 Simpan Pengeluaran</button></form></section>
+<button class="btn-main" type="submit" id="btnSaveExpense" data-ldm-permission="expenses.create">💾 Simpan Pengeluaran</button></form></section>
 <section class="box-container"><div class="box-title"><span>📜 Riwayat Pengeluaran</span><small id="recordInfo" style="font-size:.68rem;color:#64748b">0 Record</small></div><div class="filter-row"><div class="form-group"><label>Filter Tanggal</label><input type="date" id="filterExpenseDate" class="form-control" onchange="renderExpenses()"></div><div class="form-group"><label>Kategori</label><select id="filterCategory" class="form-control" onchange="renderExpenses()"><option value="">Semua Kategori</option><option>Perlengkapan</option><option>Listrik</option><option>Air</option><option>Internet</option><option>Transportasi</option><option>Maintenance</option><option>Konsumsi</option><option>Biaya Bank</option><option>Lainnya</option></select></div></div><div class="table-responsive"><table class="log-table"><thead><tr><th>Waktu</th><th>Kategori / Keterangan</th><th>Nota / Struk</th><th>Nominal</th><th>Aksi</th></tr></thead><tbody id="expenseBody"></tbody></table></div></section>
 </div></main></div>
 <div class="modal-alert" id="customAlertModal"><div class="modal-alert-content"><div class="modal-alert-icon" id="customAlertIcon">✅</div><div class="modal-alert-title" id="customAlertTitle">Informasi</div><div class="modal-alert-msg" id="customAlertMsg">-</div><button class="btn-modal-ok" onclick="closeAlert()">Tutup</button></div></div>
@@ -2218,7 +2218,7 @@ async function handleReceiptFile(event){
         clearReceipt();
         showAlert(
             'Foto Tidak Dapat Digunakan',
-            err?.message||'Gagal memproses foto Nota / Struk.',
+            'Foto Nota / Struk belum dapat diproses. Gunakan gambar lain lalu coba lagi.',
             'warning'
         );
     }finally{
@@ -2476,7 +2476,7 @@ function renderExpenses(){
                             <td>
                                 ${
                                     currentRole==='owner'
-                                        ? `<button class="btn-small btn-delete" onclick="deleteExpense(${Number(x.id)})">Hapus</button>`
+                                        ? `<button class="btn-small btn-delete" data-ldm-permission="expenses.delete" onclick="deleteExpense(${Number(x.id)})">Hapus</button>`
                                         : '<span style="color:#94a3b8;font-size:.62rem">🔒</span>'
                                 }
                             </td>
@@ -3201,7 +3201,7 @@ window.addEventListener(
         }
 
         if(!window.LDMReporting){
-            showAlert("Cloud Reporting Belum Siap","reporting-service.js belum termuat.","danger");
+            showAlert("Data Belum Siap","Data pengeluaran belum siap digunakan. Muat ulang halaman lalu coba lagi.","danger");
             return;
         }
 
@@ -3231,9 +3231,10 @@ window.addEventListener(
             document.getElementById("expenseRef").value = "";
             clearReceipt();
             renderExpenses();
-            showAlert("Pengeluaran Disimpan","Pengeluaran berhasil disimpan ke cloud.","success");
+            showAlert("Pengeluaran Disimpan","Pengeluaran berhasil disimpan.","success");
         }catch(error){
-            showAlert("Pengeluaran Gagal",error?.message || String(error),"danger");
+            console.error("[LocDaily][expense-save]",error);
+            showAlert("Pengeluaran Gagal","Pengeluaran belum dapat disimpan. Periksa koneksi lalu coba lagi.","danger");
         }finally{
             if(button){
                 button.disabled = false;
@@ -3252,7 +3253,7 @@ window.addEventListener(
         if(!target) return;
 
         if(!target.cloudId){
-            showAlert("Pengeluaran Legacy","Migrasikan data ini ke Tahap 12 terlebih dahulu.","warning");
+            showAlert("Data Lama Belum Dapat Diproses","Data lama ini belum dapat dihapus dari halaman Pengeluaran.","warning");
             return;
         }
 
@@ -3267,9 +3268,10 @@ window.addEventListener(
         try{
             await window.LDMReporting.deleteExpense(target.cloudId);
             renderExpenses();
-            showAlert("Pengeluaran Dihapus","Data cloud di-soft-delete.","success");
+            showAlert("Pengeluaran Dihapus","Pengeluaran berhasil dihapus dari daftar aktif.","success");
         }catch(error){
-            showAlert("Hapus Gagal",error?.message || String(error),"danger");
+            console.error("[LocDaily][expense-delete]",error);
+            showAlert("Hapus Gagal","Pengeluaran belum dapat dihapus. Coba lagi setelah koneksi stabil.","danger");
         }
     };
 

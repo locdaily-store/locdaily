@@ -3,7 +3,7 @@
 
     function service(){
         if(!window.LDMProcurement){
-            throw new Error("procurement-service.js belum termuat.");
+            throw new Error("Layanan Penerimaan Barang belum siap.");
         }
         return window.LDMProcurement;
     }
@@ -24,7 +24,7 @@
         const supplier = sanitizeSimpleText(document.getElementById("inputSupplier").value,80);
         const suratJalan = sanitizeSimpleText(document.getElementById("inputSuratJalan").value,50);
         if(!supplier){
-            tampilkanNotifikasi("Supplier Wajib Diisi","Pilih Supplier dari Master Supplier Cloud.");
+            tampilkanNotifikasi("Supplier Wajib Diisi","Pilih supplier dari daftar Supplier.");
             return;
         }
         if(!suratJalan){
@@ -36,8 +36,8 @@
         const ok = await confirmCloud(
             session.role === "admin" ? "Ajukan Goods Receipt" : "Simpan Goods Receipt",
             session.role === "admin"
-                ? "Goods Receipt Admin akan menjadi PENDING. Stok cloud belum berubah sampai Owner Accept. Lanjutkan?"
-                : "Goods Receipt Owner akan diterapkan ke stok cloud secara atomik. Lanjutkan?",
+                ? "Penerimaan dari Admin akan menunggu persetujuan Owner. Stok belum berubah sampai disetujui. Lanjutkan?"
+                : "Penerimaan barang akan memperbarui stok. Lanjutkan?",
             session.role === "admin" ? "Ajukan" : "Terima"
         );
         if(!ok) return;
@@ -73,17 +73,17 @@
 
             const status = result && result.status ? result.status : (session.role === "admin" ? "PendingApproval" : "Accepted");
             if(status === "PendingApproval"){
-                tampilkanNotifikasi("Dikirim ke Owner",`${nomorGR} tersimpan di cloud sebagai Pending Approval. Stok belum berubah.`);
+                tampilkanNotifikasi("Dikirim ke Owner",`${nomorGR} tersimpan dan menunggu persetujuan. Stok belum berubah.`);
             }else{
-                tampilkanNotifikasi("Goods Receipt Diterima",`${nomorGR} berhasil diterapkan ke stok cloud secara atomik.`);
-                if(result && result.id){
+                tampilkanNotifikasi("Goods Receipt Diterima",`${nomorGR} berhasil disimpan dan stok telah diperbarui.`);
+                if(result && result.id && hasPermission("goodsreceipt.print")){
                     try{ cetakGoodsReceiptById(result.id); }catch(error){}
                 }
             }
             setTimeout(resetDokumenGoodsReceipt,250);
         }catch(error){
             console.error("Cloud Goods Receipt gagal:",error);
-            tampilkanNotifikasi("Goods Receipt Gagal",error.message || String(error));
+            tampilkanNotifikasi("Penerimaan Gagal","Penerimaan barang belum dapat disimpan. Periksa koneksi lalu coba lagi.");
         }
     };
 
@@ -92,9 +92,9 @@
         const receipt = safeReadArray("dataGoodsReceipt").find(gr => String(gr.id) === String(id));
         if(!receipt) return;
         const ok = await confirmCloud(
-            "Accept Goods Receipt",
-            `Setujui ${receipt.nomorGR}? Stok cloud dan qty diterima pada PO akan diperbarui dalam satu transaksi database.`,
-            "Accept"
+            "Setujui Penerimaan",
+            `Setujui ${receipt.nomorGR}? Stok dan jumlah barang diterima pada Purchase Order akan diperbarui.`,
+            "Setujui"
         );
         if(!ok) return;
         try{
@@ -102,20 +102,20 @@
             renderRiwayatGoodsReceipt();
             renderApprovedPurchaseOrderInbox();
             try{ tutupModal("modalDetailGR"); }catch(error){}
-            tampilkanNotifikasi("Goods Receipt Diterima",`${receipt.nomorGR} telah di-Accept dan stok cloud diperbarui.`);
+            tampilkanNotifikasi("Goods Receipt Diterima",`${receipt.nomorGR} telah disetujui dan stok diperbarui.`);
         }catch(error){
-            tampilkanNotifikasi("Accept Goods Receipt Gagal",error.message || String(error));
+            tampilkanNotifikasi("Persetujuan Gagal","Penerimaan barang belum dapat disetujui. Coba lagi.");
         }
     };
 
     globalThis.konfirmasiHapusGoodsReceipt = async function(id){
-        if(!requirePermission("goodsreceipt.delete")) return;
+        if(!requirePermission("goodsreceipt.cancel")) return;
         const receipt = safeReadArray("dataGoodsReceipt").find(gr => String(gr.id) === String(id));
         if(!receipt) return;
         const ok = await confirmCloud(
-            receipt.status === "Accepted" ? "Batalkan & Rollback Goods Receipt" : "Batalkan Goods Receipt",
+            receipt.status === "Accepted" ? "Batalkan Penerimaan" : "Batalkan Penerimaan",
             receipt.status === "Accepted"
-                ? `Batalkan ${receipt.nomorGR}? Server akan mengurangi kembali stok secara atomik. Jika stok sudah tidak cukup karena penjualan berikutnya, pembatalan akan ditolak.`
+                ? `Batalkan ${receipt.nomorGR}? Stok akan dikembalikan ke kondisi sebelum penerimaan bila persediaan masih memungkinkan.`
                 : `Batalkan ${receipt.nomorGR}?`,
             "Batalkan"
         );
@@ -124,7 +124,7 @@
     };
 
     globalThis.hapusGoodsReceiptDanRollback = async function(id){
-        if(!requirePermission("goodsreceipt.delete")) return;
+        if(!requirePermission("goodsreceipt.cancel")) return;
         const receipt = safeReadArray("dataGoodsReceipt").find(gr => String(gr.id) === String(id));
         if(!receipt) return;
         try{
@@ -133,10 +133,10 @@
             renderApprovedPurchaseOrderInbox();
             tampilkanNotifikasi(
                 "Goods Receipt Dibatalkan",
-                `${receipt.nomorGR} berstatus Cancelled. Efek stok dibalik secara atomik bila sebelumnya sudah Accepted.`
+                `${receipt.nomorGR} berhasil dibatalkan. Penyesuaian stok telah diterapkan sesuai kondisi barang.`
             );
         }catch(error){
-            tampilkanNotifikasi("Pembatalan Goods Receipt Gagal",error.message || String(error));
+            tampilkanNotifikasi("Pembatalan Gagal","Penerimaan barang belum dapat dibatalkan. Pastikan stok masih memenuhi syarat lalu coba lagi.");
         }
     };
 

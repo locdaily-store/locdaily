@@ -6,6 +6,13 @@
 
     let channel = null;
 
+    async function requireAction(permissionCode){
+        const service=window.LDMEmployeePermissions;
+        if(service&&typeof service.requirePermission==="function"){
+            await service.requirePermission(permissionCode);
+        }
+    }
+
     function client(){
         if(
             !window.LDMSupabase ||
@@ -305,6 +312,7 @@
     }
 
     async function checkout(options){
+        await requireAction("pos.transaction.create");
         if(!options){
             throw new Error(
                 "Data checkout kosong."
@@ -431,6 +439,7 @@
         transactionId,
         reason = "Void transaksi"
     ){
+        await requireAction("reports.transaction.delete");
         const supabase = client();
 
         const {

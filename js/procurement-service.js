@@ -29,6 +29,13 @@
         return window.LDMSupabase.createClient();
     }
 
+    async function requireAction(permissionCode){
+        const service=window.LDMEmployeePermissions;
+        if(service&&typeof service.requirePermission==="function"){
+            await service.requirePermission(permissionCode);
+        }
+    }
+
     async function ensureAuth(){
         if(!window.LDMCloudSession){
             throw new Error("Cloud Session belum tersedia.");
@@ -285,7 +292,7 @@
         const byName = products.find(row => normalizeName(row.nama) === wanted);
         if(byName && byName.id) return String(byName.id);
 
-        throw new Error(`Barang ${item && (item.namaBarang || item.nama) || "-"} belum mempunyai UUID cloud.`);
+        throw new Error(`Barang ${item && (item.namaBarang || item.nama) || "-"} belum terhubung ke data barang aktif.`);
     }
 
     function resolveSupplierByName(name){
@@ -382,6 +389,7 @@
     }
 
     async function saveSupplier(payload){
+        await requireAction(payload?.id ? "suppliers.update" : "suppliers.create");
         await ensureAuth();
         assertMigrated("suppliers");
         const supabase = client();
@@ -406,6 +414,7 @@
     }
 
     async function deleteSupplier(id){
+        await requireAction("suppliers.delete");
         await ensureAuth();
         const supabase = client();
         const {data,error} = await supabase.rpc("ldm_soft_delete_supplier",{p_supplier_id:id});
@@ -415,13 +424,14 @@
     }
 
     async function savePurchaseOrder(payload){
+        await requireAction(payload?.id ? "purchase_order.update" : "purchase_order.create");
         await ensureAuth();
         assertMigrated("purchaseOrders");
         assertMigrated("suppliers");
         const supplier = payload.supplierId
             ? safeArray(KEYS.suppliers).find(row => String(row.id) === String(payload.supplierId))
             : resolveSupplierByName(payload.supplier);
-        if(!supplier) throw new Error("Supplier harus dipilih dari Master Supplier Cloud yang aktif.");
+        if(!supplier) throw new Error("Supplier harus dipilih dari Daftar Supplier yang aktif.");
 
         const items = (payload.items || []).map((item,index) => ({
             product_id:resolveProductId(item),
@@ -451,6 +461,7 @@
     }
 
     async function approvePurchaseOrder(id){
+        await requireAction("purchase_order.approve");
         await ensureAuth();
         const supabase = client();
         const {data,error} = await supabase.rpc("ldm_approve_purchase_order",{p_purchase_order_id:id});
@@ -460,6 +471,7 @@
     }
 
     async function cancelPurchaseOrder(id,reason){
+        await requireAction("purchase_order.cancel");
         await ensureAuth();
         const supabase = client();
         const {data,error} = await supabase.rpc("ldm_cancel_purchase_order",{
@@ -472,6 +484,7 @@
     }
 
     async function deletePurchaseOrder(id){
+        await requireAction("purchase_order.delete");
         await ensureAuth();
         const supabase = client();
         const {data,error} = await supabase.rpc("ldm_soft_delete_purchase_order",{p_purchase_order_id:id});
@@ -481,13 +494,14 @@
     }
 
     async function submitGoodsReceipt(payload){
+        await requireAction("goods_receipt.create");
         await ensureAuth();
         assertMigrated("goodsReceipts");
         assertMigrated("suppliers");
         const supplier = payload.supplierId
             ? safeArray(KEYS.suppliers).find(row => String(row.id) === String(payload.supplierId))
             : resolveSupplierByName(payload.supplier);
-        if(!supplier) throw new Error("Supplier harus dipilih dari Master Supplier Cloud yang aktif.");
+        if(!supplier) throw new Error("Supplier harus dipilih dari Daftar Supplier yang aktif.");
 
         const items = (payload.items || []).map((item,index) => ({
             product_id:resolveProductId(item),
@@ -518,6 +532,7 @@
     }
 
     async function approveGoodsReceipt(id){
+        await requireAction("goods_receipt.approve");
         await ensureAuth();
         const supabase = client();
         const {data,error} = await supabase.rpc("ldm_approve_goods_receipt",{p_goods_receipt_id:id});
@@ -530,6 +545,7 @@
     }
 
     async function cancelGoodsReceipt(id,reason){
+        await requireAction("goods_receipt.cancel");
         await ensureAuth();
         const supabase = client();
         const {data,error} = await supabase.rpc("ldm_cancel_goods_receipt",{
@@ -631,7 +647,7 @@
     async function migrateLegacy(){
         const context = await ensureAuth();
         if(String(context.profile.role || "").toLowerCase() !== "owner"){
-            throw new Error("Hanya Owner yang dapat menjalankan migrasi Tahap 11.");
+            throw new Error("Hanya Owner yang dapat menyesuaikan data pembelian lama.");
         }
 
         const oldSuppliers = safeArray(KEYS.suppliers).filter(row => row && !row._cloud);

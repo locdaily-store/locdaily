@@ -18,6 +18,11 @@
     let syncTimer =
         null;
 
+    async function requireAction(permissionCode){
+        const service=window.LDMEmployeePermissions;
+        if(service&&typeof service.requirePermission==="function") await service.requirePermission(permissionCode);
+    }
+
     function client(){
         if(
             !window.LDMSupabase ||
@@ -523,6 +528,7 @@
     async function softDelete(
         productId
     ){
+        await requireAction("inventory.product.delete");
         if(!productId){
             return false;
         }

@@ -1716,7 +1716,7 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/cloud-auth.js?v=27.9.0-v28.16.3-navfast"></script>
     <script src="js/cloud-session.js?v=27.9.0-v28.16.3-navfast"></script>
-    <script src="js/employee-permission-service-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/role-access-guard-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
+    <script src="js/employee-permission-service-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/role-access-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/action-permission-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
     
     <script src="js/products-service.js?v=27.9.0-v28.18.3"></script>
@@ -2884,10 +2884,9 @@ const bolehApprove =
     );
 
 
-const bolehHapus =
-    hasPermission(
-        "stockopname.delete"
-    );
+const bolehReject = hasPermission("stockopname.reject");
+const bolehCancel = hasPermission("stockopname.cancel");
+const bolehArsip = hasPermission("stockopname.delete");
 
 
 if (
@@ -2921,9 +2920,9 @@ if (
 
 
             ${
-                bolehHapus
+                bolehReject
                     ? `
-                        <button
+                        <button data-ldm-permission="stock_opname.reject"
                             class="btn-action-success"
                             style="
                                 padding:4px 8px;
@@ -2949,12 +2948,15 @@ if (
 
 else if (
     item.status !== "Pending"
-    &&
-    bolehHapus
+    && (
+        (["Tervalidasi","Approved"].includes(item.status) && bolehCancel)
+        || (!["Tervalidasi","Approved"].includes(item.status) && bolehArsip)
+    )
 ) {
 
     aksiButtonHtml = `
         <button
+            data-ldm-permission="${["Tervalidasi","Approved"].includes(item.status) ? "stock_opname.cancel" : "stock_opname.delete"}"
             class="btn-action-success"
             style="
                 padding:4px 8px;
@@ -3598,8 +3600,8 @@ const usernameOwner =
             "function"
     ) {
         showAlert(
-            "Cloud Stock Opname Belum Siap",
-            "stock-opname-service.js belum termuat."
+            "Layanan Belum Siap",
+            "Stock Opname belum dapat diproses. Muat ulang aplikasi lalu coba lagi."
         );
         return;
     }
@@ -3660,25 +3662,24 @@ const usernameOwner =
         if (bolehApprove) {
             showAlert(
                 "Berhasil",
-                "Stock Opname tersimpan ke Cloud dan perubahan stok diterapkan sebagai satu proses aman."
+                "Stock Opname berhasil disimpan dan stok telah diperbarui."
             );
         } else {
             showAlert(
                 "Berhasil Disimpan",
-                "Stock Opname tersimpan sebagai PENDING di Cloud. Stok belum berubah sampai Owner melakukan persetujuan."
+                "Stock Opname berhasil dikirim untuk diperiksa. Stok belum berubah sampai disetujui."
             );
         }
 
     } catch (error) {
         console.error(
-            "Cloud Stock Opname gagal:",
+            "Stock Opname gagal:",
             error
         );
 
         showAlert(
             "Stock Opname Gagal",
-            error.message ||
-            String(error)
+            "Stock Opname belum dapat disimpan. Periksa koneksi lalu coba lagi."
         );
     }
 }
@@ -3701,8 +3702,8 @@ const usernameOwner =
             "function"
     ) {
         showAlert(
-            "Cloud Stock Opname Belum Siap",
-            "stock-opname-service.js belum termuat."
+            "Layanan Belum Siap",
+            "Stock Opname belum dapat diproses. Muat ulang aplikasi lalu coba lagi."
         );
         return;
     }
@@ -3717,14 +3718,14 @@ const usernameOwner =
 
         showAlert(
             "Berhasil",
-            "Pending Stock Opname diterima. Delta hasil hitung diterapkan ke stok cloud terbaru secara atomik."
+            "Stock Opname disetujui dan stok telah disesuaikan berdasarkan hasil perhitungan."
         );
 
     } catch (error) {
+        console.error("[LocDaily][stock-opname-approve]",error);
         showAlert(
-            "Approval Gagal",
-            error.message ||
-            String(error)
+            "Persetujuan Gagal",
+            "Stock Opname belum dapat disetujui. Coba lagi setelah koneksi stabil."
         );
     }
 }
@@ -3732,14 +3733,6 @@ const usernameOwner =
         async function hapusAtauTolakOpname(
     idItem
 ) {
-
-    if (
-        !requirePermission(
-            "stockopname.delete"
-        )
-    ) {
-        return;
-    }
 
     const idxSmt =
         daftarItemSementara
@@ -3750,6 +3743,7 @@ const usernameOwner =
     if (
         idxSmt !== -1
     ) {
+        if (!requirePermission("stockopname.create")) return;
         const ok =
             await ldmDialog.confirm(
                 "Hapus Item Sementara",
@@ -3800,8 +3794,8 @@ const usernameOwner =
         !window.LDMStockOpname
     ) {
         showAlert(
-            "Cloud Stock Opname Belum Siap",
-            "stock-opname-service.js belum termuat."
+            "Layanan Belum Siap",
+            "Stock Opname belum dapat diproses. Muat ulang aplikasi lalu coba lagi."
         );
         return;
     }
@@ -3814,11 +3808,12 @@ const usernameOwner =
     try {
 
         if (status === "pending") {
+            if (!requirePermission("stockopname.reject")) return;
 
             const ok =
                 await ldmDialog.confirm(
                     "Tolak Stock Opname",
-                    "Tolak Stock Opname PENDING ini? Stok cloud tidak akan berubah.",
+                    "Tolak Stock Opname ini? Stok tidak akan berubah.",
                     "warning",
                     {
                         okText:
@@ -3847,11 +3842,12 @@ const usernameOwner =
             status === "tervalidasi" ||
             status === "approved"
         ) {
+            if (!requirePermission("stockopname.cancel")) return;
 
             const ok =
                 await ldmDialog.confirm(
                     "Batalkan Stock Opname",
-                    "Stock Opname ini sudah mengubah stok. Pembatalan akan melakukan reverse delta pada stok cloud.",
+                    "Stock Opname ini sudah mengubah stok. Pembatalan akan mengembalikan perubahan stok sesuai catatan sebelumnya.",
                     "danger",
                     {
                         okText:
@@ -3871,12 +3867,13 @@ const usernameOwner =
 
             showAlert(
                 "Dibatalkan",
-                "Stock Opname berhasil dibatalkan dan perubahan stok dibalik secara atomik."
+                "Stock Opname berhasil dibatalkan dan perubahan stok telah dikembalikan."
             );
 
         }
 
         else {
+            if (!requirePermission("stockopname.delete")) return;
 
             const ok =
                 await ldmDialog.confirm(
@@ -3900,17 +3897,17 @@ const usernameOwner =
 
             showAlert(
                 "Diarsipkan",
-                "Record Stock Opname berhasil di-soft-delete."
+                "Stock Opname berhasil diarsipkan."
             );
         }
 
         renderTabelOpname();
 
     } catch (error) {
+        console.error("Stock Opname:", error);
         showAlert(
             "Proses Gagal",
-            error.message ||
-            String(error)
+            "Stock Opname belum dapat diproses. Periksa koneksi lalu coba lagi."
         );
     }
 }
@@ -4485,6 +4482,10 @@ function getCurrentRole() {
 function hasPermission(
     permission
 ) {
+    if (window.LDMActionPermissions && typeof window.LDMActionPermissions.hasLegacy === "function") {
+        return window.LDMActionPermissions.hasLegacy(permission);
+    }
+
 
     const role =
         getCurrentRole();

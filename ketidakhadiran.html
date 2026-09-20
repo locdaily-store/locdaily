@@ -30,7 +30,7 @@
   <script src="js/supabase-client.js"></script>
   <script src="js/cloud-auth.js?v=27.9.0-v28.16.3-navfast"></script>
   <script src="js/cloud-session.js?v=27.9.0-v28.16.3-navfast"></script>
-  <script src="js/employee-permission-service-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/role-access-guard-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
+  <script src="js/employee-permission-service-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/role-access-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/action-permission-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
   <script src="js/attendance-workforce-service-v28182.js"></script>
   <script src="js/license-v2-config.js?v=27.9.0-v28.13.1"></script>
@@ -77,7 +77,7 @@
             </select>
           </div>
           <div class="wf-field" style="margin-top:10px"><label for="absenceText">Penjelasan</label><textarea id="absenceText" minlength="10" maxlength="2000" required placeholder="Jelaskan kejadian dengan jelas, minimal 10 karakter."></textarea></div>
-          <div class="wf-actions" style="margin-top:12px"><button id="absenceSubmit" class="wf-btn primary" type="submit">Kirim ke Owner</button></div>
+          <div class="wf-actions" style="margin-top:12px"><button id="absenceSubmit" class="wf-btn primary" type="submit" data-ldm-permission="absence.confirm">Kirim ke Owner</button></div>
           <div id="absenceMessage" class="wf-notice" style="margin-top:10px">Memeriksa data ketidakhadiran...</div>
         </form>
       </section>

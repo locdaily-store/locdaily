@@ -1951,7 +1951,7 @@ input[type="color"] {
     <script src="js/supabase-client.js"></script>
     <script src="js/cloud-auth.js?v=27.9.0-v28.16.3-navfast"></script>
     <script src="js/cloud-session.js?v=27.9.0-v28.16.3-navfast"></script>
-    <script src="js/employee-permission-service-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/role-access-guard-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
+    <script src="js/employee-permission-service-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/role-access-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/action-permission-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
     <script src="js/unit-conversion.js?v=20.0"></script>
     <script src="js/procurement-service.js?v=25.3.1"></script>
@@ -3791,6 +3791,10 @@ function validateSessionAgainstAccounts() {
 }
 
 function hasPermission(permission) {
+    if (window.LDMActionPermissions && typeof window.LDMActionPermissions.hasLegacy === "function") {
+        return window.LDMActionPermissions.hasLegacy(permission);
+    }
+
     const session = getSecuritySession();
     if (!session) return false;
     const list = ROLE_PERMISSIONS[session.role];
@@ -4341,7 +4345,7 @@ function resetFormBarangPO() {
 }
 
 function tambahBarangKePO() {
-    if (!requirePermission("purchaseorder.create")) return;
+    if (!requirePermission(editingPOId ? "purchaseorder.edit" : "purchaseorder.create")) return;
 
     const rawIndex = document.getElementById("selectedBarangPO").value;
     if (rawIndex === "") {
@@ -4512,7 +4516,7 @@ function validasiHeaderPO() {
 
 
 function konfirmasiOrderPO() {
-    if (!requirePermission("purchaseorder.create")) return;
+    if (!requirePermission(editingPOId ? "purchaseorder.edit" : "purchaseorder.create")) return;
     if (!validasiHeaderPO()) return;
 
     const session = requireLogin();
@@ -4536,7 +4540,7 @@ function konfirmasiOrderPO() {
 
 
 function simpanPurchaseOrder(status = "Draft") {
-    if (!requirePermission("purchaseorder.create")) return;
+    if (!requirePermission(editingPOId ? "purchaseorder.edit" : "purchaseorder.create")) return;
     if (!validasiHeaderPO()) return;
 
     const session = requireLogin();
@@ -4627,7 +4631,7 @@ function simpanPurchaseOrder(status = "Draft") {
 
     renderRiwayatPO();
 
-    if (status === "Ordered") {
+    if (status === "Ordered" && hasPermission("purchaseorder.print")) {
         cetakPO(poData.id);
     }
 
@@ -4823,15 +4827,16 @@ function renderRiwayatPO() {
 
     tbody.innerHTML = data.map(po => {
         const canReceive = ["Ordered","Partial"].includes(po.status) &&
-            Number(po.totalReceived || 0) < Number(po.totalQty || 0);
+            Number(po.totalReceived || 0) < Number(po.totalQty || 0) &&
+            hasPermission("goodsreceipt.create");
 
-        const canEdit = po.status === "Draft";
+        const canEdit = po.status === "Draft" && hasPermission("purchaseorder.edit");
         const canApprove =
             po.status === "PendingApproval" &&
             hasPermission("purchaseorder.approve");
         const canWhatsApp = ["Ordered","Partial"].includes(po.status);
         const canCancel =
-            ownerDelete &&
+            hasPermission("purchaseorder.cancel") &&
             ["Draft","PendingApproval","Ordered","Partial"].includes(po.status);
 
         return `
@@ -4847,13 +4852,13 @@ function renderRiwayatPO() {
                 <td>
                     <div style="display:flex;gap:5px;flex-wrap:wrap;">
                         <button type="button" class="btn btn-soft" style="padding:5px 7px;" onclick="lihatDetailPO('${po.id}')">Detail</button>
-                        <button type="button" class="btn btn-secondary" style="padding:5px 7px;" onclick="cetakPO('${po.id}')">🖨</button>
+                        <button type="button" class="btn btn-secondary" style="padding:5px 7px;" data-ldm-permission="purchase_order.print" onclick="cetakPO('${po.id}')">🖨</button>
                         ${canEdit ? `<button type="button" class="btn btn-warning" style="padding:5px 7px;" onclick="editDraftPO('${po.id}')">Edit</button>` : ""}
                         ${canApprove ? `<button type="button" class="btn btn-success" style="padding:5px 7px;" onclick="acceptPendingPO('${po.id}')">✅ Accept</button>` : ""}
                         ${canWhatsApp ? `<button type="button" class="btn btn-success" style="padding:5px 7px;" onclick="kirimPOKeWhatsApp('${po.id}')">💬 WhatsApp</button>` : ""}
                         ${canReceive ? `<button type="button" class="btn btn-success" style="padding:5px 7px;" onclick="buatGoodsReceiptDariPO('${po.id}')">📥 Terima</button>` : ""}
-                        ${canCancel ? `<button type="button" class="btn btn-danger" style="padding:5px 7px;" onclick="konfirmasiBatalkanPO('${po.id}')">Batalkan</button>` : ""}
-                        ${ownerDelete ? `<button type="button" class="btn btn-danger" style="padding:5px 7px;" onclick="konfirmasiHapusPO('${po.id}')">Hapus</button>` : ""}
+                        ${canCancel ? `<button type="button" class="btn btn-danger" style="padding:5px 7px;" data-ldm-permission="purchase_order.cancel" onclick="konfirmasiBatalkanPO('${po.id}')">Batalkan</button>` : ""}
+                        ${ownerDelete ? `<button type="button" class="btn btn-danger" style="padding:5px 7px;" data-ldm-permission="purchase_order.delete" onclick="konfirmasiHapusPO('${po.id}')">Hapus</button>` : ""}
                     </div>
                 </td>
             </tr>
@@ -4862,6 +4867,7 @@ function renderRiwayatPO() {
 }
 
 function editDraftPO(id) {
+    if (!requirePermission("purchaseorder.edit")) return;
     const po = safeReadArray("dataPurchaseOrder").find(x => String(x.id) === String(id));
     if (!po || po.status !== "Draft") {
         notify("Tidak Bisa Diedit","Hanya PO Draft yang bisa diedit.");
@@ -4929,7 +4935,7 @@ function lihatDetailPO(id) {
                 : ""}
             ${["Ordered","Partial"].includes(po.status) ? `<button class="btn btn-success" onclick="kirimPOKeWhatsApp('${po.id}')">💬 Kirim ke WhatsApp</button>` : ""}
             ${["Ordered","Partial"].includes(po.status) ? `<button class="btn btn-success" onclick="buatGoodsReceiptDariPO('${po.id}')">📥 Buat Goods Receipt</button>` : ""}
-            <button class="btn btn-secondary" onclick="cetakPO('${po.id}')">🖨 Cetak</button>
+            <button class="btn btn-secondary" data-ldm-permission="purchase_order.print" onclick="cetakPO('${po.id}')">🖨 Cetak</button>
             <button class="btn btn-soft" onclick="tutupModal('modalDetailPO')">Tutup</button>
         </div>
     `;
@@ -5114,6 +5120,7 @@ function usernameOwner() {
 }
 
 function cetakPO(id) {
+    if (!requirePermission("purchaseorder.print")) return;
     const po = safeReadArray("dataPurchaseOrder").find(x => String(x.id) === String(id));
     if (!po) {
         notify("Cetak Gagal","Purchase Order tidak ditemukan.");
@@ -5197,7 +5204,7 @@ function cetakPO(id) {
 }
 
 function bukaScannerPO() {
-    if (!requirePermission("purchaseorder.create")) return;
+    if (!requirePermission(editingPOId ? "purchaseorder.edit" : "purchaseorder.create")) return;
 
     bukaModal("modalScanner");
 

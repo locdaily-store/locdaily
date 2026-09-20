@@ -69,6 +69,13 @@
         }
     }
 
+    async function requireAction(permissionCode){
+        const service=window.LDMEmployeePermissions;
+        if(service&&typeof service.requirePermission==="function"){
+            await service.requirePermission(permissionCode);
+        }
+    }
+
     async function ensureAuth(){
         if(!window.LDMCloudSession){
             throw new Error("Cloud Session belum tersedia.");
@@ -191,6 +198,8 @@
         items,
         directApprove
     }){
+        await requireAction("stock_opname.create");
+        if(directApprove) await requireAction("stock_opname.approve");
         await ensureAuth();
 
         if(
@@ -212,7 +221,7 @@
 
             if(!productId){
                 throw new Error(
-                    `Barang ${item.namaBarang || "-"} belum memiliki UUID cloud.`
+                    `Barang ${item.namaBarang || "-"} belum terhubung ke data barang aktif.`
                 );
             }
 
@@ -262,6 +271,7 @@
     }
 
     async function approve(entryId){
+        await requireAction("stock_opname.approve");
         await ensureAuth();
         const supabase = client();
 
@@ -289,6 +299,7 @@
     }
 
     async function reject(entryId, reason){
+        await requireAction("stock_opname.reject");
         await ensureAuth();
         const supabase = client();
 
@@ -310,6 +321,7 @@
     }
 
     async function cancel(entryId, reason){
+        await requireAction("stock_opname.cancel");
         await ensureAuth();
         const supabase = client();
 
@@ -338,6 +350,7 @@
     }
 
     async function softDelete(entryId){
+        await requireAction("stock_opname.delete");
         await ensureAuth();
         const supabase = client();
 

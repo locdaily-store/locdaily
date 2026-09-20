@@ -3,7 +3,7 @@
 
     function service(){
         if(!window.LDMProcurement){
-            throw new Error("procurement-service.js belum termuat.");
+            throw new Error("Layanan Purchase Order belum siap.");
         }
         return window.LDMProcurement;
     }
@@ -16,7 +16,7 @@
     }
 
     globalThis.konfirmasiOrderPO = async function(){
-        if(!requirePermission("purchaseorder.create")) return;
+        if(!requirePermission(editingPOId ? "purchaseorder.edit" : "purchaseorder.create")) return;
         if(!validasiHeaderPO()) return;
         const session = requireLogin();
         if(!session) return;
@@ -33,7 +33,7 @@
     };
 
     globalThis.simpanPurchaseOrder = async function(status="Draft"){
-        if(!requirePermission("purchaseorder.create")) return;
+        if(!requirePermission(editingPOId ? "purchaseorder.edit" : "purchaseorder.create")) return;
         if(!validasiHeaderPO()) return;
         const session = requireLogin();
         if(!session) return;
@@ -69,13 +69,13 @@
                 `${nomorPO} berhasil disimpan ke cloud dengan status ${finalStatus}.`
             );
 
-            if(finalStatus === "Ordered" && result && result.id){
+            if(finalStatus === "Ordered" && result && result.id && hasPermission("purchaseorder.print")){
                 try{ cetakPO(result.id); }catch(error){}
             }
             setTimeout(resetDokumenPO,200);
         }catch(error){
             console.error("Cloud PO save gagal:",error);
-            notify("Purchase Order Gagal",error.message || String(error));
+            notify("Purchase Order Gagal","Purchase Order belum dapat disimpan. Periksa koneksi lalu coba lagi.");
         }
     };
 
@@ -95,7 +95,7 @@
             try{ tutupModal("modalDetailPO"); }catch(error){}
             notify("Purchase Order Disetujui",`${target.nomorPO} sekarang tersedia untuk Goods Receipt di semua device.`);
         }catch(error){
-            notify("Accept PO Gagal",error.message || String(error));
+            notify("Persetujuan PO Gagal","Purchase Order belum dapat disetujui. Coba lagi.");
         }
     };
 
@@ -110,7 +110,7 @@
             renderRiwayatPO();
             notify("PO Dibatalkan",`${po.nomorPO} berstatus Cancelled di cloud.`);
         }catch(error){
-            notify("Pembatalan PO Gagal",error.message || String(error));
+            notify("Pembatalan PO Gagal","Purchase Order belum dapat dibatalkan. Coba lagi.");
         }
     };
 
@@ -120,16 +120,16 @@
         if(!po) return;
         const ok = await confirmCloud(
             "Hapus Purchase Order",
-            `Soft-delete ${po.nomorPO}? Server akan menolak bila PO sudah mempunyai Goods Receipt atau statusnya tidak aman untuk dihapus.`,
+            `Hapus draft ${po.nomorPO}? Penghapusan hanya dapat dilakukan jika Purchase Order masih memenuhi syarat.`,
             "Hapus"
         );
         if(!ok) return;
         try{
             await service().deletePurchaseOrder(id);
             renderRiwayatPO();
-            notify("PO Dihapus",`${po.nomorPO} berhasil di-soft-delete.`);
+            notify("PO Dihapus",`${po.nomorPO} berhasil dihapus dari daftar aktif.`);
         }catch(error){
-            notify("PO Tidak Dihapus",error.message || String(error));
+            notify("PO Tidak Dihapus","Purchase Order belum dapat dihapus. Pastikan statusnya masih dapat dihapus lalu coba lagi.");
         }
     };
 

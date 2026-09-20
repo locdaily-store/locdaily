@@ -8,6 +8,13 @@
     return window.LDMSupabase.createClient();
   }
 
+  async function requireAction(permissionCode){
+    const service=window.LDMEmployeePermissions;
+    if(service&&typeof service.requirePermission==="function"){
+      await service.requirePermission(permissionCode);
+    }
+  }
+
   async function auth(){
     if(!window.LDMCloudSession || typeof window.LDMCloudSession.ensureAuthenticated!=="function"){
       throw new Error("Cloud Session belum tersedia.");
@@ -51,6 +58,7 @@
   }
 
   async function saveMonth({storeId,userId,month,rows}={}){
+    await requireAction("master_shift.schedule.manage");
     if(!storeId||!userId||!month)throw new Error("Cabang, akun, dan bulan wajib dipilih.");
     return rpc("ldm_workforce_save_month_schedule",{
       p_store_id:storeId,
@@ -61,6 +69,7 @@
   }
 
   async function setLeaveEntitlement({storeId,userId,year,days,note=""}={}){
+    await requireAction("master_shift.leave.manage");
     return rpc("ldm_workforce_set_leave_entitlement",{
       p_store_id:storeId,
       p_user_id:userId,
@@ -103,6 +112,7 @@
   }
 
   async function submitExplanation({date,reason,explanation}={}){
+    await requireAction("absence.confirm");
     return rpc("ldm_attendance_submit_explanation_v2",{
       p_attendance_date:date,
       p_reason_category:reason,
@@ -125,6 +135,7 @@
   }
 
   async function updateAbsenceSettings({storeId=null,minutes,applyToOpen=false}={}){
+    await requireAction("master_shift.absence_deadline.manage");
     return rpc("ldm_attendance_update_absence_settings",{
       p_store_id:storeId||null,
       p_confirmation_window_minutes:Number(minutes),
@@ -133,6 +144,7 @@
   }
 
   async function reviewExplanation({id,note=""}={}){
+    await requireAction("absence.review");
     return rpc("ldm_attendance_review_explanation_v2",{
       p_explanation_id:id,
       p_review_note:String(note||"").trim()||null

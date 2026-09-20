@@ -1570,7 +1570,7 @@
     <script src="js/store-mode.js?v=27.9.0-mode1"></script>
     <script src="js/product-visuals.js?v=27.9.0-mode1"></script>
     <link rel="stylesheet" href="css/store-modes.css?v=27.9.0-mode2">
-    <script src="js/employee-permission-service-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/role-access-guard-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
+    <script src="js/employee-permission-service-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/role-access-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/action-permission-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
     <script src="js/recovery-service.js?v=17.0"></script>
     
@@ -1685,7 +1685,7 @@
                         </div>
 
                         <div class="pending-actions">
-                            <button class="btn-pending" onclick="holdTransaksi()">⏸️ Hold Transaksi</button>
+                            <button class="btn-pending" data-ldm-permission="pos.hold.use" onclick="holdTransaksi()">⏸️ Hold Transaksi</button>
                             <button class="btn-recall" onclick="bukaPopupPending()">📋 Transaksi Hold (<span id="countPending">0</span>)</button>
                         </div>
 
@@ -1713,7 +1713,7 @@
 
                     <div style="margin-bottom: 8px;">
                         <label>Diskon Transaksi (Rp / %)</label>
-                        <input type="text" id="inputDiskon" inputmode="text" placeholder="Contoh: 5000 atau 10%" oninput="hitungTotalAkhir()">
+                        <input type="text" id="inputDiskon" data-ldm-permission="pos.discount.apply" data-ldm-permission-mode="disable" inputmode="text" placeholder="Contoh: 5000 atau 10%" oninput="hitungTotalAkhir()">
                     </div>
 
                     <div class="total-box">
@@ -1739,7 +1739,7 @@
                     </div>
 
                     <div class="pay-actions">
-                        <button class="btn-bayar" onclick="prosesBayar()">💵 TUNAI</button>
+                        <button class="btn-bayar" data-ldm-permission="pos.transaction.create" onclick="prosesBayar()">💵 TUNAI</button>
                         <button class="btn-qris" onclick="bukaPopupQris()">📱 NON TUNAI</button>
                     </div>
                 </div>
@@ -1936,7 +1936,7 @@
             <h2 style="color:#10b981; font-size:1.8rem; margin: 5px 0 15px 0; word-break: break-word;">Rp <span id="teksKembali">0</span></h2>
             
             <div class="modal-buttons">
-                <button class="btn-confirm-print" onclick="ulangCetakStruk()">🖨️ CETAK ULANG STRUK</button>
+                <button class="btn-confirm-print" data-ldm-permission="pos.receipt.reprint" onclick="ulangCetakStruk()">🖨️ CETAK ULANG STRUK</button>
                 <button id="btnSelesai" onclick="tutupPopup()" class="btn-confirm-yes">TRANSAKSI BARU</button>
             </div>
         </div>
@@ -1965,7 +1965,7 @@
             <p style="color:var(--text-color); font-size:0.8rem; font-weight:500;">Apakah pembayaran Non Tunai/QRIS sebesar <strong style="color:#0284c7;">Rp <span id="qrisConfirmText">0</span></strong> sudah berhasil dikonfirmasi?</p>
             
             <div class="modal-buttons">
-                <button class="btn-confirm-yes" onclick="prosesBayarQris()">Yes (Berhasil)</button>
+                <button class="btn-confirm-yes" data-ldm-permission="pos.transaction.create" onclick="prosesBayarQris()">Yes (Berhasil)</button>
                 <button class="btn-confirm-no" onclick="tutupPopupQris()">No (Batal)</button>
             </div>
         </div>
@@ -4258,8 +4258,7 @@ function tambahItem() {
 
                 tampilkanAlertModal(
                     "Transaksi Gagal",
-                    (error.message || String(error)) +
-                    "\n\nTransaksi tidak dicatat dan stok tidak dipotong.",
+                    "Transaksi belum dapat disimpan. Periksa koneksi lalu coba lagi.\n\nTransaksi tidak dicatat dan stok tidak dipotong.",
                     "❌"
                 );
             }
@@ -4357,8 +4356,7 @@ function tambahItem() {
 
                 tampilkanAlertModal(
                     "Transaksi Gagal",
-                    (error.message || String(error)) +
-                    "\n\nTransaksi tidak dicatat dan stok tidak dipotong.",
+                    "Transaksi belum dapat disimpan. Periksa koneksi lalu coba lagi.\n\nTransaksi tidak dicatat dan stok tidak dipotong.",
                     "❌"
                 );
             }
@@ -5639,6 +5637,10 @@ function getCurrentRole() {
 function hasPermission(
     permission
 ) {
+    if (window.LDMActionPermissions && typeof window.LDMActionPermissions.hasLegacy === "function") {
+        return window.LDMActionPermissions.hasLegacy(permission);
+    }
+
 
     const role =
         getCurrentRole();

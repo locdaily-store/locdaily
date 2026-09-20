@@ -20,7 +20,7 @@
     globalThis.saveSupplier = async function(ev){
         if(ev && typeof ev.preventDefault === "function") ev.preventDefault();
         if(!ready()){
-            showModal("Cloud Belum Siap","procurement-service.js belum termuat.","danger");
+            showModal("Layanan Belum Siap","Data supplier belum dapat diproses. Muat ulang aplikasi lalu coba lagi.","danger");
             return;
         }
 
@@ -60,7 +60,7 @@
             renderSuppliers();
         }catch(error){
             console.error("Cloud Supplier save gagal:",error);
-            showModal("Supplier Gagal Disimpan",error.message || String(error),"danger");
+            showModal("Supplier Gagal Disimpan","Data supplier belum dapat disimpan. Periksa koneksi lalu coba lagi.","danger");
         }
     };
 
@@ -85,7 +85,7 @@
             });
             renderSuppliers();
         }catch(error){
-            showModal("Status Supplier Gagal",error.message || String(error),"danger");
+            showModal("Status Supplier Gagal","Status supplier belum dapat diperbarui. Coba lagi.","danger");
         }
     };
 
@@ -107,9 +107,9 @@
             await window.LDMProcurement.deleteSupplier(id);
             if(String(editingSupplierId) === String(id)) resetSupplierForm();
             renderSuppliers();
-            showModal("Supplier Dihapus",`Supplier <strong>${esc(s.nama)}</strong> berhasil di-soft-delete.`,"success");
+            showModal("Supplier Dihapus",`Supplier <strong>${esc(s.nama)}</strong> berhasil dihapus dari daftar aktif.`,"success");
         }catch(error){
-            showModal("Supplier Tidak Dihapus",error.message || String(error),"warning");
+            showModal("Supplier Tidak Dihapus","Supplier belum dapat dihapus. Pastikan data tidak sedang digunakan lalu coba lagi.","warning");
         }
     };
 
@@ -142,7 +142,7 @@
             renderSuppliers();
             showModal("Import Selesai",`${added} supplier baru berhasil dibuat di cloud.`,"success");
         }catch(error){
-            showModal("Import Supplier Gagal",error.message || String(error),"danger");
+            showModal("Import Supplier Gagal","Supplier dari Purchase Order belum dapat ditambahkan. Coba lagi.","danger");
         }
     };
 

@@ -1392,7 +1392,7 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/cloud-auth.js?v=27.9.0-v28.16.3-navfast"></script>
     <script src="js/cloud-session.js?v=27.9.0-v28.16.3-navfast"></script>
-    <script src="js/employee-permission-service-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/role-access-guard-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
+    <script src="js/employee-permission-service-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/role-access-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/action-permission-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
     <script src="js/procurement-service.js?v=11.0"></script>
     <script src="js/procurement-bootstrap.js?v=27.9.0-v28.16.2-final"></script>
@@ -1526,8 +1526,8 @@
 
         <div class="ks-toolbar-actions">
             <button type="button" class="btn secondary" onclick="resetStockCardFilter()">Reset Filter</button>
-            <button type="button" class="btn info" onclick="exportStockCardCSV()">⬇ CSV</button>
-            <button type="button" class="btn primary" onclick="printStockCard()">🖨️ Cetak</button>
+            <button type="button" class="btn info" data-ldm-permission="stock_card.export" onclick="exportStockCardCSV()">⬇ CSV</button>
+            <button type="button" class="btn primary" data-ldm-permission="stock_card.export" onclick="printStockCard()">🖨️ Cetak</button>
         </div>
 
         <div class="ks-status-note">
@@ -2616,6 +2616,7 @@ function csvCell(value){
 }
 
 function exportStockCardCSV(){
+    if (!window.LDMActionPermissions?.require("stock_card.export")) return;
     if(selectedStockIndex<0){
         showKsInfo(
             'Pilih Barang',
@@ -2680,6 +2681,7 @@ function exportStockCardCSV(){
 }
 
 function printStockCard(){
+    if (!window.LDMActionPermissions?.require("stock_card.export")) return;
     if(selectedStockIndex<0){
         showKsInfo(
             'Pilih Barang',

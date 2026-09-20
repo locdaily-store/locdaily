@@ -2490,7 +2490,7 @@
     <script src="js/store-mode.js?v=27.9.0-mode1"></script>
     <script src="js/product-visuals.js?v=27.9.0-mode1"></script>
     <link rel="stylesheet" href="css/store-modes.css?v=27.9.0-mode2">
-    <script src="js/employee-permission-service-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/role-access-guard-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
+    <script src="js/employee-permission-service-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/role-access-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/action-permission-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
     
     <script src="js/attendance-service.js?v=27.9.0-v28.16.2-final"></script>
@@ -2582,7 +2582,7 @@
                     </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <button class="btn-cetak-label" onclick="bukaModalPilihOpsiCetak()">🏷️ Cetak Label Price</button>
+                    <button class="btn-cetak-label" data-ldm-permission="inventory.label.print" onclick="bukaModalPilihOpsiCetak()">🏷️ Cetak Label Harga</button>
                 </div>
             </div>
 
@@ -2655,7 +2655,7 @@
                     <label>Harga Jual (Ke Konsumen)</label>
                     <input type="number" id="harga" placeholder="Contoh: 3500">
 
-                    <button class="btn-simpan" onclick="tambahBarang()">+ SIMPAN BARANG</button>
+                    <button class="btn-simpan" data-ldm-permission="inventory.product.create" onclick="tambahBarang()">+ SIMPAN BARANG</button>
                 </div>
 
                 <div>
@@ -2947,7 +2947,7 @@
 
             <div class="modal-footer">
                 <button class="btn-act btn-batal" onclick="tutupModal('modalStok')">Batal</button>
-                <button class="btn-act btn-tambah-stok" onclick="simpanTambahStok()">Simpan Stok</button>
+                <button class="btn-act btn-tambah-stok" data-ldm-permission="inventory.stock.adjust" onclick="simpanTambahStok()">Simpan Stok</button>
             </div>
         </div>
     </div>
@@ -3016,7 +3016,7 @@
 
             <div class="modal-footer">
                 <button class="btn-act btn-batal" onclick="tutupModal('modalEdit')">Batal</button>
-                <button class="btn-act btn-edit" onclick="simpanEditBarang()">Simpan Perubahan</button>
+                <button class="btn-act btn-edit" data-ldm-permission="inventory.product.update" onclick="simpanEditBarang()">Simpan Perubahan</button>
             </div>
         </div>
     </div>
@@ -3092,8 +3092,8 @@
 
             <div class="modal-footer">
                 <button class="btn-act btn-batal" onclick="tutupModal('modalPromo')">Batal</button>
-                <button class="btn-act btn-hapus" onclick="hapusPromoBarang()">Hapus Promo</button>
-                <button class="btn-act btn-simpan" style="width:auto;" onclick="simpanPromoBarang()">Simpan Promo</button>
+                <button class="btn-act btn-hapus" data-ldm-permission="inventory.price.update" onclick="hapusPromoBarang()">Hapus Promo</button>
+                <button class="btn-act btn-simpan" style="width:auto;" data-ldm-permission="inventory.price.update" onclick="simpanPromoBarang()">Simpan Promo</button>
             </div>
         </div>
     </div>
@@ -4038,7 +4038,7 @@ else {
                     ${showProductVisuals ? `<button class="btn-act ldm-product-visual-button" onclick="pilihGambarProdukMode(${origIdx})">🖼️ Gambar</button>${productVisualUrl ? `<button class="btn-act ldm-product-visual-remove" onclick="hapusGambarProdukMode(${origIdx})">✕ Gambar</button>` : ""}` : ""}
                     <button class="btn-act btn-promo" onclick="bukaModalPromo(${origIdx})">🏷️ Promo</button>
                     <button class="btn-act btn-edit" onclick="bukaModalEdit(${origIdx})">✏️ Edit</button>
-                    <button class="btn-act btn-hapus" onclick="hapusBarang(${origIdx})">🗑️ Hapus</button>
+                    <button class="btn-act btn-hapus" data-ldm-permission="inventory.product.delete" onclick="hapusBarang(${origIdx})">🗑️ Hapus</button>
                 `;
             }
 
@@ -4086,9 +4086,10 @@ async function hapusGambarProdukMode(index) {
     try {
         await window.LDMProductVisuals.remove(product);
         muatBarang();
-        tampilkanNotifikasi("Gambar Dihapus", `Gambar ${product.nama} sudah dihapus dari Storage.`, "🖼️");
+        tampilkanNotifikasi("Gambar Dihapus", `Gambar ${product.nama} sudah dihapus.`, "🖼️");
     } catch (error) {
-        tampilkanNotifikasi("Gambar Gagal Dihapus", error.message || String(error), "⚠️");
+        console.error("[LocDaily][product-image-delete]",error);
+        tampilkanNotifikasi("Gambar Gagal Dihapus", "Gambar belum dapat dihapus. Coba lagi setelah koneksi stabil.", "⚠️");
     }
 }
 
@@ -4101,9 +4102,10 @@ document.getElementById("ldmProductImagePicker")?.addEventListener("change", asy
     try {
         await window.LDMProductVisuals.setFromFile(product, file);
         muatBarang();
-        tampilkanNotifikasi("Gambar Disimpan", `Gambar ${product.nama} berhasil disimpan ke Supabase Storage untuk Mode Kafe.`, "✅");
+        tampilkanNotifikasi("Gambar Disimpan", `Gambar ${product.nama} berhasil disimpan untuk Mode Kafe.`, "✅");
     } catch (error) {
-        tampilkanNotifikasi("Gambar Gagal Disimpan", error.message || String(error), "⚠️");
+        console.error("[LocDaily][product-image-save]",error);
+        tampilkanNotifikasi("Gambar Gagal Disimpan", "Gambar belum dapat disimpan. Periksa file dan koneksi lalu coba lagi.", "⚠️");
     } finally {
         ldmProductImageTargetIndex = null;
         event.target.value = "";
@@ -4805,7 +4807,7 @@ function catatKartuStokMutasi(payload = {}) {
                                 tampilkanNotifikasi(
                                     "Cloud Belum Terhapus",
                                     error.message
-                                    || "Gagal menghapus barang di Supabase.",
+                                    || "Barang belum dapat dihapus. Coba lagi setelah koneksi stabil.",
                                     "⚠️"
                                 );
                             }
@@ -4826,17 +4828,18 @@ function catatKartuStokMutasi(payload = {}) {
 
     /* FUNGSI CETAK LABEL PRICE - SATU DESAIN TAMPILAN BARU */
     function requireLabelPricePrintAccess() {
+        if (window.LDMActionPermissions && typeof window.LDMActionPermissions.require === "function") {
+            return window.LDMActionPermissions.require("inventory.label.print");
+        }
         const role = String(
             localStorage.getItem("userRole") ||
             localStorage.getItem("role") ||
             ""
         ).trim().toLowerCase();
-
         if (["owner", "admin", "kasir"].includes(role)) return true;
-
         tampilkanNotifikasi(
-            "Akses Tidak Tersedia",
-            "Masuk menggunakan akun Owner, Admin, atau Kasir untuk mencetak label price.",
+            "Akses Dibatasi",
+            "Akun ini tidak memiliki akses untuk mencetak label harga.",
             "🔒"
         );
         return false;
@@ -5957,6 +5960,10 @@ function getCurrentRole() {
 }
 
 function hasPermission(permission) {
+    if (window.LDMActionPermissions && typeof window.LDMActionPermissions.hasLegacy === "function") {
+        return window.LDMActionPermissions.hasLegacy(permission);
+    }
+
     const permissions = ROLE_PERMISSIONS[getCurrentRole()];
     return Array.isArray(permissions) && permissions.includes(permission);
 }

@@ -29,6 +29,13 @@
         return window.LDMSupabase.createClient();
     }
 
+    async function requireAction(permissionCode){
+        const service=window.LDMEmployeePermissions;
+        if(service&&typeof service.requirePermission==="function"){
+            await service.requirePermission(permissionCode);
+        }
+    }
+
     async function ensureAuth(){
         if(
             !window.LDMCloudSession ||
@@ -1061,6 +1068,7 @@
     }
 
     async function addManualCashMovement({username,shift,direction="out",amount,note}){
+        await requireAction("shift_closing.create");
         await ensureAuth();
         const supabase = client();
         const {data,error} = await supabase.rpc(
@@ -1079,6 +1087,7 @@
     }
 
     async function reverseManualCashMovement(id,reason="Dibatalkan dari Closing Shift"){
+        await requireAction("shift_closing.reopen");
         await ensureAuth();
         const supabase = client();
         const {data,error} = await supabase.rpc(
@@ -1094,6 +1103,7 @@
     }
 
     async function finalizeShiftClosing({username,shift,openingCash,physicalCash,note}){
+        await requireAction("shift_closing.create");
         await ensureAuth();
         const supabase = client();
         const {data,error} = await supabase.rpc(
@@ -1112,6 +1122,7 @@
     }
 
     async function voidShiftClosing(id,reason="Dibatalkan Owner"){
+        await requireAction("shift_closing.reopen");
         await ensureAuth();
         const supabase = client();
         const {data,error} = await supabase.rpc(
@@ -1127,6 +1138,7 @@
     }
 
     async function finalizeEOD(note){
+        await requireAction("eod.run");
         await ensureAuth();
         const supabase = client();
         const {data,error} = await supabase.rpc(
@@ -1141,6 +1153,7 @@
     }
 
     async function voidEOD(id,reason="Dibatalkan Owner"){
+        await requireAction("eod.reopen");
         await ensureAuth();
         const supabase = client();
         const {data,error} = await supabase.rpc(
@@ -1156,6 +1169,7 @@
     }
 
     async function voidSale(id,reason="Void dari Laporan"){
+        await requireAction("reports.transaction.delete");
         await ensureAuth();
         const supabase = client();
         const {data,error} = await supabase.rpc(
@@ -1196,6 +1210,7 @@
         receiptName,
         receiptOriginalSize
     }){
+        await requireAction("expenses.create");
         await ensureAuth();
 
         const clientId = clientExpenseId || createUUID();
@@ -1242,6 +1257,7 @@
     }
 
     async function deleteExpense(id){
+        await requireAction("expenses.delete");
         await ensureAuth();
         const supabase = client();
         const {data,error} = await supabase.rpc(

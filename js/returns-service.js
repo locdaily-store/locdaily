@@ -88,6 +88,13 @@
         };
     }
 
+    async function requireAction(permissionCode){
+        const service=window.LDMEmployeePermissions;
+        if(service&&typeof service.requirePermission==="function"){
+            await service.requirePermission(permissionCode);
+        }
+    }
+
     async function ensureAuth(){
         if(!window.LDMCloudSession){
             throw new Error("Cloud Session belum tersedia.");
@@ -449,6 +456,7 @@
         refundUsername,
         note
     }){
+        await requireAction("returns.create");
         await ensureAuth();
 
         if(
@@ -489,7 +497,7 @@
             )
         ){
             throw new Error(
-                "Item retur cloud tidak valid atau transaction_item_id tidak tersedia."
+                "Salah satu item retur belum memiliki data transaksi yang diperlukan."
             );
         }
 
@@ -521,6 +529,7 @@
     }
 
     async function approve(returnId, refundUsername){
+        await requireAction("returns.approve");
         await ensureAuth();
         const supabase = client();
 
@@ -549,6 +558,7 @@
     }
 
     async function reject(returnId, reason){
+        await requireAction("returns.reject");
         await ensureAuth();
         const supabase = client();
 
@@ -569,6 +579,7 @@
     }
 
     async function cancel(returnId, reason){
+        await requireAction("returns.cancel");
         await ensureAuth();
         const supabase = client();
 
@@ -596,6 +607,7 @@
     }
 
     async function softDelete(returnId){
+        await requireAction("returns.delete");
         await ensureAuth();
         const supabase = client();
 
@@ -622,7 +634,7 @@
                 .toLowerCase() !== "owner"
         ){
             throw new Error(
-                "Migrasi Retur legacy hanya dapat dilakukan Owner."
+                "Penyesuaian data retur lama hanya dapat dilakukan Owner."
             );
         }
 

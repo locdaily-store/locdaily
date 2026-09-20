@@ -1555,7 +1555,7 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/cloud-auth.js?v=27.9.0-v28.16.3-navfast"></script>
     <script src="js/cloud-session.js?v=27.9.0-v28.16.3-navfast"></script>
-    <script src="js/employee-permission-service-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/role-access-guard-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
+    <script src="js/employee-permission-service-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/role-access-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/action-permission-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
     <script src="js/unit-conversion.js?v=20.0"></script>
     <script src="js/procurement-service.js?v=25.3.1"></script>
@@ -3311,7 +3311,7 @@ const ROLE_PERMISSIONS = {
     owner: [
         "goodsreceipt.view",
         "goodsreceipt.create",
-        "goodsreceipt.delete",
+        "goodsreceipt.cancel",
         "goodsreceipt.approve"
     ],
     admin: [
@@ -3458,6 +3458,10 @@ function validateSessionAgainstAccounts() {
 }
 
 function hasPermission(permission) {
+    if (window.LDMActionPermissions && typeof window.LDMActionPermissions.hasLegacy === "function") {
+        return window.LDMActionPermissions.hasLegacy(permission);
+    }
+
     const session = getSecuritySession();
     if (!session) return false;
 
@@ -4793,7 +4797,7 @@ function renderRiwayatGoodsReceipt() {
         return;
     }
 
-    const bolehHapus = hasPermission("goodsreceipt.delete");
+    const bolehBatalkan = hasPermission("goodsreceipt.cancel");
 
     tbody.innerHTML = data.map(gr => `
         <tr>
@@ -4812,13 +4816,13 @@ function renderRiwayatGoodsReceipt() {
             <td>
                 <div style="display:flex;gap:5px;flex-wrap:wrap;">
                     <button type="button" class="btn btn-soft" style="padding:5px 7px;" onclick="lihatDetailGoodsReceipt('${gr.id}')">Detail</button>
-                    <button type="button" class="btn btn-secondary" style="padding:5px 7px;" onclick="cetakGoodsReceiptById('${gr.id}')">🖨</button>
+                    <button type="button" class="btn btn-secondary" style="padding:5px 7px;" data-ldm-permission="goods_receipt.print" onclick="cetakGoodsReceiptById('${gr.id}')">🖨</button>
                     ${gr.status === "PendingApproval" && hasPermission("goodsreceipt.approve")
                         ? `<button type="button" class="btn btn-success" style="padding:5px 7px;" onclick="acceptPendingGoodsReceipt('${gr.id}')">✅ Accept</button>`
                         : ""}
                     ${
-                        bolehHapus
-                            ? `<button type="button" class="btn btn-danger" style="padding:5px 7px;" onclick="konfirmasiHapusGoodsReceipt('${gr.id}')">Hapus</button>`
+                        bolehBatalkan && !["Cancelled"].includes(String(gr.status || ""))
+                            ? `<button type="button" class="btn btn-danger" style="padding:5px 7px;" data-ldm-permission="goods_receipt.cancel" onclick="konfirmasiHapusGoodsReceipt('${gr.id}')">Batalkan</button>`
                             : ""
                     }
                 </div>
@@ -4893,7 +4897,7 @@ function lihatDetailGoodsReceipt(id) {
             ${receipt.status === "PendingApproval" && hasPermission("goodsreceipt.approve")
                 ? `<button type="button" class="btn btn-success" onclick="acceptPendingGoodsReceipt('${receipt.id}')">✅ Accept Pending</button>`
                 : ""}
-            <button type="button" class="btn btn-secondary" onclick="cetakGoodsReceiptById('${receipt.id}')">🖨 Cetak</button>
+            <button type="button" class="btn btn-secondary" data-ldm-permission="goods_receipt.print" onclick="cetakGoodsReceiptById('${receipt.id}')">🖨 Cetak</button>
             <button type="button" class="btn btn-soft" onclick="tutupModal('modalDetailGR')">Tutup</button>
         </div>
     `;
@@ -4902,7 +4906,7 @@ function lihatDetailGoodsReceipt(id) {
 }
 
 function konfirmasiHapusGoodsReceipt(id) {
-    if (!requirePermission("goodsreceipt.delete")) return;
+    if (!requirePermission("goodsreceipt.cancel")) return;
 
     const receipt = safeReadArray("dataGoodsReceipt").find(gr => String(gr.id) === String(id));
 
@@ -4912,14 +4916,14 @@ function konfirmasiHapusGoodsReceipt(id) {
     }
 
     tampilkanKonfirmasi(
-        "Hapus Goods Receipt",
-        `Hapus ${receipt.nomorGR}? Stok dari receipt ini akan dicoba dikembalikan (rollback).`,
+        "Batalkan Penerimaan",
+        `Batalkan ${receipt.nomorGR}? Perubahan stok dari penerimaan ini akan dikembalikan bila memungkinkan.`,
         () => hapusGoodsReceiptDanRollback(id)
     );
 }
 
 function hapusGoodsReceiptDanRollback(id) {
-    if (!requirePermission("goodsreceipt.delete")) return;
+    if (!requirePermission("goodsreceipt.cancel")) return;
 
     let riwayat = safeReadArray("dataGoodsReceipt");
     const indexGR = riwayat.findIndex(gr => String(gr.id) === String(id));

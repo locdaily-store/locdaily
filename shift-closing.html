@@ -1567,7 +1567,7 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/cloud-auth.js?v=27.9.0-v28.16.3-navfast"></script>
     <script src="js/cloud-session.js?v=27.9.0-v28.16.3-navfast"></script>
-    <script src="js/employee-permission-service-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/role-access-guard-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
+    <script src="js/employee-permission-service-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/role-access-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/action-permission-guard-v28200.js?v=27.9.0-v28.20.0-final"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
     
     <script src="js/products-service.js?v=27.9.0-v28.18.3"></script>
@@ -1621,7 +1621,7 @@
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                     <!-- Tombol Kelola Password Tutup Shift (Hanya Owner) -->
-                    <button class="btn-header-action" id="btnKelolaPassClosing" onclick="bukaModalPassClosing()" style="display: none; background: #0284c7;">🔑 Edit Password</button>
+                    <button class="btn-header-action" id="btnKelolaPassClosing" data-ldm-permission="shift_closing.credentials.manage" onclick="bukaModalPassClosing()" style="display: none; background: #0284c7;">🔑 Edit Password</button>
                     <span id="txtUserLoggedIn" style="font-size: 0.78rem; font-weight: 600; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 20px;">👤 Admin</span>
                     <button class="btn-header-action btn-header-logout" onclick="konfirmasiLogout()">🚪 Logout</button>
                 </div>
@@ -1743,7 +1743,7 @@
                             </div>
                             <div class="mutasi-grid-2">
                                 <input type="text" id="inputKetMutasi" class="form-control" placeholder="Keterangan, misal: Cash pickup / setor tunai">
-                                <button type="button" class="btn-mutasi-add" onclick="tambahMutasiKasShift()">+ Tambah Kas Keluar</button>
+                                <button type="button" class="btn-mutasi-add" data-ldm-permission="shift_closing.cash_movement.manage" onclick="tambahMutasiKasShift()">+ Tambah Kas Keluar</button>
                             </div>
                             <div class="mutasi-summary">
                                 <div class="mutasi-summary-box"><span>Total Kas Keluar</span><strong id="sumMutasiKeluar">Rp 0</strong></div>
@@ -1832,7 +1832,7 @@
             </div>
             <div style="display:flex; gap:8px; margin-top: 15px;">
                 <button type="button" class="btn-modal-ok" style="background:#e2e8f0; color:#475569;" onclick="tutupModalPassClosing()">Batal</button>
-                <button type="button" class="btn-modal-ok" style="background:#16a34a;" onclick="simpanPasswordClosingShift()">Simpan Password</button>
+                <button type="button" class="btn-modal-ok" data-ldm-permission="shift_closing.credentials.manage" style="background:#16a34a;" onclick="simpanPasswordClosingShift()">Simpan Password</button>
             </div>
         </div>
     </div>
@@ -2254,7 +2254,7 @@
         }
 
         async function bukaModalPassClosing() {
-            if (!requirePermission("closing.approve")) return;
+            if (!requirePermission("closing.credentials")) return;
 
             const selectAkunPass = document.getElementById("selectAkunPass");
             const inputPassword = document.getElementById("inputNewPassClosing");
@@ -2322,7 +2322,7 @@
 
     if (
         !requirePermission(
-            "closing.approve"
+            "closing.credentials"
         )
     ) {
 
@@ -2523,6 +2523,7 @@
         }
 
         function tambahMutasiKasShift() {
+            if (!requirePermission("closing.cash")) return;
             if (selectedFilterDate !== getTanggalWITA()) {
                 tampilkanAlertCustom("Mutasi Ditolak", "Mutasi kas hanya dapat ditambahkan untuk tanggal hari ini.", "warning");
                 return;
@@ -2568,6 +2569,7 @@
         }
 
         function hapusMutasiKasShift(id) {
+            if (!requirePermission("closing.cash")) return;
             const all = getMutasiKasAll();
             const target = all.find(x => Number(x.id) === Number(id));
             if (!target) return;
@@ -2729,7 +2731,7 @@
 
             if (
     !requirePermission(
-        "closing.view"
+        "closing.create"
     )
 ) {
 
@@ -2870,7 +2872,7 @@
 
 if (
     hasPermission(
-        "closing.approve"
+        "closing.reopen"
     )
 ) {
 
@@ -2884,7 +2886,7 @@ if (
                 )
             "
         >
-            🗑️ Hapus
+            ↩️ Buka Ulang
         </button>
     `;
 
@@ -2926,7 +2928,7 @@ else {
                             <small style="${selisihColor}">Selisih Tunai: ${selisihText}</small>
                         </td>
                         <td>
-                            <button type="button" class="btn-print-log" onclick="cetakLaporanLog(${Number(log.id)})">🖨️ Cetak</button>
+                            <button type="button" class="btn-print-log" data-ldm-permission="shift_closing.print" onclick="cetakLaporanLog(${Number(log.id)})">🖨️ Cetak</button>
                             ${btnHapusHtml}
                         </td>
                     </tr>
@@ -2942,7 +2944,7 @@ else {
 
     if (
         !requirePermission(
-            "closing.approve"
+            "closing.reopen"
         )
     ) {
 
@@ -2953,9 +2955,9 @@ else {
 
     tampilkanConfirmCustom(
 
-        "Hapus & Reset Perhitungan",
+        "Buka Ulang Closing",
 
-        "Apakah Anda yakin ingin menghapus riwayat tutup shift ini? Seluruh hasil perhitungan pada akun kasir tersebut akan di-reset!",
+        "Buka ulang Closing Shift ini? Hasil perhitungan akun terkait akan diperbarui kembali.",
 
         function() {
 
@@ -2973,7 +2975,7 @@ else {
         function hapusLogDanResetPerhitungan(logId) {
              if (
         !requirePermission(
-            "closing.approve"
+            "closing.reopen"
         )
     ) {
 
@@ -3014,10 +3016,11 @@ else {
             hitungOmzetKasirTerpilih();
             renderRiwayatShiftLog();
 
-            tampilkanAlertCustom("Berhasil", `Riwayat closing shift berhasil dihapus dan seluruh perhitungan untuk akun ${targetKasir} di-reset!`, "success");
+            tampilkanAlertCustom("Berhasil", `Closing Shift berhasil dibuka ulang dan perhitungan untuk akun ${targetKasir} telah diperbarui.`, "success");
         }
 
         function cetakLaporanLog(logId) {
+            if (!requirePermission("closing.print")) return;
             const shiftLog = JSON.parse(localStorage.getItem("shiftClosingLog")) || [];
             const log = shiftLog.find(l => l.id === logId);
             if (!log) return;
@@ -3640,6 +3643,10 @@ function getCurrentRole() {
 function hasPermission(
     permission
 ) {
+    if (window.LDMActionPermissions && typeof window.LDMActionPermissions.hasLegacy === "function") {
+        return window.LDMActionPermissions.hasLegacy(permission);
+    }
+
 
     const role =
         getCurrentRole();
@@ -4509,8 +4516,8 @@ document.addEventListener(
 
         if(!reportingReady()){
             tampilkanAlertCustom(
-                "Cloud Reporting Belum Siap",
-                "reporting-service.js belum termuat.",
+                "Data Belum Siap",
+                "Data Closing Shift belum siap digunakan. Muat ulang halaman lalu coba lagi.",
                 "danger"
             );
             return;
@@ -4550,13 +4557,13 @@ document.addEventListener(
 
             tampilkanAlertCustom(
                 "Mutasi Kas Tersimpan",
-                "Kas Keluar berhasil disimpan ke cloud.",
+                "Mutasi Kas berhasil disimpan.",
                 "success"
             );
         }catch(error){
             tampilkanAlertCustom(
                 "Mutasi Kas Gagal",
-                error?.message || String(error),
+                "Mutasi Kas belum dapat disimpan. Periksa koneksi lalu coba lagi.",
                 "danger"
             );
         }finally{
@@ -4571,7 +4578,7 @@ document.addEventListener(
         if(!target.cloudId){
             tampilkanAlertCustom(
                 "Data Legacy",
-                "Mutasi Kas lama belum dimigrasikan ke Tahap 12. Jalankan halaman migrasi Tahap 12 terlebih dahulu.",
+                "Catatan Mutasi Kas lama ini belum dapat dibatalkan dari halaman Closing Shift.",
                 "warning"
             );
             return;
@@ -4600,14 +4607,15 @@ document.addEventListener(
             hitungOmzetKasirTerpilih();
             kalkulasiSelisihRealtime();
         }catch(error){
-            tampilkanAlertCustom("Gagal Membatalkan",error?.message || String(error),"danger");
+            console.error("[LocDaily][cash-movement-cancel]",error);
+            tampilkanAlertCustom("Gagal Membatalkan","Mutasi Kas belum dapat dibatalkan. Coba lagi setelah koneksi stabil.","danger");
         }
     };
 
     window.prosesSubmitClosing = async function(e){
         e.preventDefault();
 
-        if(!requirePermission("closing.view")) return;
+        if(!requirePermission("closing.create")) return;
 
         if(selectedFilterDate !== getTanggalWITA()){
             tampilkanAlertCustom(
@@ -4619,7 +4627,7 @@ document.addEventListener(
         }
 
         if(!reportingReady()){
-            tampilkanAlertCustom("Cloud Reporting Belum Siap","reporting-service.js belum termuat.","danger");
+            tampilkanAlertCustom("Layanan Belum Siap","Data Closing belum dapat diproses. Muat ulang aplikasi lalu coba lagi.","danger");
             return;
         }
 
@@ -4657,7 +4665,7 @@ document.addEventListener(
 
             tampilkanAlertCustom(
                 "Berhasil Closing",
-                `${shift} untuk ${kasir} sudah FINAL di cloud.`,
+                `${shift} untuk ${kasir} berhasil diselesaikan.`,
                 "success"
             );
 
@@ -4669,7 +4677,7 @@ document.addEventListener(
         }catch(error){
             tampilkanAlertCustom(
                 "Closing Gagal",
-                error?.message || String(error),
+                "Closing Shift belum dapat disimpan. Periksa data dan koneksi lalu coba lagi.",
                 "danger"
             );
         }finally{
@@ -4681,7 +4689,7 @@ document.addEventListener(
     };
 
     window.hapusLogDanResetPerhitungan = async function(logId){
-        if(!requirePermission("closing.approve")) return;
+        if(!requirePermission("closing.reopen")) return;
 
         const rows = JSON.parse(localStorage.getItem("shiftClosingLog") || "[]");
         const target = rows.find(row => Number(row.id) === Number(logId));
@@ -4690,7 +4698,7 @@ document.addEventListener(
         if(!target.cloudId){
             tampilkanAlertCustom(
                 "Closing Legacy",
-                "Closing lama belum dimigrasikan ke cloud Tahap 12.",
+                "Closing lama ini belum dapat dibuka ulang dari halaman ini.",
                 "warning"
             );
             return;
@@ -4711,11 +4719,12 @@ document.addEventListener(
 
             tampilkanAlertCustom(
                 "Closing Dibatalkan",
-                "Closing diubah menjadi VOIDED dan Mutasi Kas aktif dibuka kembali.",
+                "Closing berhasil dibuka ulang dan Mutasi Kas aktif dapat digunakan kembali.",
                 "success"
             );
         }catch(error){
-            tampilkanAlertCustom("Void Closing Gagal",error?.message || String(error),"danger");
+            console.error("[LocDaily][closing-reopen]",error);
+            tampilkanAlertCustom("Buka Ulang Gagal","Closing belum dapat dibuka ulang. Coba lagi setelah koneksi stabil.","danger");
         }
     };
 

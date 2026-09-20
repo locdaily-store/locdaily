@@ -53,6 +53,9 @@
   let myRows=[];
   let ownerStores=[];
 
+  function canAction(code){return !window.LDMActionPermissions||window.LDMActionPermissions.can(code);}
+  function requireAction(code){return !window.LDMActionPermissions||window.LDMActionPermissions.require(code);}
+
   function message(text,type=""){
     const box=$("absenceMessage");
     if(!box)return;
@@ -108,6 +111,7 @@
 
   async function submit(event){
     event.preventDefault();
+    if(!requireAction("absence.confirm"))return;
     const button=$("absenceSubmit");
     button.disabled=true;
     try{
@@ -117,12 +121,12 @@
       await Promise.all([loadCandidates(),loadMine()]);
       if(role()==="owner")await loadInbox();
       await refreshMenuState();
-    }catch(error){message(error.message||String(error),"danger");await Promise.allSettled([loadCandidates(),loadMine(),refreshMenuState()]);}
+    }catch(error){console.error("Ketidakhadiran:",error);message("Konfirmasi belum dapat dikirim. Periksa koneksi lalu coba lagi.","danger");await Promise.allSettled([loadCandidates(),loadMine(),refreshMenuState()]);}
     finally{button.disabled=!$("absenceDate").value;}
   }
 
   async function loadOwnerStores(){
-    if(role()!=="owner")return;
+    if(role()!=="owner"||!canAction("absence.review"))return;
     $("absenceOwnerInbox").hidden=false;
     ownerStores=await window.LDMWorkforce.stores();
     const select=$("absenceStore");
@@ -138,7 +142,7 @@
   }
 
   async function loadInbox(){
-    if(role()!=="owner")return;
+    if(role()!=="owner"||!canAction("absence.review"))return;
     const storeId=$("absenceStore").value||null;
     try{
       const rows=await window.LDMWorkforce.explanationInbox({storeId});
@@ -150,21 +154,22 @@
             ?`<p>Belum ada konfirmasi dari karyawan. Deadline ${esc(dateTime(row.confirmation_deadline_at))}.</p>`
             :`<p>Tidak ada konfirmasi sampai deadline. Sistem menetapkan catatan ini sebagai Tidak Hadir.</p>`;
         const review=row.case_status==="EXPLANATION_SUBMITTED"&&row.explanation_id
-          ?`<div class="wf-actions" style="margin-top:10px"><button class="wf-btn primary" type="button" data-review="${esc(row.explanation_id)}">Tandai Ditinjau</button></div>`:"";
+          ?`<div class="wf-actions" style="margin-top:10px"><button class="wf-btn primary" type="button" data-ldm-permission="absence.review" data-review="${esc(row.explanation_id)}">Tandai Ditinjau</button></div>`:"";
         return `<article class="wf-item"><div class="wf-item-head"><div><h3>${esc(row.display_name||row.username)} · ${esc(row.store_name)}</h3><small>${esc(dateID(row.attendance_date))} · ${esc(row.shift_label||"-")} ${esc(time(row.planned_start_time))}-${esc(time(row.planned_end_time))}</small></div><span class="wf-tag ${esc(caseClass(row.case_status))}">${esc(status)}</span></div><div class="wf-tags"><span class="wf-tag">Deadline: ${esc(dateTime(row.confirmation_deadline_at))}</span><span class="wf-tag">${esc(roleLabel(row.role))}</span><span class="wf-tag">${esc(row.store_code)}</span>${row.reason_category?`<span class="wf-tag">${esc(reasonLabel(row.reason_category))}</span>`:""}</div>${body}${row.review_note?`<p><strong>Catatan review:</strong> ${esc(row.review_note)}</p>`:""}${review}</article>`;
       }).join(""):'<div class="wf-empty">Tidak ada kasus ketidakhadiran pada cakupan cabang ini.</div>';
       $("absenceInbox").querySelectorAll("[data-review]").forEach(button=>button.addEventListener("click",()=>review(button.dataset.review)));
-    }catch(error){$("absenceInbox").innerHTML=`<div class="wf-notice danger">${esc(error.message||String(error))}</div>`;}
+    }catch(error){console.error("Ketidakhadiran inbox:",error);$("absenceInbox").innerHTML='<div class="wf-notice danger">Data tinjauan belum dapat dimuat. Coba lagi.</div>';}
   }
 
   async function review(id){
+    if(!requireAction("absence.review"))return;
     const note=window.prompt("Catatan review Owner (opsional):","");
     if(note===null)return;
     try{
       await window.LDMWorkforce.reviewExplanation({id,note});
       await Promise.all([loadInbox(),loadMine()]);
       await refreshMenuState();
-    }catch(error){window.alert(error.message||String(error));}
+    }catch(error){console.error("Review ketidakhadiran:",error);window.alert("Tinjauan belum dapat disimpan. Periksa koneksi lalu coba lagi.");}
   }
 
   let booting=false;
@@ -187,7 +192,8 @@
       await loadOwnerStores();
       await refreshMenuState();
     }catch(error){
-      message("Halaman Ketidakhadiran belum dapat dimuat. "+(error.message||String(error)),"danger");
+      console.error("Ketidakhadiran boot:",error);
+      message("Halaman Ketidakhadiran belum dapat dimuat. Muat ulang aplikasi lalu coba lagi.","danger");
       scheduleRetry();
     }finally{booting=false;}
   }
