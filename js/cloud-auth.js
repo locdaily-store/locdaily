@@ -1,7 +1,7 @@
 (function(){
     "use strict";
 
-    const VERSION="28.21.0";
+    const VERSION="28.21.1";
     const DEVICE_KEY="ldmCloudDeviceId";
     const FAST_CONTEXT_KEY="ldmFastCloudContextV28163";
     const FAST_DEVICE_ACCESS_KEY="ldmFastDeviceAccessV28163";
@@ -123,19 +123,40 @@
         }
 
         invalidateFastCache();
+        const client=getClient();
 
-        const result=await invokeLoginResolver({
-            action:"sign_in",
-            identifier:normalizedIdentifier,
-            password:String(password),
-            store_code:normalizedStore
-        });
-
-        if(!result?.session?.access_token || !result?.session?.refresh_token){
-            throw new Error("Email/NIK atau password tidak valid.");
+        // Email tidak memerlukan resolver. Jalur langsung ini menjaga login email
+        // tetap tersedia meskipun Edge Function resolver NIK sedang bermasalah.
+        if(isEmail){
+            const {data,error}=await client.auth.signInWithPassword({
+                email:normalizedIdentifier.toLowerCase(),
+                password:String(password)
+            });
+            if(error || !data?.session || !data?.user){
+                throw new Error("Email atau password tidak valid.");
+            }
+            return data;
         }
 
-        const client=getClient();
+        let result;
+        try{
+            result=await invokeLoginResolver({
+                action:"sign_in",
+                identifier:normalizedIdentifier,
+                password:String(password),
+                store_code:normalizedStore
+            });
+        }catch(error){
+            console.error("Login NIK resolver gagal:",error);
+            const raw=String(error?.message||"").trim();
+            if(raw && !/Login belum dapat diproses/i.test(raw)) throw error;
+            throw new Error("Layanan login NIK sedang tidak tersedia. Gunakan email akun untuk masuk sementara atau coba kembali beberapa saat lagi.");
+        }
+
+        if(!result?.session?.access_token || !result?.session?.refresh_token){
+            throw new Error("NIK atau password tidak valid.");
+        }
+
         const {data,error}=await client.auth.setSession({
             access_token:result.session.access_token,
             refresh_token:result.session.refresh_token
@@ -154,12 +175,32 @@
             throw new Error("Kode Toko diperlukan untuk reset password menggunakan NIK Karyawan.");
         }
 
-        return invokeLoginResolver({
-            action:"reset_password",
-            identifier:normalizedIdentifier,
-            store_code:normalizedStore,
-            redirect_to:String(redirectTo||"")
-        });
+        // Reset menggunakan email juga tidak perlu melalui resolver NIK.
+        if(isEmail){
+            const client=getClient();
+            const options={};
+            const target=String(redirectTo||"").trim();
+            if(target) options.redirectTo=target;
+            await client.auth.resetPasswordForEmail(normalizedIdentifier.toLowerCase(),options);
+            return {
+                ok:true,
+                message:"Jika data akun cocok, tautan reset password akan dikirim ke email yang terhubung."
+            };
+        }
+
+        try{
+            return await invokeLoginResolver({
+                action:"reset_password",
+                identifier:normalizedIdentifier,
+                store_code:normalizedStore,
+                redirect_to:String(redirectTo||"")
+            });
+        }catch(error){
+            console.error("Reset password NIK resolver gagal:",error);
+            const raw=String(error?.message||"").trim();
+            if(raw && !/Login belum dapat diproses/i.test(raw)) throw error;
+            throw new Error("Layanan reset password melalui NIK sedang tidak tersedia. Gunakan email akun sementara atau coba kembali beberapa saat lagi.");
+        }
     }
 
     async function signOut(){
