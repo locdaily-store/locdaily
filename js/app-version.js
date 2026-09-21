@@ -1,10 +1,10 @@
 (function(root){
     "use strict";
     const INFO=Object.freeze({
-        appVersion:"27.9.0-v28.20.2-final",
-        displayVersion:"LocDaily 28.20.2",
-        buildVersion:"28.20.2",
-        buildName:"Expandable Access Sections"
+        appVersion:"27.9.0-v28.20.3-final",
+        displayVersion:"LocDaily 28.20.3",
+        buildVersion:"28.20.3",
+        buildName:"Permission Revocation Sync & Job Role Status"
     });
     root.LDM_VERSION_INFO=INFO;
     root.LDM_APP_VERSION=INFO.appVersion;
