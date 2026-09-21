@@ -2,6 +2,7 @@
     "use strict";
 
     const APP_VERSION = String(window.LDM_APP_VERSION || "runtime-version-missing");
+    const DISPLAY_VERSION = String(window.LDM_DISPLAY_VERSION || window.LDM_BUILD_VERSION || "LocDaily");
     const SERVICE_WORKER_URL = "./service-worker.js";
     const UNSYNCED_COUNT_KEY = "ldmOfflineUnsyncedCountV16";
     const RESERVATION_KEY = "ldmOfflineStockReservationsV16";
@@ -235,7 +236,7 @@
             const banner = document.createElement("div");
             banner.id = "ldmPwaUpdateBanner";
             banner.className = "ldm-pwa-update";
-            banner.innerHTML = '<span>Versi baru LocDaily tersedia.</span><button type="button" class="later">Nanti</button><button type="button" class="apply">Perbarui</button>';
+            banner.innerHTML = `<span><strong>Pembaruan LocDaily tersedia.</strong><small style="display:block;opacity:.78;margin-top:2px">Versi saat ini: ${DISPLAY_VERSION}</small></span><button type="button" class="later">Nanti</button><button type="button" class="apply">Perbarui</button>`;
             banner.querySelector(".later").onclick = () => banner.remove();
             banner.querySelector(".apply").onclick = async event => {
                 event.currentTarget.disabled = true;
@@ -275,7 +276,7 @@
     }
 
     window.LDMPWA = Object.freeze({
-        version:APP_VERSION,register,install,checkForUpdate,applyUpdate,getState,
+        version:DISPLAY_VERSION,runtimeVersion:APP_VERSION,register,install,checkForUpdate,applyUpdate,getState,
         getStorageInfo,requestPersistentStorage,clearCachesSafely,getQueueRisk,isInstalled
     });
 
