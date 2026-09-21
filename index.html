@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.20.3-final"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.21.0-final"></script>
   <script src="js/brand-migration-v28180.js?v=27.9.0-v28.18.3"></script>
 <script src="js/navigation-performance.js?v=27.9.0-v28.16.3" defer></script>
 
@@ -27,7 +27,7 @@
 
     
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
-    <script src="js/pwa-manager.js?v=27.9.0-v28.20.3-final"></script>
+    <script src="js/pwa-manager.js?v=27.9.0-v28.21.0-final"></script>
 
     <!-- Google Fonts Lengkap -->
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fira+Code:wght@500;700&family=Fredoka:wght@600;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&family=Lato:wght@400;700&family=Lobster&family=Merriweather:wght@400;700&family=Montserrat:wght@400;600;700&family=Nunito:wght@400;700&family=Open+Sans:wght@400;600;700&family=Oswald:wght@500;700&family=Pacifico&family=Playfair+Display:wght@600;800&family=Poppins:wght@400;600;700&family=Raleway:wght@500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -159,6 +159,35 @@
             border-color: #ffc107; 
             background: var(--card-bg); 
             box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
+        }
+
+        .nik-store-group{
+            display:grid;
+            grid-template-rows:0fr;
+            opacity:0;
+            transform:translateY(-8px);
+            margin-bottom:0;
+            transition:grid-template-rows .24s ease,opacity .2s ease,transform .24s ease,margin-bottom .24s ease;
+            pointer-events:none;
+        }
+        .nik-store-group.show{
+            grid-template-rows:1fr;
+            opacity:1;
+            transform:translateY(0);
+            margin-bottom:16px;
+            pointer-events:auto;
+        }
+        .nik-store-group-inner{min-height:0;overflow:hidden}
+        .login-helper{
+            margin:6px 0 0;
+            font-size:.7rem;
+            line-height:1.45;
+            color:#64748b;
+            text-transform:none;
+            letter-spacing:0;
+        }
+        @media (prefers-reduced-motion: reduce){
+            .nik-store-group{transition:none}
         }
 
         .toggle-password {
@@ -648,9 +677,22 @@
 
         <form id="formLogin" onsubmit="handleLogin(event)">
             <div class="input-group">
-                <label for="username">Email Akun</label>
+                <label for="loginIdentifier">Email / NIK Karyawan</label>
                 <div class="input-wrapper">
-                    <input type="email" id="username" placeholder="Masukkan email akun" required autocomplete="username">
+                    <input type="text" id="loginIdentifier" placeholder="Masukkan email atau NIK Karyawan" required autocomplete="username" inputmode="text">
+                </div>
+                <p class="login-helper">Gunakan email akun, atau NIK Karyawan yang diberikan oleh toko.</p>
+            </div>
+
+            <div class="nik-store-group" id="nikStoreCodeGroup" aria-hidden="true">
+                <div class="nik-store-group-inner">
+                    <div class="input-group" style="margin-bottom:0">
+                        <label for="loginStoreCode">Kode Toko</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="loginStoreCode" placeholder="Contoh: TOKO-001" autocomplete="organization" maxlength="50">
+                        </div>
+                        <p class="login-helper">Kode Toko hanya diperlukan saat masuk menggunakan NIK karena NIK yang sama dapat digunakan oleh cabang berbeda.</p>
+                    </div>
                 </div>
             </div>
 
@@ -698,8 +740,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0"></script>
     <script src="js/supabase-config.js"></script>
     <script src="js/supabase-client.js"></script>
-    <script src="js/cloud-auth.js?v=27.9.0-v28.16.3-navfast"></script>
-    <script src="js/cloud-session.js?v=27.9.0-v28.16.3-navfast"></script>
+    <script src="js/cloud-auth.js?v=27.9.0-v28.21.0-final"></script>
+    <script src="js/cloud-session.js?v=27.9.0-v28.21.0-final"></script>
 
     <script>
         // Sinkronisasi Tema & Konfigurasi dari LocalStorage (tersambung ke dashboard.html)
@@ -1021,12 +1063,21 @@ async function handleLogin(event) {
         return;
     }
 
-    const emailInput =
+    const identifierInput =
         document
-            .getElementById("username")
+            .getElementById("loginIdentifier")
             .value
+            .trim();
+
+    const isEmailLogin =
+        identifierInput.includes("@");
+
+    const storeCodeInput =
+        String(
+            document.getElementById("loginStoreCode")?.value || ""
+        )
             .trim()
-            .toLowerCase();
+            .toUpperCase();
 
     const passwordInput =
         document
@@ -1034,16 +1085,32 @@ async function handleLogin(event) {
             .value;
 
     if (
-        !emailInput ||
+        !identifierInput ||
         !passwordInput
     ) {
         showAlert(
             "Login Gagal",
-            "Email dan password wajib diisi.",
+            "Email/NIK Karyawan dan password wajib diisi.",
             "⚠️"
         );
 
         return;
+    }
+
+    if (
+        !isEmailLogin &&
+        !storeCodeInput
+    ) {
+        showAlert(
+            "Kode Toko Diperlukan",
+            "Saat masuk menggunakan NIK Karyawan, isi Kode Toko agar LocDaily dapat menemukan akun pada cabang yang benar.",
+            "🏪"
+        );
+        return;
+    }
+
+    if(storeCodeInput){
+        try{ localStorage.setItem("ldmLoginStoreCode",storeCodeInput); }catch(_error){}
     }
 
     if (
@@ -1087,8 +1154,9 @@ async function handleLogin(event) {
         const context =
             await window.LDMCloudSession
                 .signIn(
-                    emailInput,
-                    passwordInput
+                    identifierInput,
+                    passwordInput,
+                    storeCodeInput
                 );
 
         const profile =
@@ -1122,7 +1190,7 @@ async function handleLogin(event) {
             error &&
             error.message
                 ? error.message
-                : "Email atau password tidak valid.",
+                : "Email/NIK atau password tidak valid.",
             "❌"
         );
 
@@ -1139,24 +1207,51 @@ async function handleLogin(event) {
 }
 
 async function requestPasswordReset() {
-    const email = String(
-        document.getElementById("username").value || ""
+    const identifier = String(
+        document.getElementById("loginIdentifier")?.value || ""
+    ).trim();
+
+    const isEmail = identifier.includes("@");
+    const storeCode = String(
+        document.getElementById("loginStoreCode")?.value || ""
     )
         .trim()
-        .toLowerCase();
+        .toUpperCase();
 
-    if (!email) {
+    if (!identifier) {
         showAlert(
-            "Email Diperlukan",
-            "Isi Email Akun terlebih dahulu, lalu tekan Lupa Password.",
+            "Email / NIK Diperlukan",
+            "Isi Email atau NIK Karyawan terlebih dahulu, lalu tekan Lupa Password.",
             "✉️"
         );
         return;
     }
 
+    if (!isEmail && !storeCode) {
+        showAlert(
+            "Kode Toko Diperlukan",
+            "Untuk reset password menggunakan NIK Karyawan, isi Kode Toko terlebih dahulu.",
+            "🏪"
+        );
+        return;
+    }
+
+    const ok = window.ldmDialog
+        ? await window.ldmDialog.confirm(
+            "Reset Password",
+            "Jika data akun cocok, tautan reset akan dikirim ke email yang terhubung. Password lama tetap berlaku sampai password baru berhasil disimpan. Periksa kembali Email/NIK dan Kode Toko sebelum melanjutkan.",
+            "question",
+            {okText:"Kirim Tautan",cancelText:"Batal"}
+        )
+        : window.confirm(
+            "Kirim tautan reset password?\n\nJika data akun cocok, tautan reset akan dikirim ke email yang terhubung. Password lama tetap berlaku sampai password baru berhasil disimpan."
+        );
+    if(!ok) return;
+
     try {
-        const client =
-            window.LDMSupabase.createClient();
+        if(!window.LDMCloudAuth || typeof window.LDMCloudAuth.requestPasswordReset!=="function"){
+            throw new Error("Layanan reset password belum siap. Muat ulang halaman.");
+        }
 
         const redirectTo =
             new URL(
@@ -1164,19 +1259,15 @@ async function requestPasswordReset() {
                 window.location.href
             ).href;
 
-        const { error } =
-            await client.auth.resetPasswordForEmail(
-                email,
-                { redirectTo }
-            );
-
-        if (error) {
-            throw error;
-        }
+        await window.LDMCloudAuth.requestPasswordReset(
+            identifier,
+            storeCode,
+            redirectTo
+        );
 
         showAlert(
-            "Permintaan Dikirim",
-            "Jika email terdaftar, tautan reset password akan dikirim. Periksa inbox dan folder spam.",
+            "Permintaan Reset Diterima",
+            "Jika data akun cocok, tautan reset password akan dikirim ke email yang terhubung. Periksa Inbox dan Spam. Demi keamanan, LocDaily tidak menampilkan apakah akun tersebut terdaftar.",
             "✅"
         );
 
@@ -1187,10 +1278,10 @@ async function requestPasswordReset() {
         );
 
         showAlert(
-            "Reset Password Gagal",
+            "Reset Password Belum Berhasil",
             error && error.message
                 ? error.message
-                : "Permintaan reset password gagal.",
+                : "Permintaan reset password belum dapat diproses.",
             "❌"
         );
     }
@@ -1690,6 +1781,32 @@ setInterval(
     </script>
 
 <script>
+function syncNikStoreCodeVisibility(){
+    const identifier=String(document.getElementById("loginIdentifier")?.value||"").trim();
+    const group=document.getElementById("nikStoreCodeGroup");
+    const storeInput=document.getElementById("loginStoreCode");
+    if(!group)return;
+
+    const needsStore=Boolean(identifier && !identifier.includes("@"));
+    group.classList.toggle("show",needsStore);
+    group.setAttribute("aria-hidden",needsStore?"false":"true");
+    if(storeInput){
+        storeInput.required=needsStore;
+        if(needsStore && !storeInput.value){
+            try{ storeInput.value=String(localStorage.getItem("ldmLoginStoreCode")||""); }catch(_error){}
+        }
+    }
+}
+
+document.addEventListener("DOMContentLoaded",function(){
+    const identifier=document.getElementById("loginIdentifier");
+    if(identifier){
+        identifier.addEventListener("input",syncNikStoreCodeVisibility);
+        identifier.addEventListener("change",syncNikStoreCodeVisibility);
+    }
+    syncNikStoreCodeVisibility();
+});
+
 document.addEventListener(
     "DOMContentLoaded",
     async function(){

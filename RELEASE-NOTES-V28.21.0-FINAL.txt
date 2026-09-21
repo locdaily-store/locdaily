@@ -1,0 +1,32 @@
+LocDaily 28.21.0 FINAL
+Email/NIK Login & Transfer Identity Hardening
+
+RINGKASAN
+- Login aplikasi menggunakan Email atau NIK Karyawan. Username tidak lagi menjadi identitas login yang ditampilkan ke pengguna.
+- Login dengan NIK meminta Kode Toko agar NIK yang sama pada cabang berbeda tidak ambigu.
+- NIK Karyawan unik per cabang aktif saat ini.
+- Transfer Karyawan mempertahankan NIK jika NIK tersebut masih tersedia di cabang tujuan.
+- Jika NIK bentrok di cabang tujuan, LocDaily membuat NIK baru otomatis dalam transaksi server yang sama.
+- UUID Auth, email, dan histori karyawan tetap dipertahankan ketika NIK berubah.
+- Riwayat transfer menyimpan NIK sebelum/sesudah dan alasan perubahan.
+- Jabatan custom dievaluasi ulang setelah mutasi: aktif, nonaktif, perlu disesuaikan, atau akses standar.
+- Management Account tidak meminta username saat membuat akun.
+- Reset Password menampilkan konfirmasi/pemberitahuan sebelum email reset dikirim serta pesan sukses yang jelas.
+- Halaman reset password memakai copy yang ramah pengguna.
+- Maintenance Source Private dibersihkan dari baseline, arsip QA, dokumen rilis lama, dan duplikasi root yang tidak diperlukan.
+
+DATABASE
+- Stage 41.
+- Migration: 20260922020000_email_nik_login_transfer_identity_v28210.sql
+- SQL copy-paste: SQL-V28.21.0-EMAIL-NIK-LOGIN-TRANSFER-IDENTITY.sql
+- Verify: VERIFY-SQL-V28.21.0-FINAL.sql
+
+EDGE FUNCTIONS
+- ldm-account-admin: diperbarui untuk pembuatan akun Email + NIK otomatis.
+- ldm-login-resolver: baru; menangani login/reset dengan Email atau NIK + Kode Toko.
+
+DEPLOY ORDER
+1. Deploy App Supabase Stage 41 + dua Edge Function.
+2. Jalankan VERIFY-SQL-V28.21.0-FINAL.sql.
+3. Deploy GitHub Pages Production.
+4. Hard refresh sekali dan lakukan QA login/transfer/reset-password.

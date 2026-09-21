@@ -362,15 +362,17 @@
     }
 
     async function signIn(
-        email,
-        password
+        identifier,
+        password,
+        storeCode = ""
     ){
         requireHelpers();
 
         await window.LDMCloudAuth
             .signIn(
-                email,
-                password
+                identifier,
+                password,
+                storeCode
             );
 
         try{

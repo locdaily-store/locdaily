@@ -1,7 +1,7 @@
 (function(){
     "use strict";
 
-    const VERSION="28.16.3";
+    const VERSION="28.21.0";
     const DEVICE_KEY="ldmCloudDeviceId";
     const FAST_CONTEXT_KEY="ldmFastCloudContextV28163";
     const FAST_DEVICE_ACCESS_KEY="ldmFastDeviceAccessV28163";
@@ -93,21 +93,73 @@
         return data?.session?.user || null;
     }
 
-    async function signIn(email,password){
-        const normalizedEmail=String(email||"").trim().toLowerCase();
-        if(!normalizedEmail) throw new Error("Email wajib diisi.");
+    async function invokeLoginResolver(body){
+        const client=getClient();
+        const {data,error}=await client.functions.invoke("ldm-login-resolver",{body});
+        if(error){
+            let message=String(data?.error||"").trim();
+            try{
+                const response=error?.context;
+                if(!message && response && typeof response.clone==="function"){
+                    const payload=await response.clone().json();
+                    message=String(payload?.error||"").trim();
+                }
+            }catch(_error){}
+            throw new Error(message || "Login belum dapat diproses. Coba kembali.");
+        }
+        if(data?.error) throw new Error(String(data.error));
+        return data||{};
+    }
+
+    async function signIn(identifier,password,storeCode=""){
+        const normalizedIdentifier=String(identifier||"").trim();
+        if(!normalizedIdentifier) throw new Error("Email atau NIK Karyawan wajib diisi.");
         if(!password) throw new Error("Password wajib diisi.");
+
+        const isEmail=normalizedIdentifier.includes("@");
+        const normalizedStore=String(storeCode||"").trim().toUpperCase();
+        if(!isEmail && !normalizedStore){
+            throw new Error("Kode Toko diperlukan untuk login menggunakan NIK Karyawan.");
+        }
 
         invalidateFastCache();
 
+        const result=await invokeLoginResolver({
+            action:"sign_in",
+            identifier:normalizedIdentifier,
+            password:String(password),
+            store_code:normalizedStore
+        });
+
+        if(!result?.session?.access_token || !result?.session?.refresh_token){
+            throw new Error("Email/NIK atau password tidak valid.");
+        }
+
         const client=getClient();
-        const {data,error}=await client.auth.signInWithPassword({
-            email:normalizedEmail,
-            password
+        const {data,error}=await client.auth.setSession({
+            access_token:result.session.access_token,
+            refresh_token:result.session.refresh_token
         });
         if(error) throw error;
-        if(!data?.user) throw new Error("Sistem login belum mengembalikan data akun. Coba login ulang.");
+        if(!data?.user) throw new Error("Sesi akun belum dapat dibuat. Coba login ulang.");
         return data;
+    }
+
+    async function requestPasswordReset(identifier,storeCode="",redirectTo=""){
+        const normalizedIdentifier=String(identifier||"").trim();
+        if(!normalizedIdentifier) throw new Error("Email atau NIK Karyawan wajib diisi.");
+        const isEmail=normalizedIdentifier.includes("@");
+        const normalizedStore=String(storeCode||"").trim().toUpperCase();
+        if(!isEmail && !normalizedStore){
+            throw new Error("Kode Toko diperlukan untuk reset password menggunakan NIK Karyawan.");
+        }
+
+        return invokeLoginResolver({
+            action:"reset_password",
+            identifier:normalizedIdentifier,
+            store_code:normalizedStore,
+            redirect_to:String(redirectTo||"")
+        });
     }
 
     async function signOut(){
@@ -338,6 +390,7 @@
         version:VERSION,
         getClient,
         signIn,
+        requestPasswordReset,
         signOut,
         getUser,
         getContext,

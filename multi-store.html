@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://xwzighiqmxemnblzgcrf.supabase.co wss://xwzighiqmxemnblzgcrf.supabase.co https://vplweadbeujidsoponrl.supabase.co wss://vplweadbeujidsoponrl.supabase.co https://world.openfoodfacts.org; worker-src 'self' blob:; media-src 'self' blob: data:; frame-src 'self' https://lynk.id; form-action 'self' https://lynk.id https://wa.me; manifest-src 'self'; upgrade-insecure-requests">
 
-  <script src="js/app-version.js?v=27.9.0-v28.20.3-final"></script>
+  <script src="js/app-version.js?v=27.9.0-v28.21.0-final"></script>
   <script src="js/brand-migration-v28180.js?v=27.9.0-v28.18.3"></script>
 <script src="js/navigation-performance.js?v=27.9.0-v28.16.3" defer></script>
 
@@ -44,15 +44,15 @@
     <script src="js/supabase-config.js"></script>
     <script src="js/supabase-client.js?v=22.0"></script>
     <script src="js/offline-queue.js?v=16.0"></script>
-    <script src="js/cloud-auth.js?v=27.9.0-v28.16.3-navfast"></script>
-    <script src="js/cloud-session.js?v=27.9.0-v28.16.3-navfast"></script>
-    <script src="js/employee-permission-service-v28203.js?v=27.9.0-v28.20.3-final"></script><script src="js/role-access-guard-v28203.js?v=27.9.0-v28.20.3-final"></script><script src="js/action-permission-guard-v28203.js?v=27.9.0-v28.20.3-final"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
+    <script src="js/cloud-auth.js?v=27.9.0-v28.21.0-final"></script>
+    <script src="js/cloud-session.js?v=27.9.0-v28.21.0-final"></script>
+    <script src="js/employee-permission-service-v28203.js?v=27.9.0-v28.21.0-final"></script><script src="js/role-access-guard-v28203.js?v=27.9.0-v28.21.0-final"></script><script src="js/action-permission-guard-v28203.js?v=27.9.0-v28.21.0-final"></script><script src="js/financial-visibility-ui-v28190rc2.js?v=27.9.0-v28.19.0-rc2"></script>
 <script src="js/cloud-session-guard.js?v=27.9.0-v28.16.3-navfast"></script>
-    <script src="js/primary-owner-service.js?v=28.11.0"></script>
+    <script src="js/primary-owner-service.js?v=27.9.0-v28.21.0-final"></script>
     <script src="js/license-v2-config.js?v=27.9.0-v28.13.1"></script>
 <script src="js/license-v2-client.js?v=27.9.0-v28.4.2"></script>
 <script src="js/license-quota-sync-v2841.js?v=27.9.0-v28.4.2"></script>
-<script src="js/multi-store-service.js?v=28.11.0"></script>
+<script src="js/multi-store-service.js?v=27.9.0-v28.21.0-final"></script>
 <script defer src="js/license-v2-guard.js?v=27.9.0-v28.4.2"></script>
   <script src="js/security-hardening.js?v=27.9.0-v28.16.2-final"></script>
 </head>
@@ -285,7 +285,7 @@
         function selectedEmployee(){return employees.find(row=>row.user_id===$("employeeSelect").value)||null}
         function renderEmployeeForm(){
             const selected=selectedEmployee();
-            $("employeeSelect").innerHTML='<option value="">Pilih karyawan</option>'+employees.map(row=>`<option value="${esc(row.user_id)}">${esc(row.display_name||row.username)} · ${esc(row.role)} · ${esc(row.store_name)}</option>`).join("");
+            $("employeeSelect").innerHTML='<option value="">Pilih karyawan</option>'+employees.map(row=>`<option value="${esc(row.user_id)}">${esc(row.display_name||row.employee_id||"Karyawan")} · ${esc(row.role)} · ${esc(row.store_name)}</option>`).join("");
             if(selected) $("employeeSelect").value=selected.user_id;
             updateEmployeeDestination();
         }
@@ -296,11 +296,18 @@
                 $("employeeDestination").innerHTML='<option value="">Pilih cabang tujuan</option>';
                 return;
             }
-            $("employeeInfo").innerHTML=`<strong>${esc(employee.display_name||employee.username)}</strong><span class="ms-role-pill">${esc(employee.role)}</span><br>NIK Karyawan: ${esc(employee.employee_id||"-")}<br>Cabang asal: <strong>${esc(employee.store_name)}</strong> (${esc(employee.store_code)})`;
+            $("employeeInfo").innerHTML=`<strong>${esc(employee.display_name||employee.employee_id||"Karyawan")}</strong><span class="ms-role-pill">${esc(employee.role)}</span><br>NIK Karyawan: ${esc(employee.employee_id||"-")}<br>Cabang asal: <strong>${esc(employee.store_name)}</strong> (${esc(employee.store_code)})`;
             $("employeeDestination").innerHTML='<option value="">Pilih cabang tujuan</option>'+networkStores.filter(row=>row.store_id!==employee.store_id).map(row=>`<option value="${esc(row.store_id)}">${esc(row.store_name)} (${esc(row.store_code)})</option>`).join("");
         }
         function renderEmployeeTransfers(){
-            $("employeeTransferList").innerHTML=employeeTransfers.length?employeeTransfers.map(row=>`<article class="ms-employee-move"><strong>${esc(row.display_name||row.username||"Karyawan")} <span class="ms-role-pill">${esc(row.employee_role)}</span></strong><p>${esc(row.source_store_name)} → <strong>${esc(row.destination_store_name)}</strong><br>${new Date(row.moved_at).toLocaleString("id-ID")}${row.note?` · ${esc(row.note)}`:""}<br>Dipindahkan oleh ${esc(row.moved_by_name||"Owner")}</p></article>`).join(""):'<div class="ms-empty">Belum ada riwayat pemindahan karyawan.</div>';
+            $("employeeTransferList").innerHTML=employeeTransfers.length?employeeTransfers.map(row=>{
+                const nikBefore=row.employee_id_before||"-";
+                const nikAfter=row.employee_id_after||nikBefore;
+                const nikLine=row.employee_id_changed
+                    ? `<br>NIK: <strong>${esc(nikBefore)}</strong> → <strong>${esc(nikAfter)}</strong> <span class="ms-role-pill">Diperbarui otomatis</span>`
+                    : `<br>NIK: <strong>${esc(nikAfter)}</strong> <span class="ms-role-pill">Tetap</span>`;
+                return `<article class="ms-employee-move"><strong>${esc(row.display_name||row.employee_id||"Karyawan"||"Karyawan")} <span class="ms-role-pill">${esc(row.employee_role)}</span></strong><p>${esc(row.source_store_name)} → <strong>${esc(row.destination_store_name)}</strong>${nikLine}<br>${new Date(row.moved_at).toLocaleString("id-ID")}${row.note?` · ${esc(row.note)}`:""}<br>Dipindahkan oleh ${esc(row.moved_by_name||"Owner")}</p></article>`;
+            }).join(""):'<div class="ms-empty">Belum ada riwayat pemindahan karyawan.</div>';
         }
         async function loadEmployees(){
             if(!isPrimaryOwner())return;
@@ -318,11 +325,21 @@
             const destination=$("employeeDestination").value;
             if(!employee||!destination){alertBox("Pilih karyawan dan cabang tujuan terlebih dahulu.","bad");return}
             const target=findNetworkStore(destination);
-            if(!confirm(`Pindahkan ${employee.display_name||employee.username} dari ${employee.store_name} ke ${target?target.store_name:"cabang tujuan"}?\n\nAkses cabang lama akan dihentikan dan perangkat lama perlu otorisasi ulang.`))return;
+            if(!confirm(`Pindahkan ${employee.display_name||employee.employee_id||"Karyawan"} dari ${employee.store_name} ke ${target?target.store_name:"cabang tujuan"}?\n\nNIK saat ini: ${employee.employee_id||"-"}\nJika NIK yang sama sudah digunakan di cabang tujuan, LocDaily akan membuat NIK baru otomatis. Email, UUID akun, dan histori tetap dipertahankan. Akses perangkat lama akan dihentikan.`))return;
             setLoading(true);
             try{
                 const result=await window.LDMMultiStore.transferEmployee(employee.user_id,destination,$("employeeTransferNote").value);
-                alertBox(result.message||`Karyawan berhasil dipindahkan ke ${result.destination_store_name}.`);
+                const nikText=result.employee_id_changed
+                    ? ` NIK diperbarui: ${result.employee_id_before} → ${result.employee_id_after}.`
+                    : ` NIK tetap: ${result.employee_id_after||employee.employee_id||"-"}.`;
+                const jobText=result.job_role_status==="needs_adjustment"
+                    ? ` Jabatan ${result.job_role_name||"custom"} perlu disesuaikan untuk cabang tujuan.`
+                    : result.job_role_status==="inactive"
+                        ? ` Jabatan ${result.job_role_name||"custom"} sedang nonaktif.`
+                        : result.job_role_status==="active"
+                            ? ` Jabatan ${result.job_role_name||"custom"} tetap aktif.`
+                            : "";
+                alertBox((result.message||`Karyawan berhasil dipindahkan ke ${result.destination_store_name}.`)+nikText+jobText);
                 $("employeeTransferForm").reset();
                 await Promise.all([loadEmployees(),loadEmployeeTransfers()]);
             }catch(error){alertBox(errorMessage(error),"bad")}finally{setLoading(false)}

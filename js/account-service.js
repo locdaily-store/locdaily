@@ -121,14 +121,13 @@
         return data || {};
     }
 
-    async function createAccount({email,password,username,displayName,role}){
+    async function createAccount({email,password,displayName,role}){
         await ownerContext();
         try{
             const data = await invokeAccountAdmin({
                 action:"create",
                 email:String(email||"").trim().toLowerCase(),
                 password:String(password||""),
-                username:String(username||"").trim(),
                 display_name:String(displayName||"").trim() || null,
                 role:String(role||"kasir").trim().toLowerCase()
             });
@@ -177,11 +176,10 @@
         },"Penautan akun");
     }
 
-    async function updateProfile({userId,username,displayName,role,active}){
+    async function updateProfile({userId,displayName,role,active}){
         const context = await ownerContext();
-        const data = await rpc("ldm_account_update_profile_v28191",{
+        const data = await rpc("ldm_account_update_profile_v28210",{
             p_user_id:userId,
-            p_username:String(username||"").trim(),
             p_display_name:String(displayName||"").trim() || null,
             p_role:String(role||"kasir").trim().toLowerCase(),
             p_active:Boolean(active)
