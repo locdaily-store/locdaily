@@ -1,7 +1,7 @@
 (function(){
     "use strict";
 
-    const VERSION="28.21.1";
+    const VERSION="28.21.2";
     const DEVICE_KEY="ldmCloudDeviceId";
     const FAST_CONTEXT_KEY="ldmFastCloudContextV28163";
     const FAST_DEVICE_ACCESS_KEY="ldmFastDeviceAccessV28163";
@@ -94,21 +94,53 @@
     }
 
     async function invokeLoginResolver(body){
-        const client=getClient();
-        const {data,error}=await client.functions.invoke("ldm-login-resolver",{body});
-        if(error){
-            let message=String(data?.error||"").trim();
-            try{
-                const response=error?.context;
-                if(!message && response && typeof response.clone==="function"){
-                    const payload=await response.clone().json();
-                    message=String(payload?.error||"").trim();
-                }
-            }catch(_error){}
-            throw new Error(message || "Login belum dapat diproses. Coba kembali.");
+        const cfg=(window.LDMSupabase && typeof window.LDMSupabase.getConfig==="function")
+            ? window.LDMSupabase.getConfig()
+            : (window.LDM_SUPABASE_CONFIG||{});
+        const baseUrl=String(cfg?.url||"").replace(/\/+$/,"");
+        const publishableKey=String(cfg?.publishableKey||"").trim();
+        if(!baseUrl || !publishableKey){
+            throw new Error("Konfigurasi layanan login Cloud belum tersedia.");
         }
-        if(data?.error) throw new Error(String(data.error));
-        return data||{};
+
+        const endpoint=`${baseUrl}/functions/v1/ldm-login-resolver`;
+        let response;
+        try{
+            response=await fetch(endpoint,{
+                method:"POST",
+                mode:"cors",
+                cache:"no-store",
+                credentials:"omit",
+                headers:{
+                    "Content-Type":"application/json",
+                    "apikey":publishableKey,
+                    "x-client-info":"locdaily-web/28.21.2"
+                },
+                body:JSON.stringify(body||{})
+            });
+        }catch(error){
+            const wrapped=new Error("Layanan login NIK tidak dapat dijangkau.");
+            wrapped.code="RESOLVER_NETWORK_ERROR";
+            wrapped.cause=error;
+            throw wrapped;
+        }
+
+        let payload={};
+        try{ payload=await response.json(); }catch(_error){}
+
+        if(!response.ok){
+            const message=String(payload?.error||"").trim();
+            const wrapped=new Error(
+                message || (response.status===404
+                    ? "Layanan login NIK belum aktif di server."
+                    : `Layanan login NIK gagal merespons (${response.status}).`)
+            );
+            wrapped.status=response.status;
+            wrapped.code=String(payload?.code||"") || (response.status===404?"RESOLVER_NOT_DEPLOYED":"RESOLVER_HTTP_ERROR");
+            throw wrapped;
+        }
+        if(payload?.error) throw new Error(String(payload.error));
+        return payload||{};
     }
 
     async function signIn(identifier,password,storeCode=""){
@@ -149,7 +181,14 @@
         }catch(error){
             console.error("Login NIK resolver gagal:",error);
             const raw=String(error?.message||"").trim();
-            if(raw && !/Login belum dapat diproses/i.test(raw)) throw error;
+            const code=String(error?.code||"");
+            if(code==="RESOLVER_NOT_DEPLOYED" || Number(error?.status)===404){
+                throw new Error("Layanan login NIK belum aktif di server. Deploy ldm-login-resolver terlebih dahulu.");
+            }
+            if(code==="RESOLVER_NETWORK_ERROR"){
+                throw new Error("Layanan login NIK tidak dapat dijangkau. Periksa koneksi atau status Edge Function lalu coba kembali.");
+            }
+            if(raw && !/Login belum dapat diproses|Layanan login NIK gagal merespons/i.test(raw)) throw error;
             throw new Error("Layanan login NIK sedang tidak tersedia. Gunakan email akun untuk masuk sementara atau coba kembali beberapa saat lagi.");
         }
 
@@ -198,7 +237,14 @@
         }catch(error){
             console.error("Reset password NIK resolver gagal:",error);
             const raw=String(error?.message||"").trim();
-            if(raw && !/Login belum dapat diproses/i.test(raw)) throw error;
+            const code=String(error?.code||"");
+            if(code==="RESOLVER_NOT_DEPLOYED" || Number(error?.status)===404){
+                throw new Error("Layanan reset password melalui NIK belum aktif di server.");
+            }
+            if(code==="RESOLVER_NETWORK_ERROR"){
+                throw new Error("Layanan reset password melalui NIK tidak dapat dijangkau. Coba kembali setelah koneksi tersedia.");
+            }
+            if(raw && !/Login belum dapat diproses|Layanan login NIK gagal merespons/i.test(raw)) throw error;
             throw new Error("Layanan reset password melalui NIK sedang tidak tersedia. Gunakan email akun sementara atau coba kembali beberapa saat lagi.");
         }
     }
