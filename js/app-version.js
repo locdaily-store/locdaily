@@ -1,9 +1,9 @@
 (function(root){
     "use strict";
     const INFO=Object.freeze({
-        appVersion:"27.9.0-v28.20.0-final",
-        buildVersion:"V28.20.0-FINAL",
-        buildName:"Granular Feature Actions & Permission Enforcement"
+        appVersion:"27.9.0-v28.20.1-final",
+        buildVersion:"V28.20.1-FINAL",
+        buildName:"Advanced Permission Dropdown & Granular Access Polish"
     });
     root.LDM_VERSION_INFO=INFO;
     root.LDM_APP_VERSION=INFO.appVersion;
